@@ -16,18 +16,20 @@
 #include "include/cDepthStencilView.h"// UNFINISHED
 #include "include/cVertexShader.h"// UNFINISHED
 #include "include/cInputLayout.h"// UNFINISHED
-#include "include/cPixelShader.h"// UNFINISHED
+#include "include/cPixelShader.h"// UNFINISHED 
 #include "include/cBuffer.h"// FINISHED
 #include "include/cVertexBuffer.h"// FINISHED 
 #include "include/cIndexBuffer.h"// FINISHED 
 #include "include/cConstBuffer.h"// FINISHED 
 #include "include/cSampler.h"// FINISHED 
+#include "include/cViewport.h" // FINISHED
+#include "include/cShaderResourceView.h"//UNFINISHED
 /*****************************************************/
 cDevice my_device;
 cDeviceContext my_deviceContext;
 cTexture2D my_backBuffer;
 cTexture2D my_depthStencil;
-cDepthStencilView my_depthStencillView;
+cDepthStencilView my_depthStencilView;
 cRenderTargetView my_renderTragetView;
 cVertexShader my_vertexShader;
 cPixelShader my_pixelShader;
@@ -38,6 +40,8 @@ cConstBuffer my_constNeverChanges;
 cConstBuffer my_constChangeOnResize;
 cConstBuffer my_constChangesEveryFrame;
 cSampler my_sampler;
+cViewport my_viewport;
+cShaderResourceView my_shaderResourceView;
 /*****************************************************/
 #include <cassert>
 //--------------------------------------------------------------------------------------
@@ -326,24 +330,21 @@ HRESULT InitDevice()
   depthDesc.Dimension = 3;// equivalent to D3D11_DSV_DIMENSION_TEXTURE2D 
   depthDesc.Mip = 0;
 
-  isSuccesful = my_device.CreateDepthStencilView(my_depthStencil, depthDesc, my_depthStencillView);
+  isSuccesful = my_device.CreateDepthStencilView(my_depthStencil, depthDesc, my_depthStencilView);
   assert(isSuccesful == true, "Error with depth-stencil creation");
 
   my_deviceContext.OMSetRenderTargets(&my_renderTragetView,
-                                      my_depthStencillView);
+                                      my_depthStencilView);
 
   //g_pImmediateContext->OMSetRenderTargets(1
   //                                        , my_renderTragetView.getRenderTragetViewRef(),
   //                                        my_depthStencillView.getDepthStencilView());
   // Setup the viewport
-  D3D11_VIEWPORT vp;
-  vp.Width = (FLOAT) width;
-  vp.Height = (FLOAT) height;
-  vp.MinDepth = 0.0f;
-  vp.MaxDepth = 1.0f;
-  vp.TopLeftX = 0;
-  vp.TopLeftY = 0;
-  g_pImmediateContext->RSSetViewports(1, &vp);
+  my_viewport.setViewport(width, height,
+                          0.0f, 1.0f);
+
+  my_deviceContext.RSSetViewports(&my_viewport);
+  //g_pImmediateContext->RSSetViewports(1, &vp);
 
   // Compile the vertex shader
 
@@ -400,8 +401,9 @@ HRESULT InitDevice()
   //                                     my_vertexShader.getInfo()->GetBufferPointer(),
   //                                     my_vertexShader.getInfo()->GetBufferSize(), 
   //                                     &g_pVertexLayout);
+
   // Set the input layout
-  g_pImmediateContext->IASetInputLayout(my_vertexInputLayout.getInputLayout());
+  my_deviceContext.IASetInputLayout(my_vertexInputLayout);
 
   // Compile the pixel shader
   hr = CompileShaderFromFile(L"Tutorial07.fx"
@@ -418,7 +420,7 @@ HRESULT InitDevice()
 
   // Create the pixel shader
   isSuccesful = my_device.CreatePixelShader(my_pixelShader);
-  assert(isSuccesful == true, "Error creating the pixel shader");
+  assert((isSuccesful == true, "Error creating the pixel shader"));
   //hr = g_pd3dDevice->CreatePixelShader(
   //  pPSBlob->GetBufferPointer()
   //  , pPSBlob->GetBufferSize()
@@ -460,12 +462,12 @@ HRESULT InitDevice()
   };
 
 
-  D3D11_BUFFER_DESC bd;
-  SecureZeroMemory(&bd, sizeof(bd));
-  bd.Usage = D3D11_USAGE_DEFAULT;
-  bd.ByteWidth = sizeof(SimpleVertex) * 24;
-  bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  bd.CPUAccessFlags = 0;
+  //D3D11_BUFFER_DESC bd;
+  //SecureZeroMemory(&bd, sizeof(bd));
+  //bd.Usage = D3D11_USAGE_DEFAULT;
+  //bd.ByteWidth = sizeof(SimpleVertex) * 24;
+  //bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  //bd.CPUAccessFlags = 0;
 
   my_vertexBuffer.setDescription(sizeof(SimpleVertex),
                                  24,
@@ -478,16 +480,17 @@ HRESULT InitDevice()
   InitData.pSysMem = vertices;
 
   isSuccesful = my_device.CreateVertexBuffer(my_vertexBuffer);
-  assert(isSuccesful == true, "Error creating the vertex buffer ");
+  assert((isSuccesful == true, "Error creating the vertex buffer "));
 
   // Set vertex buffer
   UINT stride = sizeof(SimpleVertex);
   UINT offset = 0;
-  g_pImmediateContext->IASetVertexBuffers(0,
-                                          1,
-                                          my_vertexBuffer.getBufferRef(),
-                                          &stride,
-                                          &offset);
+  my_deviceContext.IASetVertexBuffers(&my_vertexBuffer, 1);
+  //g_pImmediateContext->IASetVertexBuffers(0,
+  //                                        1,
+  //                                        my_vertexBuffer.getBufferRef(),
+  //                                        &stride,
+  //                                        &offset);
 
   // Create index buffer
   // Create vertex buffer
@@ -512,12 +515,6 @@ HRESULT InitDevice()
       23,20,22
   };
 
-  bd.Usage = D3D11_USAGE_DEFAULT;
-  bd.ByteWidth = sizeof(WORD) * 36;
-  bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-  bd.CPUAccessFlags = 0;
-  InitData.pSysMem = indices;
-
   my_indexBuffer.setDescription(sizeof(WORD),
                                 36,
                                 0);
@@ -525,25 +522,21 @@ HRESULT InitDevice()
   my_indexBuffer.setData(indices);
 
   isSuccesful = my_device.CreateIndexBuffer(my_indexBuffer);
-  assert(isSuccesful == true, "Error with creating Index buffer");
+  assert((isSuccesful == true, "Error with creating Index buffer"));
   //hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
   //if (FAILED(hr))
   //  return hr;
 
+
   // Set index buffer
-  g_pImmediateContext->IASetIndexBuffer(my_indexBuffer.getBuffer(),
-                                        DXGI_FORMAT_R16_UINT,
-                                        0);
+  my_deviceContext.IASetIndexBuffer(my_indexBuffer, 57/*equivalent to DXGI_FORMAT_R16_UINT*/);
+  //g_pImmediateContext->IASetIndexBuffer(my_indexBuffer.getBuffer(),
+  //                                      DXGI_FORMAT_R16_UINT,
+  //                                      0);
 
   // Set primitive topology
-  g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+  my_deviceContext.IASetPrimitiveTopology(4);//equivalent to D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
   // Create the constant buffers
-  bd.Usage = D3D11_USAGE_DEFAULT;
-  bd.ByteWidth = sizeof(CBNeverChanges);
-  bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  bd.CPUAccessFlags = 0;
-
   my_constNeverChanges.setDescription(sizeof(CBNeverChanges),
                                       1,
                                       0);
@@ -583,7 +576,7 @@ HRESULT InitDevice()
                                               L"seafloor.dds"
                                               , NULL
                                               , NULL
-                                              , &g_pTextureRV
+                                              , my_shaderResourceView.getShaderResourceRef()
                                               , NULL);
 
   if (FAILED(hr))
@@ -623,12 +616,13 @@ HRESULT InitDevice()
 
   CBNeverChanges cbNeverChanges;
   cbNeverChanges.mView = XMMatrixTranspose(g_View);
-  g_pImmediateContext->UpdateSubresource(my_constNeverChanges.getBuffer(),
-                                         0,
-                                         NULL,
-                                         &cbNeverChanges,
-                                         0,
-                                         0);
+  my_deviceContext.UpdateSubresource(&my_constNeverChanges, &cbNeverChanges);
+  //g_pImmediateContext->UpdateSubresource(my_constNeverChanges.getBuffer(),
+  //                                       0,
+  //                                       NULL,
+  //                                       &cbNeverChanges,
+  //                                       0,
+  //                                       0);
 
   // Initialize the projection matrix
   g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4,
@@ -638,12 +632,13 @@ HRESULT InitDevice()
 
   CBChangeOnResize cbChangesOnResize;
   cbChangesOnResize.mProjection = XMMatrixTranspose(g_Projection);
-  g_pImmediateContext->UpdateSubresource(my_constChangeOnResize.getBuffer(),
-                                         0,
-                                         NULL,
-                                         &cbChangesOnResize,
-                                         0,
-                                         0);
+  my_deviceContext.UpdateSubresource(&my_constChangeOnResize, &cbChangesOnResize);
+  //g_pImmediateContext->UpdateSubresource(my_constChangeOnResize.getBuffer(),
+  //                                       0,
+  //                                       NULL,
+  //                                       &cbChangesOnResize,
+  //                                       0,
+  //                                       0);
 
   return S_OK;
 }
@@ -656,7 +651,7 @@ void CleanupDevice()
 {
   if (g_pImmediateContext) g_pImmediateContext->ClearState();
 
- // if (g_pSamplerLinear) g_pSamplerLinear->Release();
+  // if (g_pSamplerLinear) g_pSamplerLinear->Release();
   if (g_pTextureRV) g_pTextureRV->Release(); //
   //if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
   //if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
@@ -671,7 +666,7 @@ void CleanupDevice()
   if (g_pRenderTargetView) g_pRenderTargetView->Release();
   if (g_pSwapChain) g_pSwapChain->Release();
   if (g_pImmediateContext) g_pImmediateContext->Release();
-//  if (g_pd3dDevice) g_pd3dDevice->Release();
+  //  if (g_pd3dDevice) g_pd3dDevice->Release();
 }
 
 
@@ -733,63 +728,74 @@ void Render()
   // Clear the back buffer
   //
   float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red, green, blue, alpha
-  g_pImmediateContext->ClearRenderTargetView(my_renderTragetView.getRenderTragetView()
-                                             , ClearColor);
+  my_deviceContext.ClearRenderTargetView(my_renderTragetView);
+  //g_pImmediateContext->ClearRenderTargetView(my_renderTragetView.getRenderTragetView()
+  //                                           , ClearColor);
 
 
   //
   // Clear the depth buffer to 1.0 (max depth)
   //
-  g_pImmediateContext->ClearDepthStencilView(my_depthStencillView.getDepthStencilView()
-                                             , D3D11_CLEAR_DEPTH, 1.0f
-                                             , 0);
+
+  my_deviceContext.ClearDepthStencilView(my_depthStencilView);
+  //g_pImmediateContext->ClearDepthStencilView(my_depthStencilView.getDepthStencilView()
+  //                                           , D3D11_CLEAR_DEPTH, 1.0f
+  //                                           , 0);
 
   //
   // Update variables that change once per frame
-  //
   CBChangesEveryFrame cb;
   cb.mWorld = XMMatrixTranspose(g_World);
   cb.vMeshColor = g_vMeshColor;
-  g_pImmediateContext->UpdateSubresource(my_constChangesEveryFrame.getBuffer(),
-                                         0, NULL,
-                                         &cb, 0,
-                                         0);
+  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
+  //g_pImmediateContext->UpdateSubresource(my_constChangesEveryFrame.getBuffer(),
+  //                                       0, NULL,
+  //                                       &cb, 0,
+  //                                       0);
 
-
-
-  //CBChangesEveryFrame cb2;
-  //cb2.mWorld = XMMatrixTranspose(g_World);
-  //cb2.vMeshColor = g_vMeshColor;
-  //g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb2, 0, 0);
 
   //
   // Render the cube
   //
-  g_pImmediateContext->VSSetShader(my_vertexShader.getVertexShader(), NULL, 0);
-  g_pImmediateContext->VSSetConstantBuffers(0, 1, my_constNeverChanges.getBufferRef());
-  g_pImmediateContext->VSSetConstantBuffers(1, 1, my_constChangeOnResize.getBufferRef());
-  g_pImmediateContext->VSSetConstantBuffers(2, 1, my_constChangesEveryFrame.getBufferRef());
-  g_pImmediateContext->PSSetShader(my_pixelShader.getPixelShader(), NULL, 0);
-  g_pImmediateContext->PSSetConstantBuffers(2, 1, my_constChangesEveryFrame.getBufferRef());
-  g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV);
-  g_pImmediateContext->PSSetSamplers(0, 1, my_sampler.getSamplerRef());
-  g_pImmediateContext->DrawIndexed(36, 0, 0);
+  /*setting values for the vertex shader*/
+  my_deviceContext.VSSetShader(my_vertexShader);
+  my_deviceContext.VSSetConstantBuffers(my_constNeverChanges, 0);
+  my_deviceContext.VSSetConstantBuffers(my_constChangeOnResize, 1);
+  my_deviceContext.VSSetConstantBuffers(my_constChangesEveryFrame, 2);
+  /*setting values for the pixel shader */
+  my_deviceContext.PSSetShader(my_pixelShader);
+  my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, 2);
+  my_deviceContext.PSSetShaderResources(&my_shaderResourceView);
+  my_deviceContext.PSSetSamplers(&my_sampler);
+  my_deviceContext.DrawIndexed(36, 0);
+
+  //g_pImmediateContext->VSSetShader(my_vertexShader.getVertexShader(), NULL, 0);// DONE
+
+  //g_pImmediateContext->VSSetConstantBuffers(0, 1, my_constNeverChanges.getBufferRef());      //DONE
+  //g_pImmediateContext->VSSetConstantBuffers(1, 1, my_constChangeOnResize.getBufferRef());//DONE
+  //g_pImmediateContext->VSSetConstantBuffers(2, 1, my_constChangesEveryFrame.getBufferRef());//DONE
+
+  //g_pImmediateContext->PSSetShader(my_pixelShader.getPixelShader(), NULL, 0);
+  //g_pImmediateContext->PSSetConstantBuffers(2, 1, my_constChangesEveryFrame.getBufferRef());
+  //g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV);
+  //g_pImmediateContext->PSSetSamplers(0, 1, my_sampler.getSamplerRef());
+  //g_pImmediateContext->DrawIndexed(36, 0, 0);
 
   XMVECTOR Move = {2,1,1,0};
   // CBChangesEveryFrame cb;
   cb.mWorld = XMMatrixTranspose(XMMatrixTranslationFromVector(Move));
   cb.vMeshColor = g_vMeshColor;
-  g_pImmediateContext->UpdateSubresource(my_constChangesEveryFrame.getBuffer(), 0, NULL, &cb, 0, 0);
+  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
 
-  g_pImmediateContext->DrawIndexed(36, 0, 0);
+  my_deviceContext.DrawIndexed(36, 0);
 
   XMVECTOR Move2 = {-2,1,1,0};
   // CBChangesEveryFrame cb;
   cb.mWorld = XMMatrixTranspose(XMMatrixTranslationFromVector(Move2));
   cb.vMeshColor = g_vMeshColor;
-  g_pImmediateContext->UpdateSubresource(my_constChangesEveryFrame.getBuffer(), 0, NULL, &cb, 0, 0);
+  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
 
-  g_pImmediateContext->DrawIndexed(36, 0, 0);
+  my_deviceContext.DrawIndexed(36, 0);
   //
   // Present our back buffer to our front buffer
   //
