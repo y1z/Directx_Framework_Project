@@ -397,6 +397,7 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="include\cDepthStencilView.cpp" />
+    <ClCompile Include="include\cDeviceContext.cpp" />
     <ClCompile Include="include\cSampler.cpp" />
     <ClCompile Include="src\cBuffer.cpp" />
     <ClCompile Include="src\cConstBuffer.cpp" />
@@ -409,6 +410,7 @@
     <ClCompile Include="src\cTexture2D.cpp" />
     <ClCompile Include="src\cVertexBuffer.cpp" />
     <ClCompile Include="src\cVertexShader.cpp" />
+    <ClCompile Include="src\cViewport.cpp" />
     <ClCompile Include="Tutorial07.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -421,6 +423,7 @@
     <ClInclude Include="include\cConstBuffer.h" />
     <ClInclude Include="include\cDepthStencilView.h" />
     <ClInclude Include="include\cDevice.h" />
+    <ClInclude Include="include\cDeviceContext.h" />
     <ClInclude Include="include\cIndexBuffer.h" />
     <ClInclude Include="include\cInputLayout.h" />
     <ClInclude Include="include\cPixelShader.h" />
@@ -430,8 +433,8 @@
     <ClInclude Include="include\cTexture2D.h" />
     <ClInclude Include="include\cVertexBuffer.h" />
     <ClInclude Include="include\cVertexShader.h" />
+    <ClInclude Include="include\cViewport.h" />
     <ClInclude Include="include\enum_header\enums.h" />
-    <ClInclude Include="include\HelperFunction.h" />
     <ClInclude Include="include\utiliy\Grafics_libs.h" />
     <ClInclude Include="MacroslessWindow.h" />
     <CLInclude Include="resource.h" />

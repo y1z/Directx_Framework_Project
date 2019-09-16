@@ -11,6 +11,9 @@ public:
   ID3D11RenderTargetView ** getRenderTragetViewRef();
 
 private:
+#if DIRECTX
   ID3D11RenderTargetView *mptr_renderTragetView;
+  
+#endif // DIRECTX
 };
 

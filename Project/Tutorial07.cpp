@@ -9,7 +9,8 @@
 #include "include/utiliy/Grafics_libs.h"
 
 /******************************************************/
-#include "include/cDevice.h"// UNFINISHED
+#include "include/cDevice.h"// FINISHED
+#include "include/cDeviceContext.h" //UNFINISHED 
 #include "include/cTexture2D.h"// UNFINISHED
 #include "include/cRenderTargetView.h"// UNFINISHED
 #include "include/cDepthStencilView.h"// UNFINISHED
@@ -23,6 +24,7 @@
 #include "include/cSampler.h"// FINISHED 
 /*****************************************************/
 cDevice my_device;
+cDeviceContext my_deviceContext;
 cTexture2D my_backBuffer;
 cTexture2D my_depthStencil;
 cDepthStencilView my_depthStencillView;
@@ -71,7 +73,7 @@ HINSTANCE                           g_hInst = NULL;
 HWND                                g_hWnd = NULL;
 D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
-ID3D11Device*                       g_pd3dDevice = NULL;
+//ID3D11Device*                       g_pd3dDevice = NULL;
 ID3D11DeviceContext*                g_pImmediateContext = NULL;
 IDXGISwapChain*                     g_pSwapChain = NULL;
 ID3D11RenderTargetView*             g_pRenderTargetView = NULL;
@@ -80,13 +82,13 @@ ID3D11DepthStencilView*             g_pDepthStencilView = NULL;
 ID3D11VertexShader*                 g_pVertexShader = NULL;
 ID3D11PixelShader*                  g_pPixelShader = NULL;
 ID3D11InputLayout*                  g_pVertexLayout = NULL;
-ID3D11Buffer*                       g_pVertexBuffer = NULL;
+/*ID3D11Buffer*                       g_pVertexBuffer = NULL;
 ID3D11Buffer*                       g_pIndexBuffer = NULL;
 ID3D11Buffer*                       g_pCBNeverChanges = NULL;
 ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
-ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;
+ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;*/
 ID3D11ShaderResourceView*           g_pTextureRV = NULL;
-ID3D11SamplerState*                 g_pSamplerLinear = NULL;
+//ID3D11SamplerState*                 g_pSamplerLinear = NULL;
 XMMATRIX                            g_World;
 XMMATRIX                            g_View;
 XMMATRIX                            g_Projection;
@@ -263,8 +265,12 @@ HRESULT InitDevice()
   for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
   {
     g_driverType = driverTypes[driverTypeIndex];
-    hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
-                                       D3D11_SDK_VERSION, &sd, &g_pSwapChain, my_device.getDeviceRef(), &g_featureLevel, &g_pImmediateContext);
+    hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType,
+                                       NULL, createDeviceFlags,
+                                       featureLevels, numFeatureLevels,
+                                       D3D11_SDK_VERSION, &sd,
+                                       &g_pSwapChain, my_device.getDeviceRef(),
+                                       &g_featureLevel, my_deviceContext.getDeviceContextRef());
     if (SUCCEEDED(hr))
       break;
   }
@@ -308,11 +314,11 @@ HRESULT InitDevice()
   assert(isSuccesful == true, "Error with Texture 2d creation ");
 
   // Create the depth stencil view
-  D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-  SecureZeroMemory(&descDSV, sizeof(descDSV));
-  descDSV.Format = static_cast<DXGI_FORMAT>(TextureDesc.texFormat);
-  descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-  descDSV.Texture2D.MipSlice = 0;
+  //D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+  //SecureZeroMemory(&descDSV, sizeof(descDSV));
+  //descDSV.Format = static_cast<DXGI_FORMAT>(TextureDesc.texFormat);
+  //descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+  //descDSV.Texture2D.MipSlice = 0;
 
   // my own descriptor 
   sDepthStencilDescriptor depthDesc;
@@ -323,9 +329,12 @@ HRESULT InitDevice()
   isSuccesful = my_device.CreateDepthStencilView(my_depthStencil, depthDesc, my_depthStencillView);
   assert(isSuccesful == true, "Error with depth-stencil creation");
 
-  g_pImmediateContext->OMSetRenderTargets(1
-                                          , my_renderTragetView.getRenderTragetViewRef(),
-                                          my_depthStencillView.getDepthStencilView());
+  my_deviceContext.OMSetRenderTargets(&my_renderTragetView,
+                                      my_depthStencillView);
+
+  //g_pImmediateContext->OMSetRenderTargets(1
+  //                                        , my_renderTragetView.getRenderTragetViewRef(),
+  //                                        my_depthStencillView.getDepthStencilView());
   // Setup the viewport
   D3D11_VIEWPORT vp;
   vp.Width = (FLOAT) width;
@@ -647,13 +656,13 @@ void CleanupDevice()
 {
   if (g_pImmediateContext) g_pImmediateContext->ClearState();
 
-  if (g_pSamplerLinear) g_pSamplerLinear->Release();
-  if (g_pTextureRV) g_pTextureRV->Release();
-  if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
-  if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
-  if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
-  if (g_pVertexBuffer) g_pVertexBuffer->Release();
-  if (g_pIndexBuffer) g_pIndexBuffer->Release();
+ // if (g_pSamplerLinear) g_pSamplerLinear->Release();
+  if (g_pTextureRV) g_pTextureRV->Release(); //
+  //if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
+  //if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
+  //if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
+  //if (g_pVertexBuffer) g_pVertexBuffer->Release();
+  //if (g_pIndexBuffer) g_pIndexBuffer->Release();
   if (g_pVertexLayout) g_pVertexLayout->Release();
   if (g_pVertexShader) g_pVertexShader->Release();
   if (g_pPixelShader) g_pPixelShader->Release();
@@ -662,7 +671,7 @@ void CleanupDevice()
   if (g_pRenderTargetView) g_pRenderTargetView->Release();
   if (g_pSwapChain) g_pSwapChain->Release();
   if (g_pImmediateContext) g_pImmediateContext->Release();
-  if (g_pd3dDevice) g_pd3dDevice->Release();
+//  if (g_pd3dDevice) g_pd3dDevice->Release();
 }
 
 
