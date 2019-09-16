@@ -768,7 +768,7 @@ void Render()
   my_deviceContext.PSSetShaderResources(&my_shaderResourceView);
   my_deviceContext.PSSetSamplers(&my_sampler);
   my_deviceContext.DrawIndexed(36, 0);
-
+  /// PRIVIOUS FUNCTIONS
   //g_pImmediateContext->VSSetShader(my_vertexShader.getVertexShader(), NULL, 0);// DONE
 
   //g_pImmediateContext->VSSetConstantBuffers(0, 1, my_constNeverChanges.getBufferRef());      //DONE
