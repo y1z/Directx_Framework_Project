@@ -428,7 +428,6 @@
     <None Include="Tutorial07.fx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GraficsMacros.h" />
     <ClInclude Include="include\cBuffer.h" />
     <ClInclude Include="include\cConstBuffer.h" />
     <ClInclude Include="include\cDepthStencilView.h" />
@@ -450,6 +449,7 @@
     <ClInclude Include="include\directx_structs.h" />
     <ClInclude Include="include\enum_header\enums.h" />
     <ClInclude Include="include\cModel.h" />
+    <ClInclude Include="include\utiliy\GraficsMacros.h" />
     <ClInclude Include="include\utiliy\Grafics_libs.h" />
     <ClInclude Include="include\utiliy\HelperFunction.h" />
     <ClInclude Include="include\utiliy\MacroslessWindow.h" />
