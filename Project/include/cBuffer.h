@@ -1,6 +1,6 @@
 #pragma once
-#include "include/utiliy/Grafics_libs.h"
-#include "include/enum_header/enums.h"
+#include "../include/utiliy/Grafics_libs.h"
+#include "../include/enum_header/enums.h"
 #include <cstdint>
 #include <cstddef>
 
@@ -30,8 +30,9 @@ public:
   //! for functions that require a 2 pointers 
   ID3D11Buffer 
     **getBufferRef();
-public: // functions 
 #endif // DIRECTX
+
+public: // functions 
   //! for setting the values in the buffer 
   virtual void
     setDescription(uint32_t singleElementSize,
@@ -39,6 +40,10 @@ public: // functions
                    uint32_t  cpuAccess,
                    uint32_t miscFlags = 0,
                    uint32_t structured = 0) = 0;
+
+//! returns the number of elements in the buffer 
+  std::size_t 
+    getElementCount() const;
 
 #if DIRECTX
   //! this is for interfacing with the directX api.
@@ -60,6 +65,8 @@ protected:
   //! directX 11 buffer implementation
   ID3D11Buffer *mptr_buffer;
 #endif 
+  //! keeps track of how many element's a buffer contains
+  std::size_t m_elementCount;
   //! the size of a single element in the buffer 
   std::size_t m_stride;
   //! to keep track of the stats of the buffer 

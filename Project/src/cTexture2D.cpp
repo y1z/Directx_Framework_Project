@@ -1,4 +1,4 @@
-#include "include/cTexture2D.h"
+#include "../include/cTexture2D.h"
 
 cTexture2D::cTexture2D()
 #if DIRECTX

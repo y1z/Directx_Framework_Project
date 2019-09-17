@@ -34,6 +34,11 @@ cBuffer::getBufferRef()
 }
 #endif // DIRECTX
 
+std::size_t cBuffer::getElementCount() const
+{
+  return m_elementCount;
+}
+
 sBufferDesc
 cBuffer::getDescriptor() const
 {

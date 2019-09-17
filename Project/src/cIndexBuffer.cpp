@@ -1,4 +1,4 @@
-#include "include/cIndexBuffer.h"
+#include "../include/cIndexBuffer.h"
 #include <memory>
 cIndexBuffer::cIndexBuffer()
   :cBuffer()
@@ -8,7 +8,8 @@ cIndexBuffer::cIndexBuffer()
 }
 
 cIndexBuffer::~cIndexBuffer()
-{}
+{
+}
 
 void
 cIndexBuffer::setDescription(uint32_t singleElementSize,
@@ -18,6 +19,7 @@ cIndexBuffer::setDescription(uint32_t singleElementSize,
                              uint32_t structured)
 {
   m_stride = singleElementSize;
+  m_elementCount = TotalElements;
   m_Desc.sizeOfBuffer = singleElementSize * TotalElements;
   m_Desc.bindFlags = static_cast<int>(m_Type);
   m_Desc.cpuAccess = cpuAccess;
