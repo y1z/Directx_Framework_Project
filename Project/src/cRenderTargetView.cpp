@@ -1,4 +1,4 @@
-#include "include/cRenderTargetView.h"
+#include "../include/cRenderTargetView.h"
 
 cRenderTargetView::cRenderTargetView()
 #if DIRECTX

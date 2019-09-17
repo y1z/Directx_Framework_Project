@@ -16,6 +16,8 @@ cConstBuffer::setDescription(uint32_t singleElementSize,
                              uint32_t miscFlags,
                              uint32_t structured)
 {
+  m_stride = singleElementSize;
+  m_elementCount = totalElements;
   m_Desc.sizeOfBuffer = singleElementSize * totalElements;
   m_Desc.cpuAccess = cpuAccess;
   m_Desc.miscFlags = miscFlags;

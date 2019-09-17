@@ -6,27 +6,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
-//------------------------------ MASTER VERSION -
-
-#include "include/utiliy/Grafics_libs.h"
+#include "../include/utiliy/Grafics_libs.h"
 
 /******************************************************/
-#include "include/cDevice.h"// FINISHED
-#include "include/cDeviceContext.h" //UNFINISHED 
-#include "include/cTexture2D.h"// UNFINISHED
-#include "include/cRenderTargetView.h"// UNFINISHED
-#include "include/cDepthStencilView.h"// UNFINISHED
-#include "include/cVertexShader.h"// UNFINISHED
-#include "include/cInputLayout.h"// UNFINISHED
-#include "include/cPixelShader.h"// UNFINISHED 
-#include "include/cBuffer.h"// FINISHED
-#include "include/cVertexBuffer.h"// FINISHED 
-#include "include/cIndexBuffer.h"// FINISHED 
-#include "include/cConstBuffer.h"// FINISHED 
-#include "include/cSampler.h"// FINISHED 
-#include "include/cViewport.h" // FINISHED
-#include "include/cShaderResourceView.h"//FINISHED
-#include "include/cSwapChain.h"
+#include "../include/cDevice.h"// FINISHED
+#include "../include/cDeviceContext.h" //UNFINISHED 
+#include "../include/cTexture2D.h"// UNFINISHED
+#include "../include/cRenderTargetView.h"// UNFINISHED
+#include "../include/cDepthStencilView.h"// UNFINISHED
+#include "../include/cVertexShader.h"// UNFINISHED
+#include "../include/cInputLayout.h"// UNFINISHED
+#include "../include/cPixelShader.h"// UNFINISHED 
+#include "../include/cBuffer.h"// FINISHED
+#include "../include/cVertexBuffer.h"// FINISHED 
+#include "../include/cIndexBuffer.h"// FINISHED 
+#include "../include/cConstBuffer.h"// FINISHED 
+#include "../include/cSampler.h"// FINISHED 
+#include "../include/cViewport.h" // FINISHED
+#include "../include/cShaderResourceView.h"//FINISHED
+#include "../include/cSwapChain.h"
+#include "../include/cModel.h"
+/*****************************************************/
+#include "../include/directx_structs.h"
 /*****************************************************/
 cDevice my_device;
 cDeviceContext my_deviceContext;
@@ -46,33 +47,9 @@ cSampler my_sampler;
 cViewport my_viewport;
 cShaderResourceView my_shaderResourceView;
 cSwapChain my_swapChain;
+cModel my_model;
 /*****************************************************/
 #include <cassert>
-//--------------------------------------------------------------------------------------
-// Structures
-//--------------------------------------------------------------------------------------
-struct SimpleVertex
-{
-  XMFLOAT3 Pos;
-  XMFLOAT2 Tex;
-};
-
-struct CBNeverChanges
-{
-  XMMATRIX mView;
-};
-
-struct CBChangeOnResize
-{
-  XMMATRIX mProjection;
-};
-
-struct CBChangesEveryFrame
-{
-  XMMATRIX mWorld;
-  XMFLOAT4 vMeshColor;
-};
-
 
 //--------------------------------------------------------------------------------------
 // Global Variables
@@ -289,6 +266,7 @@ HRESULT InitDevice()
   if (FAILED(hr))
     return hr;
 
+
   // Create a render target view
   isSuccesful = my_swapChain.GetBuffer(my_backBuffer, 0);
   assert(("Error with swap-chain getting a buffer ", isSuccesful == true));
@@ -298,21 +276,21 @@ HRESULT InitDevice()
   /// OLD CODE
   //hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
   isSuccesful = my_device.CreateRenderTargetView(my_backBuffer, my_renderTragetView);
-  assert(isSuccesful == true, "Error with render-target creation");
+  assert((isSuccesful == true, "Error with render-target creation"));
   // Create depth stencil texture
-  D3D11_TEXTURE2D_DESC descDepth;
-  ZeroMemory(&descDepth, sizeof(descDepth));
-  descDepth.Width = width;
-  descDepth.Height = height;
-  descDepth.MipLevels = 1;
-  descDepth.ArraySize = 1;
-  descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT_D24_UNORM_S8_UINT
-  descDepth.SampleDesc.Count = 1;
-  descDepth.SampleDesc.Quality = 0;
-  descDepth.Usage = D3D11_USAGE_DEFAULT;
-  descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-  descDepth.CPUAccessFlags = 0;
-  descDepth.MiscFlags = 0;
+  //D3D11_TEXTURE2D_DESC descDepth;
+  //SecureZeroMemory(&descDepth, sizeof(descDepth));
+  //descDepth.Width = width;
+  //descDepth.Height = height;
+  //descDepth.MipLevels = 1;
+  //descDepth.ArraySize = 1;
+  //descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT_D24_UNORM_S8_UINT
+  //descDepth.SampleDesc.Count = 1;
+  //descDepth.SampleDesc.Quality = 0;
+  //descDepth.Usage = D3D11_USAGE_DEFAULT;
+  //descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+  //descDepth.CPUAccessFlags = 0;
+  //descDepth.MiscFlags = 0;
 
   sTextureDescriptor TextureDesc;
   memset(&TextureDesc, 0, sizeof(TextureDesc));
@@ -436,6 +414,7 @@ HRESULT InitDevice()
   //  , pPSBlob->GetBufferSize()
   //  , NULL
   //  , &g_pPixelShader);
+#ifndef MODEL_LOAD
 
   // Create vertex buffer
   SimpleVertex vertices[] =
@@ -543,8 +522,13 @@ HRESULT InitDevice()
   //g_pImmediateContext->IASetIndexBuffer(my_indexBuffer.getBuffer(),
   //                                      DXGI_FORMAT_R16_UINT,
   //                                      0);
+#else
+ isSuccesful = my_model.LoadModelFromFile("resources/media/3d models/obj/drakefire_pistol_low.obj",
+                    my_device);
+ assert(("Error with loading model file", isSuccesful == true));
+#endif // !MODEL_LOAD
 
-  // Set primitive topology
+// Set primitive topology
   my_deviceContext.IASetPrimitiveTopology(4);//equivalent to D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
   // Create the constant buffers
   my_constNeverChanges.setDescription(sizeof(CBNeverChanges),
@@ -659,24 +643,11 @@ HRESULT InitDevice()
 //--------------------------------------------------------------------------------------
 void CleanupDevice()
 {
-  //if (g_pImmediateContext) g_pImmediateContext->ClearState();
-
-  // if (g_pSamplerLinear) g_pSamplerLinear->Release();
-  //if (g_pTextureRV) g_pTextureRV->Release(); //
-  //if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
-  //if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
-  //if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
-  //if (g_pVertexBuffer) g_pVertexBuffer->Release();
-  //if (g_pIndexBuffer) g_pIndexBuffer->Release();
-//  if (g_pVertexLayout) g_pVertexLayout->Release();
   if (g_pVertexShader) g_pVertexShader->Release();
   if (g_pPixelShader) g_pPixelShader->Release();
   if (g_pDepthStencil) g_pDepthStencil->Release();
   if (g_pDepthStencilView) g_pDepthStencilView->Release();
   if (g_pRenderTargetView) g_pRenderTargetView->Release();
-  //  if (g_pSwapChain) g_pSwapChain->Release();
-    // if (g_pImmediateContext) g_pImmediateContext->Release();
-     //  if (g_pd3dDevice) g_pd3dDevice->Release();
 }
 
 
@@ -763,20 +734,20 @@ void Render()
 
   XMVECTOR moveVector2 = {0,1,-1,1};
   XMVECTOR scaleVector2 = {1,1,std::fabs(std::cosf(t)) * 2,1};
-  XMVECTOR rotVector2 = { 0,0, -t,1};
+  XMVECTOR rotVector2 = {0,0, -t,1};
 
   XMMATRIX tempMatrixMove2 = XMMatrixTranspose(XMMatrixTranslationFromVector(moveVector2));
   XMMATRIX tempMatrixScale2 = XMMatrixScalingFromVector(scaleVector2);
   XMMATRIX tempMatrixRotate2 = XMMatrixRotationRollPitchYawFromVector(rotVector2);//XMMatrixRotationZ(-t);
+
+
   CBChangesEveryFrame cb;
-  cb.mWorld = XMMatrixMultiply(XMMatrixMultiply(tempMatrixMove2, tempMatrixRotate2),tempMatrixScale2) ;
+#ifndef MODEL_LOAD
+  cb.mWorld = XMMatrixMultiply(XMMatrixMultiply(tempMatrixMove2, tempMatrixRotate2), tempMatrixScale2);
   cb.vMeshColor = g_vMeshColor;
   my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
-  //g_pImmediateContext->UpdateSubresource(my_constChangesEveryFrame.getBuffer(),
-  //                                       0, NULL,
-  //                                       &cb, 0,
-  //                                       0);
 
+#endif // !MODEL_LOAD
 
   //
   // Render the cube
@@ -791,22 +762,9 @@ void Render()
   my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, 2);
   my_deviceContext.PSSetShaderResources(&my_shaderResourceView);
   my_deviceContext.PSSetSamplers(&my_sampler);
+
+#ifndef MODEL_LOAD
   my_deviceContext.DrawIndexed(36, 0);
-  /// PRIVIOUS FUNCTIONS
-  //g_pImmediateContext->VSSetShader(my_vertexShader.getVertexShader(), NULL, 0);// DONE
-
-  //g_pImmediateContext->VSSetConstantBuffers(0, 1, my_constNeverChanges.getBufferRef());      //DONE
-  //g_pImmediateContext->VSSetConstantBuffers(1, 1, my_constChangeOnResize.getBufferRef());//DONE
-  //g_pImmediateContext->VSSetConstantBuffers(2, 1, my_constChangesEveryFrame.getBufferRef());//DONE
-
-  //g_pImmediateContext->PSSetShader(my_pixelShader.getPixelShader(), NULL, 0);
-  //g_pImmediateContext->PSSetConstantBuffers(2, 1, my_constChangesEveryFrame.getBufferRef());
-  //g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV);
-  //g_pImmediateContext->PSSetSamplers(0, 1, my_sampler.getSamplerRef());
-  //g_pImmediateContext->DrawIndexed(36, 0, 0);
-
-
-
   cb.mWorld = XMMatrixMultiply(tempMatrixMove, tempMatrixScale);//XMMatrixTranspose(XMMatrixTranslationFromVector(moveVector));
 
   cb.vMeshColor = g_vMeshColor;
@@ -823,6 +781,20 @@ void Render()
   my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
 
   my_deviceContext.DrawIndexed(36, 0);
+#else
+  static std::vector<cConstBuffer *> bufferArray =
+  {
+    &my_constChangesEveryFrame,
+    &my_constChangeOnResize,
+    &my_constNeverChanges
+  };
+
+  my_model.DrawMeshes(my_deviceContext,bufferArray);
+
+  cb.mWorld = XMMatrixRotationY(t);
+  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
+#endif // !MODEL_LOAD
+
   //
   // Present our back buffer to our front buffer
   //

@@ -1,5 +1,5 @@
 #pragma once
-#include "include/utiliy/Grafics_libs.h"
+#include "../include/utiliy/Grafics_libs.h"
 /*! \brief takes care of the representation of textures */
 struct sTextureDescriptor
 {

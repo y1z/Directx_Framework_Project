@@ -1,6 +1,6 @@
 #pragma once
 
-#include"include/utiliy/Grafics_libs.h"
+#include"../include/utiliy/Grafics_libs.h"
 
 #include <string>
 #include <cstdint>

@@ -1,5 +1,5 @@
 #pragma once
-#include "include/cBuffer.h"
+#include "../include/cBuffer.h"
 class cConstBuffer : public cBuffer
 {
 public:

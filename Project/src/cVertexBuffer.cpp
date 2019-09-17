@@ -24,6 +24,7 @@ cVertexBuffer::setDescription(uint32_t singleElementSize,
                               uint32_t miscFlags,
                               uint32_t structured)
 {
+  m_elementCount = TotalElements;
   m_stride = singleElementSize;
   m_Desc.sizeOfBuffer = singleElementSize * TotalElements ;
   m_Desc.cpuAccess = cpuAccess;
