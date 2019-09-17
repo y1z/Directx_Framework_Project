@@ -807,5 +807,7 @@ void Render()
   //
   // Present our back buffer to our front buffer
   //
+
+  // returns a boolean value 
   my_swapChain.Present(0, 0);
 }
