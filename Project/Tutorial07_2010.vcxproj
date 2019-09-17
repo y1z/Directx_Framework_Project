@@ -408,6 +408,7 @@
     <ClCompile Include="src\cRenderTargetView.cpp" />
     <ClCompile Include="src\cShader.cpp" />
     <ClCompile Include="src\cShaderResourceView.cpp" />
+    <ClCompile Include="src\cSwapChain.cpp" />
     <ClCompile Include="src\cTexture2D.cpp" />
     <ClCompile Include="src\cVertexBuffer.cpp" />
     <ClCompile Include="src\cVertexShader.cpp" />
@@ -432,6 +433,7 @@
     <ClInclude Include="include\cSampler.h" />
     <ClInclude Include="include\cShader.h" />
     <ClInclude Include="include\cShaderResourceView.h" />
+    <ClInclude Include="include\cSwapChain.h" />
     <ClInclude Include="include\cTexture2D.h" />
     <ClInclude Include="include\cVertexBuffer.h" />
     <ClInclude Include="include\cVertexShader.h" />

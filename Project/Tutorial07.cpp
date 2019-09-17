@@ -23,7 +23,8 @@
 #include "include/cConstBuffer.h"// FINISHED 
 #include "include/cSampler.h"// FINISHED 
 #include "include/cViewport.h" // FINISHED
-#include "include/cShaderResourceView.h"//UNFINISHED
+#include "include/cShaderResourceView.h"//FINISHED
+#include "include/cSwapChain.h"
 /*****************************************************/
 cDevice my_device;
 cDeviceContext my_deviceContext;
@@ -42,6 +43,7 @@ cConstBuffer my_constChangesEveryFrame;
 cSampler my_sampler;
 cViewport my_viewport;
 cShaderResourceView my_shaderResourceView;
+cSwapChain my_swapChain;
 /*****************************************************/
 #include <cassert>
 //--------------------------------------------------------------------------------------
@@ -78,7 +80,7 @@ HWND                                g_hWnd = NULL;
 D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
 //ID3D11Device*                       g_pd3dDevice = NULL;
-ID3D11DeviceContext*                g_pImmediateContext = NULL;
+//ID3D11DeviceContext*                g_pImmediateContext = NULL;
 IDXGISwapChain*                     g_pSwapChain = NULL;
 ID3D11RenderTargetView*             g_pRenderTargetView = NULL;
 ID3D11Texture2D*                    g_pDepthStencil = NULL;
@@ -91,7 +93,7 @@ ID3D11Buffer*                       g_pIndexBuffer = NULL;
 ID3D11Buffer*                       g_pCBNeverChanges = NULL;
 ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
 ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;*/
-ID3D11ShaderResourceView*           g_pTextureRV = NULL;
+//ID3D11ShaderResourceView*           g_pTextureRV = NULL;
 //ID3D11SamplerState*                 g_pSamplerLinear = NULL;
 XMMATRIX                            g_World;
 XMMATRIX                            g_View;
@@ -253,7 +255,7 @@ HRESULT InitDevice()
   UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
   DXGI_SWAP_CHAIN_DESC sd;
-  ZeroMemory(&sd, sizeof(sd));
+  SecureZeroMemory(&sd, sizeof(sd));
   sd.BufferCount = 1;
   sd.BufferDesc.Width = width;
   sd.BufferDesc.Height = height;
@@ -266,14 +268,18 @@ HRESULT InitDevice()
   sd.SampleDesc.Quality = 0;
   sd.Windowed = TRUE;
 
+  my_swapChain.setDescription(width, height, 28,//equivalent to DXGI_FORMAT_R8G8B8A8_UNORM
+                              32,/*equivalent to DXGI_USAGE_RENDER_TARGET_OUTPUT*/ g_hWnd);
+
+
   for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
   {
     g_driverType = driverTypes[driverTypeIndex];
     hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType,
                                        NULL, createDeviceFlags,
                                        featureLevels, numFeatureLevels,
-                                       D3D11_SDK_VERSION, &sd,
-                                       &g_pSwapChain, my_device.getDeviceRef(),
+                                       D3D11_SDK_VERSION, &my_swapChain.getSwapChainDesc(),
+                                       my_swapChain.getSwapChainRef(), my_device.getDeviceRef(),
                                        &g_featureLevel, my_deviceContext.getDeviceContextRef());
     if (SUCCEEDED(hr))
       break;
@@ -282,9 +288,11 @@ HRESULT InitDevice()
     return hr;
 
   // Create a render target view
-  hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*) my_backBuffer.getTextureRef());
-  if (FAILED(hr))
-    return hr;
+  isSuccesful = my_swapChain.GetBuffer(my_backBuffer,0);
+  assert(("Error with swap-chain getting a buffer ", isSuccesful == true));
+  //hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*) my_backBuffer.getTextureRef());
+  //if (FAILED(hr))
+  //  return hr;
   /// OLD CODE
   //hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
   isSuccesful = my_device.CreateRenderTargetView(my_backBuffer, my_renderTragetView);
@@ -649,10 +657,10 @@ HRESULT InitDevice()
 //--------------------------------------------------------------------------------------
 void CleanupDevice()
 {
-  if (g_pImmediateContext) g_pImmediateContext->ClearState();
+  //if (g_pImmediateContext) g_pImmediateContext->ClearState();
 
   // if (g_pSamplerLinear) g_pSamplerLinear->Release();
-  if (g_pTextureRV) g_pTextureRV->Release(); //
+  //if (g_pTextureRV) g_pTextureRV->Release(); //
   //if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
   //if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
   //if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
@@ -665,8 +673,8 @@ void CleanupDevice()
   if (g_pDepthStencilView) g_pDepthStencilView->Release();
   if (g_pRenderTargetView) g_pRenderTargetView->Release();
   if (g_pSwapChain) g_pSwapChain->Release();
-  if (g_pImmediateContext) g_pImmediateContext->Release();
-  //  if (g_pd3dDevice) g_pd3dDevice->Release();
+  // if (g_pImmediateContext) g_pImmediateContext->Release();
+   //  if (g_pd3dDevice) g_pd3dDevice->Release();
 }
 
 
@@ -799,5 +807,5 @@ void Render()
   //
   // Present our back buffer to our front buffer
   //
-  g_pSwapChain->Present(0, 0);
+  my_swapChain.Present(0, 0);
 }
