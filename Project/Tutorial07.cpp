@@ -6,6 +6,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
+//------------------------------ MASTER VERSION -
+
 #include "include/utiliy/Grafics_libs.h"
 
 /******************************************************/
