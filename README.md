@@ -6,3 +6,4 @@ This is the repository that will house a framework that can chose in-between ope
 - c++ 17 
 ## External libs 
 - ASSIMP: https://github.com/assimp/assimp
+- ImGui : github.com/ocornut/imgui 

@@ -1,9 +1,10 @@
 #pragma once
-
 #include"../include/utiliy/Grafics_libs.h"
-
 #include <string>
 #include <cstdint>
+#include <vector>
+// FORWARD DECLARATIONS
+class cVertexShader;
 
 /*! tells the input layout how to interpret the data */
 struct sInputDescriptor
@@ -25,10 +26,27 @@ public:
 
   ~cInputLayout();
   
-  ID3D11InputLayout *getInputLayout();
-  ID3D11InputLayout **getInputLayoutRef();
+#if DIRECTX
+  //! for interfacing with directX 
+  ID3D11InputLayout 
+    *getInputLayout();
+
+  //! for functions that require an address to a pointer 
+  ID3D11InputLayout
+    **getInputLayoutRef();
+#endif // DIRECTX
+public:
+
+  bool 
+    ReadShaderData(cVertexShader& ShaderData, bool isPerVertex = true);
+
+  std::vector<sInputDescriptor> 
+    getInputDescriptor() const;
 
 private:
+#if DIRECTX
   ID3D11InputLayout *mptr_inputLayout;
- };
+#endif // DIRECTX
+  std::vector<sInputDescriptor> m_InputLayouts;
+};
 

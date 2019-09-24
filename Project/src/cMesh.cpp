@@ -1,18 +1,28 @@
 #include "..//include/cMesh.h"
 #include "..//include/cDevice.h"
+#include "../include/utiliy/CustomStructs.h"
 
 cMesh::cMesh()
+ :m_topology(Topology::TriList)
 {
   mptr_indexBuffer = new cIndexBuffer();
   mptr_vertexBuffer = new cVertexBuffer();
+  mptr_Texture = std::make_shared<cTexture2D>();
+#if DIRECTX
+  XMVECTOR defualtPos = XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f);
+  m_transform = XMMatrixTranslationFromVector(defualtPos);
+#else
+#endif // DIRECTX
 }
 
 cMesh::cMesh(cMesh && mesh)
   :mptr_indexBuffer(mesh.mptr_indexBuffer),
-  mptr_vertexBuffer(mesh.mptr_vertexBuffer)
+  mptr_vertexBuffer(mesh.mptr_vertexBuffer),
+  m_topology(mesh.m_topology)
 {
   mesh.mptr_indexBuffer = nullptr;
   mesh.mptr_vertexBuffer = nullptr;
+  mptr_Texture = mesh.mptr_Texture;
 }
 
 cMesh::~cMesh()
@@ -25,6 +35,18 @@ cMesh::~cMesh()
   {
     delete mptr_vertexBuffer;
   }
+}
+
+cMesh & cMesh::operator=(cMesh && mesh)
+{
+  this->mptr_indexBuffer = mesh.mptr_indexBuffer;
+  this->mptr_vertexBuffer = mesh.mptr_vertexBuffer;
+  this->mptr_Texture = mesh.mptr_Texture;
+
+
+  mesh.mptr_indexBuffer = nullptr;
+  mesh.mptr_vertexBuffer = nullptr;
+  return *this;
 }
 
 void cMesh::initIndexBuffer(std::vector<WORD>& indeces)
@@ -51,15 +73,31 @@ bool cMesh::createIndexBuffer(cDevice & device)
   return isSuccessful;
 }
 
-cMesh & cMesh::operator=(cMesh && mesh)
+void cMesh::setTexture(const std::shared_ptr<cTexture2D> &newTexture)
 {
-  this->mptr_indexBuffer = mesh.mptr_indexBuffer;
-  this->mptr_vertexBuffer = mesh.mptr_vertexBuffer;
-
-  mesh.mptr_indexBuffer = nullptr;
-  mesh.mptr_vertexBuffer = nullptr;
-  return *this;
+  mptr_Texture = newTexture;
 }
+
+void cMesh::setTransform(sMatrix4x4 & newTransform)
+{
+#if DIRECTX
+  m_transform = newTransform.matrix;
+#else
+#endif // DIRECTX
+
+}
+
+void cMesh::setTopology(Topology topology)
+{
+  m_topology = topology;
+}
+
+Topology 
+cMesh::getTopology() const
+{
+  return  m_topology;
+}
+
 
 cVertexBuffer &
 cMesh::getVertexBuffer()
@@ -72,3 +110,18 @@ cMesh::getIndexBuffer()
 {
   return  *this->mptr_indexBuffer;
 }
+
+#if DIRECTX
+ID3D11ShaderResourceView *
+cMesh::getResource()
+{
+  return mptr_Texture->getResource();
+}
+
+ID3D11ShaderResourceView **
+cMesh::getResourceRef()
+{
+  return mptr_Texture->getResourceRef();
+}
+
+#endif // DIRECTX

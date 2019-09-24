@@ -27,6 +27,5 @@ ID3D11ShaderResourceView ** cShaderResourceView::getShaderResourceRef()
 {
   return &mptr_shaderResource;
 }
-
-
 #endif // DIRECTX
+

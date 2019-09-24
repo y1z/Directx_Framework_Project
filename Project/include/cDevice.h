@@ -17,10 +17,13 @@ class cVertexBuffer;
 class cIndexBuffer;
 class cConstBuffer;
 class cSampler;
+class cRenderTarget;
+struct sRenderTarget;
 struct sSamplerDesc;
 struct sTextureDescriptor;
 struct sDepthStencilDescriptor;
 struct sInputDescriptor;
+
 
 
 
@@ -32,6 +35,8 @@ public:
 public:
 //! return true if it succeeds
  bool CreateRenderTargetView(cTexture2D &texture, cRenderTargetView &renderTraget);
+
+ bool CreateRenderTargetView(cRenderTarget &renderTarget, cRenderTargetView &renderTraget);
  //! creates a 2D texture 
  bool CreateTexture2D(sTextureDescriptor &Description, cTexture2D &Texture);
  //!  Creates a depth view using a texture as the buffer 
@@ -40,7 +45,7 @@ public:
  bool CreateVertexShader(cVertexShader &vertexShader);
 //! creates a pixel shader 
  bool CreatePixelShader(cPixelShader &vertexShader);
-/*!Creates an input layout
+/*!Creates an input layout ( meant for when making the input layout manually)
 \param inputLayout contains the input layout 
 \param NumDesc how many arguments the input layout will take 
 \param Desc tell the input layout how the data is organized 
@@ -49,6 +54,9 @@ public:
                         ,uint32_t NumDesc
                         , sInputDescriptor Desc[]
                         ,cVertexShader &vertexShader);
+/*!*/ 
+ bool CreateInputLayout(cInputLayout &inputLayout, cVertexShader &vertexShader);
+
 //! Creates a vertex buffer 
  bool CreateVertexBuffer(cVertexBuffer &VertexBuffer);
  //! Creates a index buffer 

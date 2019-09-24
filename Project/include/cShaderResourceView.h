@@ -15,7 +15,6 @@ public:
 //! for function that ask for pointers to arrays 
   ID3D11ShaderResourceView 
     **getShaderResourceRef();
-
 #endif // DIRECTX
 private:
 #if DIRECTX

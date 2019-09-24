@@ -1,9 +1,11 @@
 #pragma once
 #include"../include/utiliy/Grafics_libs.h"
 
+#if DIRECTX
+
 struct SimpleVertex
 {
-  XMFLOAT3 Pos;
+  XMFLOAT4 Pos;
   XMFLOAT2 Tex;
 };
 
@@ -23,3 +25,5 @@ struct CBChangesEveryFrame
   XMFLOAT4 vMeshColor;
 };
 
+
+#endif // DIRECTX

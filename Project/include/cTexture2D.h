@@ -1,5 +1,7 @@
 #pragma once
 #include "../include/utiliy/Grafics_libs.h"
+#include "../include/cShaderResourceView.h"
+class cMesh;
 /*! \brief takes care of the representation of textures */
 struct sTextureDescriptor
 {
@@ -20,9 +22,25 @@ public:
   cTexture2D();
   ~cTexture2D();
 public:
+#if DIRECTX
   ID3D11Texture2D * getTexture();
   ID3D11Texture2D ** getTextureRef();
+
+  ID3D11ShaderResourceView  *getResource();
+  ID3D11ShaderResourceView  **getResourceRef();
+#endif // DIRECTX
+
+  void
+    setDescriptor(float width , float height,
+                  int format,int usage,
+                  int bindFlags, int CpuAccess = 0,
+                  int arraySize = 1);
+
 private:
+#if DIRECTX
   ID3D11Texture2D * mptr_texture;
+#endif // DIRECTX
+  sTextureDescriptor m_desc;
+  cShaderResourceView m_resourceView;
 };
 

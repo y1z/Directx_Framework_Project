@@ -157,7 +157,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(SolutionDir)src;$(SolutionDir)dependencies\assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\assimp\include;$(SolutionDir)include</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -199,7 +199,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)src;$(SolutionDir)dependencies\assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\assimp\include;$(SolutionDir)include</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -241,7 +241,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(SolutionDir)src;$(SolutionDir)dependencies\assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\assimp\include;$(SolutionDir)include</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -283,7 +283,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)src;$(SolutionDir)dependencies\assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\assimp\include;$(SolutionDir)include</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -326,7 +326,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(SolutionDir)src;$(SolutionDir)dependencies\assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\assimp\include;$(SolutionDir)include</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -368,7 +368,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)src;$(SolutionDir)dependencies\assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\assimp\include;$(SolutionDir)include</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -402,18 +402,28 @@
   </ItemDefinitionGroup>
   <ItemGroup />
   <ItemGroup>
-    <ClCompile Include="include\cDepthStencilView.cpp" />
-    <ClCompile Include="include\cDeviceContext.cpp" />
-    <ClCompile Include="include\cSampler.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_demo.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_draw.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="include\utiliy\Timer.cpp" />
     <ClCompile Include="src\cBuffer.cpp" />
+    <ClCompile Include="src\cCamera.cpp" />
+    <ClCompile Include="src\cCameraBase.cpp" />
     <ClCompile Include="src\cConstBuffer.cpp" />
+    <ClCompile Include="src\cDepthStencilView.cpp" />
     <ClCompile Include="src\cDevice.cpp" />
+    <ClCompile Include="src\cDeviceContext.cpp" />
     <ClCompile Include="src\cIndexBuffer.cpp" />
     <ClCompile Include="src\cInputLayout.cpp" />
     <ClCompile Include="src\cMesh.cpp" />
     <ClCompile Include="src\cModel.cpp" />
     <ClCompile Include="src\cPixelShader.cpp" />
+    <ClCompile Include="src\cRenderTarget.cpp" />
     <ClCompile Include="src\cRenderTargetView.cpp" />
+    <ClCompile Include="src\cSampler.cpp" />
     <ClCompile Include="src\cShader.cpp" />
     <ClCompile Include="src\cShaderResourceView.cpp" />
     <ClCompile Include="src\cSwapChain.cpp" />
@@ -421,6 +431,7 @@
     <ClCompile Include="src\cVertexBuffer.cpp" />
     <ClCompile Include="src\cVertexShader.cpp" />
     <ClCompile Include="src\cViewport.cpp" />
+    <ClCompile Include="src\imGuiManager.cpp" />
     <ClCompile Include="Tutorial07.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -428,7 +439,17 @@
     <None Include="Tutorial07.fx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dependencies\imgui\imgui\imconfig.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_internal.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imstb_rectpack.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imstb_textedit.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imstb_truetype.h" />
     <ClInclude Include="include\cBuffer.h" />
+    <ClInclude Include="include\cCamera.h" />
+    <ClInclude Include="include\cCameraBase.h" />
     <ClInclude Include="include\cConstBuffer.h" />
     <ClInclude Include="include\cDepthStencilView.h" />
     <ClInclude Include="include\cDevice.h" />
@@ -437,6 +458,7 @@
     <ClInclude Include="include\cInputLayout.h" />
     <ClInclude Include="include\cMesh.h" />
     <ClInclude Include="include\cPixelShader.h" />
+    <ClInclude Include="include\cRenderTarget.h" />
     <ClInclude Include="include\cRenderTargetView.h" />
     <ClInclude Include="include\cSampler.h" />
     <ClInclude Include="include\cShader.h" />
@@ -449,10 +471,13 @@
     <ClInclude Include="include\directx_structs.h" />
     <ClInclude Include="include\enum_header\enums.h" />
     <ClInclude Include="include\cModel.h" />
+    <ClInclude Include="include\imGuiManager.h" />
+    <ClInclude Include="include\utiliy\CustomStructs.h" />
     <ClInclude Include="include\utiliy\GraficsMacros.h" />
     <ClInclude Include="include\utiliy\Grafics_libs.h" />
     <ClInclude Include="include\utiliy\HelperFunction.h" />
     <ClInclude Include="include\utiliy\MacroslessWindow.h" />
+    <ClInclude Include="include\utiliy\Timer.h" />
     <CLInclude Include="resource.h" />
     <ResourceCompile Include="Tutorial07.rc" />
   </ItemGroup>

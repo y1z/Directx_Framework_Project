@@ -16,10 +16,12 @@ class cSampler;
 class cViewport;
 class cBuffer;
 class cShaderResourceView;
+class cMesh;
 struct sSamplerDesc;
 struct sTextureDescriptor;
 struct sDepthStencilDescriptor;
 struct sInputDescriptor;
+
 
 class cDeviceContext
 {
@@ -93,6 +95,9 @@ public:// functions
 
   void/*! set's the resources for the pixel shader (can set multiple)*/
     PSSetShaderResources(cShaderResourceView  ShaderResources[], uint32_t numResources = 1, uint32_t Slots = 0);
+
+  void/*! set's the resources for the pixel shader (can only set one) */
+    PSSetShaderResources(cMesh &ShaderResources, uint32_t Slot = 0 );
 
   void/*! setting the const-buffers for the pixel shader (can only set one at a time)
       \param Slots the individual slots where the constant buffer goes to.*/

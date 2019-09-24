@@ -9,6 +9,7 @@
 #include "../include/cIndexBuffer.h"
 #include "../include/cConstBuffer.h"
 #include "../include/cSampler.h"
+#include "../include/cRenderTarget.h"
 //std includes 
 #include <vector>
 
@@ -41,6 +42,21 @@ bool cDevice::CreateRenderTargetView(cTexture2D & texture, cRenderTargetView & r
   return false;
 }
 
+bool cDevice::CreateRenderTargetView(cRenderTarget & renderTarget, cRenderTargetView & renderTragetView)
+{
+#if DIRECTX
+
+  HRESULT hr;
+  hr = mptr_device->CreateRenderTargetView(renderTarget.getRenderTarget(), &renderTarget.getDiscriptor(), renderTragetView.getRenderTragetViewRef());
+  if (SUCCEEDED(hr))
+  {
+    return true;
+  }
+
+#endif // 0
+  return false;
+}
+
 bool cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Texture)
 {
 #ifdef DIRECTX
@@ -58,6 +74,7 @@ bool cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Tex
   descDepth.BindFlags = Description.BindFlags;
   descDepth.CPUAccessFlags = Description.CpuAccess;
   descDepth.MiscFlags = 0;
+
   hr = mptr_device->CreateTexture2D(&descDepth, NULL, Texture.getTextureRef());
   if (SUCCEEDED(hr))
   {
@@ -147,6 +164,40 @@ bool cDevice::CreateInputLayout(cInputLayout &inputLayout
                                       vertexShader.getInfo()->GetBufferPointer(),
                                       vertexShader.getInfo()->GetBufferSize(),
                                       inputLayout.getInputLayoutRef());
+  if (SUCCEEDED(hr))
+  {
+    return true;
+  }
+#endif // DIRECTX
+  return false;
+}
+
+bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vertexShader)
+{
+#if DIRECTX
+  std::vector<D3D11_INPUT_ELEMENT_DESC> directxInputLayout;
+  std::vector<sInputDescriptor> intermidateLayout = inputLayout.getInputDescriptor();
+
+  for (const sInputDescriptor &intermidate : intermidateLayout)
+  {
+    D3D11_INPUT_ELEMENT_DESC directxDesc;
+    directxDesc.Format = static_cast<DXGI_FORMAT>(intermidate.Format);
+    directxDesc.AlignedByteOffset = static_cast<UINT>(intermidate.Alignment);
+    directxDesc.SemanticIndex = intermidate.Index;
+    directxDesc.SemanticName = intermidate.Name.c_str();
+    directxDesc.InputSlot = intermidate.Slot;
+    directxDesc.InputSlotClass = static_cast<D3D11_INPUT_CLASSIFICATION> (intermidate.SlotClass);
+    directxDesc.InstanceDataStepRate = intermidate.InstanceData;
+    directxInputLayout.emplace_back(directxDesc);
+  }
+  //for (std::size_t i = 0; i < intermidateLayout.size() - 1; ++i) {
+  //}
+
+  HRESULT  hr = mptr_device->CreateInputLayout(&directxInputLayout[0],
+                                               intermidateLayout.size(),
+                                               vertexShader.getInfo()->GetBufferPointer(),
+                                               vertexShader.getInfo()->GetBufferSize(),
+                                               inputLayout.getInputLayoutRef());
   if (SUCCEEDED(hr))
   {
     return true;

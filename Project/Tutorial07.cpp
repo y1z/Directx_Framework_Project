@@ -13,6 +13,7 @@
 #include "../include/cDeviceContext.h" //UNFINISHED 
 #include "../include/cTexture2D.h"// UNFINISHED
 #include "../include/cRenderTargetView.h"// UNFINISHED
+#include "../include/cRenderTarget.h"
 #include "../include/cDepthStencilView.h"// UNFINISHED
 #include "../include/cVertexShader.h"// UNFINISHED
 #include "../include/cInputLayout.h"// UNFINISHED
@@ -26,6 +27,9 @@
 #include "../include/cShaderResourceView.h"//FINISHED
 #include "../include/cSwapChain.h"
 #include "../include/cModel.h"
+#include "../include/imGuiManager.h"
+#include "../include/utiliy/Timer.h"
+#include "../include/utiliy/CustomStructs.h"
 /*****************************************************/
 #include "../include/directx_structs.h"
 /*****************************************************/
@@ -33,8 +37,12 @@ cDevice my_device;
 cDeviceContext my_deviceContext;
 cTexture2D my_backBuffer;
 cTexture2D my_depthStencil;
+
 cDepthStencilView my_depthStencilView;
-cRenderTargetView my_renderTragetView;
+
+cRenderTargetView my_renderTargetView;
+cRenderTarget my_renderTarget;
+
 cVertexShader my_vertexShader;
 cPixelShader my_pixelShader;
 cInputLayout my_vertexInputLayout;
@@ -43,11 +51,14 @@ cIndexBuffer my_indexBuffer;
 cConstBuffer my_constNeverChanges;
 cConstBuffer my_constChangeOnResize;
 cConstBuffer my_constChangesEveryFrame;
+
 cSampler my_sampler;
 cViewport my_viewport;
 cShaderResourceView my_shaderResourceView;
 cSwapChain my_swapChain;
 cModel my_model;
+imGuiManager my_gui;
+Timer my_timer;
 /*****************************************************/
 #include <cassert>
 
@@ -266,17 +277,20 @@ HRESULT InitDevice()
   if (FAILED(hr))
     return hr;
 
+  // DXGI_FORMAT_R32G32B32A32_FLOAT = 2;
+  my_renderTarget.setDescription(width, height, 2);
+
 
   // Create a render target view
-  isSuccesful = my_swapChain.GetBuffer(my_backBuffer, 0);
-  assert(("Error with swap-chain getting a buffer ", isSuccesful == true));
+  isSuccesful = my_swapChain.GetBuffer(my_renderTarget.getTexture(), 0);
+  assert(("Error with swap-chain getting a buffer " &&  isSuccesful == true));
   //hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*) my_backBuffer.getTextureRef());
   //if (FAILED(hr))
   //  return hr;
   /// OLD CODE
   //hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
-  isSuccesful = my_device.CreateRenderTargetView(my_backBuffer, my_renderTragetView);
-  assert((isSuccesful == true, "Error with render-target creation"));
+  isSuccesful = my_device.CreateRenderTargetView(my_renderTarget.getTexture(), my_renderTargetView);
+  assert((isSuccesful == true && "Error with render-target creation"));
   // Create depth stencil texture
   //D3D11_TEXTURE2D_DESC descDepth;
   //SecureZeroMemory(&descDepth, sizeof(descDepth));
@@ -303,7 +317,7 @@ HRESULT InitDevice()
   TextureDesc.arraySize = 1;
 
   isSuccesful = my_device.CreateTexture2D(TextureDesc, my_depthStencil);
-  assert(isSuccesful == true, "Error with Texture 2d creation ");
+  assert(isSuccesful == true && "Error with Texture 2d creation ");
 
   // Create the depth stencil view
   //D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
@@ -312,6 +326,9 @@ HRESULT InitDevice()
   //descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
   //descDSV.Texture2D.MipSlice = 0;
 
+  /**********************************************************/
+  my_gui.Init(my_device, my_deviceContext, g_hWnd);
+  /**********************************************************/
   // my own descriptor 
   sDepthStencilDescriptor depthDesc;
   depthDesc.Format = TextureDesc.texFormat;
@@ -319,9 +336,9 @@ HRESULT InitDevice()
   depthDesc.Mip = 0;
 
   isSuccesful = my_device.CreateDepthStencilView(my_depthStencil, depthDesc, my_depthStencilView);
-  assert(isSuccesful == true, "Error with depth-stencil creation");
+  assert(isSuccesful == true && "Error with depth-stencil creation");
 
-  my_deviceContext.OMSetRenderTargets(&my_renderTragetView,
+  my_deviceContext.OMSetRenderTargets(&my_renderTargetView,
                                       my_depthStencilView);
 
   //g_pImmediateContext->OMSetRenderTargets(1
@@ -349,7 +366,7 @@ HRESULT InitDevice()
 
   // Create the vertex shader
   isSuccesful = my_device.CreateVertexShader(my_vertexShader);
-  assert(isSuccesful == true, "Error creating vertex shader");
+  assert(isSuccesful == true && "Error creating vertex shader");
   // Define the input layout
   //D3D11_INPUT_ELEMENT_DESC layout[] =
   //{
@@ -376,14 +393,17 @@ HRESULT InitDevice()
     0}
   };
 
+ isSuccesful = my_vertexInputLayout.ReadShaderData(my_vertexShader);
+
+
   UINT numElements = ARRAYSIZE(my_layout);
   // Create the input layout
   isSuccesful = my_device.CreateInputLayout(my_vertexInputLayout,
-                                            numElements,
-                                            my_layout,
                                             my_vertexShader);
 
-  assert(isSuccesful == true, "Error creating Input layout ");
+
+
+  assert(isSuccesful == true && "Error creating Input layout ");
   //hr = g_pd3dDevice->CreateInputLayout(layout,
   //                                     numElements,
   //                                     my_vertexShader.getInfo()->GetBufferPointer(),
@@ -408,7 +428,7 @@ HRESULT InitDevice()
 
   // Create the pixel shader
   isSuccesful = my_device.CreatePixelShader(my_pixelShader);
-  assert((isSuccesful == true, "Error creating the pixel shader"));
+  assert((isSuccesful == true && "Error creating the pixel shader"));
   //hr = g_pd3dDevice->CreatePixelShader(
   //  pPSBlob->GetBufferPointer()
   //  , pPSBlob->GetBufferSize()
@@ -523,12 +543,15 @@ HRESULT InitDevice()
   //                                      DXGI_FORMAT_R16_UINT,
   //                                      0);
 #else
- isSuccesful = my_model.LoadModelFromFile("resources/media/3d models/obj/drakefire_pistol_low.obj",
-                    my_device);
- assert(("Error with loading model file", isSuccesful == true));
+  const char *ModelPath = "resources/media/3d models/obj/drakefire_pistol_low.obj";
+  const char *TexPath = "resources/media/3d models/textures/drakefire_tex/base_albedo.jpg";
+
+  isSuccesful = my_model.LoadModelFromFile("resources/media/3d models/obj/drakefire_pistol_low.obj",
+                                           my_device, TexPath);
+  assert(("Error with loading model file" && isSuccesful == true));
 #endif // !MODEL_LOAD
 
-// Set primitive topology
+  // Set primitive topology
   my_deviceContext.IASetPrimitiveTopology(4);//equivalent to D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
   // Create the constant buffers
   my_constNeverChanges.setDescription(sizeof(CBNeverChanges),
@@ -577,15 +600,15 @@ HRESULT InitDevice()
     return hr;
 
   // Create the sample state
-  D3D11_SAMPLER_DESC sampDesc;
-  SecureZeroMemory(&sampDesc, sizeof(sampDesc));
-  sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-  sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-  sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-  sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-  sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-  sampDesc.MinLOD = 0;
-  sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+  //D3D11_SAMPLER_DESC sampDesc;
+  //SecureZeroMemory(&sampDesc, sizeof(sampDesc));
+  //sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+  //sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+  //sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+  //sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+  //sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+  //sampDesc.MinLOD = 0;
+  //sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
   my_sampler.setDescirption(0x15,// equivalent to D3D11_FILTER_MIN_MAG_MIP_LINEAR
                             1, //equivalent to D3D11_TEXTURE_ADDRESS_WRAP
@@ -654,11 +677,15 @@ void CleanupDevice()
 //--------------------------------------------------------------------------------------
 // Called every time the application receives a message
 //--------------------------------------------------------------------------------------
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+  if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+    return true;
+
   PAINTSTRUCT ps;
   HDC hdc;
-
   switch (message)
   {
     case WM_PAINT:
@@ -685,6 +712,8 @@ void Render()
 {
   // Update our time
   static float t = 0.0f;
+  my_timer.StartTiming();
+
   if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
   {
     t += (float) XM_PI * 0.0125f;
@@ -709,7 +738,7 @@ void Render()
   // Clear the back buffer
   //
   float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red, green, blue, alpha
-  my_deviceContext.ClearRenderTargetView(my_renderTragetView);
+  my_deviceContext.ClearRenderTargetView(my_renderTargetView);
   //g_pImmediateContext->ClearRenderTargetView(my_renderTragetView.getRenderTragetView()
   //                                           , ClearColor);
 
@@ -748,7 +777,6 @@ void Render()
   my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
 
 #endif // !MODEL_LOAD
-
   //
   // Render the cube
   //
@@ -789,12 +817,17 @@ void Render()
     &my_constNeverChanges
   };
 
-  my_model.DrawMeshes(my_deviceContext,bufferArray);
+  my_model.DrawMeshes(my_deviceContext, bufferArray);
+  XMMATRIX MoveGunLeft = XMMatrixTranspose(XMMatrixTranslationFromVector({-2,1,1,1}));
+  cb.mWorld = XMMatrixMultiply(MoveGunLeft, XMMatrixRotationY(t));// XMMatrixTranslationFromVector(moveVector)
+  cb.vMeshColor = {0.81f,0.17f,0.8314f,1.0f};
 
-  cb.mWorld = XMMatrixRotationY(t);
   my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
-#endif // !MODEL_LOAD
 
+#endif // !MODEL_LOAD
+  my_timer.EndTiming();
+  float deltaTime = my_timer.GetResultSeconds();
+  my_gui.FpsCountWindow("Data", deltaTime);
   //
   // Present our back buffer to our front buffer
   //

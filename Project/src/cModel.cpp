@@ -1,24 +1,43 @@
 #include "..//include/cModel.h"
 #include "assimp/cimport.h"
+#include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
+#include "../include/cDevice.h"
 #include "../include/cDeviceContext.h"
 #include "../include/cConstBuffer.h"
 #include "../include/utiliy/Grafics_libs.h"
 #include <cassert>
+#include <string>
+#include <vector>
 
-bool cModel::LoadModelFromFile(const char * filePath, cDevice &device)
+auto comparePaths = [](std::vector<std::string>& alreadyFoundPaths, const char* possibleNewPath) {
+  for (const std::string &Path : alreadyFoundPaths)
+  {
+    if (!Path.compare(possibleNewPath))
+    {
+      return true;
+    }
+  }
+  return false;
+};
+
+bool cModel::LoadModelFromFile(const char * filePath, cDevice &device, const char *HardCodedPath)
 {
   /**************REMOVED BECUASE OF LINKER ERRORS ***************/
   //Assimp::Importer importer;
+  //
   //const aiScene* TheScene = importer.ReadFile(filePath,
   //                                            aiProcess_Triangulate |
   //                                            aiProcessPreset_TargetRealtime_MaxQuality |
   //                                            aiProcess_ConvertToLeftHanded);
+
   const aiScene* Scene = aiImportFile(filePath,
                                       aiProcess_Triangulate |
                                       aiProcessPreset_TargetRealtime_MaxQuality |
                                       aiProcess_ConvertToLeftHanded);
+
+  std::vector<std::string> texturePaths;
 
   if (Scene == nullptr)
   {
@@ -26,48 +45,63 @@ bool cModel::LoadModelFromFile(const char * filePath, cDevice &device)
   }
   else
   {
-    this->TraversTree(Scene, Scene->mRootNode, device);
+    this->TraversTree(Scene, Scene->mRootNode, device, texturePaths);
 
+    if (HardCodedPath != nullptr)
+    {
+      ExtractTexture(HardCodedPath, m_meshes[0], device);
+    }
+
+    aiReleaseImport(Scene);
     return true;
   }
 
 }
 
-void cModel::DrawMeshes(cDeviceContext & deviceContext,std::vector<cConstBuffer *> &buffers)
+void cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &buffers)
 {
   CBChangesEveryFrame cb;
+  //m_meshes[2].setTopology(Topology::LineList);
   for (cMesh &mesh : m_meshes)
   {
     deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), 57);
     deviceContext.IASetVertexBuffers(&mesh.getVertexBuffer(), 1);
-    deviceContext.DrawIndexed(mesh.getIndexBuffer().getElementCount(), 0); 
+    deviceContext.IASetPrimitiveTopology(static_cast<int>(mesh.getTopology()));
+    if (mesh.getResource() != nullptr)
+    { deviceContext.PSSetShaderResources(mesh); }
+
+    deviceContext.DrawIndexed(mesh.getIndexBuffer().getElementCount(), 0);
   }
   cb.mWorld = XMMatrixIdentity();
   // red 
   cb.vMeshColor = {0.6f,0.0f,0.0f,0.0f};
-  deviceContext.UpdateSubresource(buffers[0],&cb);
+  deviceContext.UpdateSubresource(buffers[0], &cb);
 }
 
 
-void cModel::TraversTree(const aiScene * scene, aiNode * node, cDevice & device)
+void cModel::TraversTree(const aiScene * scene, aiNode * node, cDevice & device, std::vector<std::string> &texturePaths)
 {
   // extract the current mesh
   for (uint32_t i = 0; i < node->mNumMeshes; ++i)
   {
     aiMesh *meshes = scene->mMeshes[node->mMeshes[i]];
-    this->ExtractMesh(meshes, device);
+    this->ExtractMesh(meshes, device, scene, texturePaths);
   }
+
   // get the children in order to the rest of the meshes 
   for (uint32_t j = 0; j < node->mNumChildren; j++)
   {
-    this->TraversTree(scene, node->mChildren[j], device);
+    this->TraversTree(scene, node->mChildren[j], device, texturePaths);
   }
 }
 
-void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device)
+void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device, const aiScene*scene, std::vector<std::string> &texturePaths)
 {
   std::vector<WORD> indices;
+#if DIRECTX
   std::vector<SimpleVertex> vertices;
+#else
+#endif // DIRECTX
 
   // get the indices of a the model 
   for (uint32_t i = 0; i < assimpMesh->mNumFaces; ++i)
@@ -89,8 +123,15 @@ void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device)
     vertex.Pos.x = assimpMesh->mVertices[i].x;
     vertex.Pos.y = assimpMesh->mVertices[i].y;
     vertex.Pos.z = assimpMesh->mVertices[i].z;
+    vertex.Pos.w  = 1.0f;
+    if (assimpMesh->HasTextureCoords(0))
+    {
+      vertex.Tex.x = static_cast<float>(assimpMesh->mTextureCoords[0][i].x);
+      vertex.Tex.y = static_cast<float>(assimpMesh->mTextureCoords[0][i].y);
+    }
     vertices.emplace_back(vertex);
   }
+
 
   cMesh result;
   result.initIndexBuffer(indices);
@@ -100,4 +141,49 @@ void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device)
 
   assert((IndexSuccessful & VertexSuccessful, "error with index or vertex buffer creation"));
   m_meshes.emplace_back(std::move(result));
+}
+
+void cModel::CheckTexturePaths(const aiScene * scene, const aiMesh *assimpMesh, std::vector<std::string> &texturePaths)
+{
+
+  aiMaterial *material = scene->mMaterials[assimpMesh->mNumAnimMeshes];
+  if (material->GetTextureCount(aiTextureType_DIFFUSE));
+  {
+    aiString FilePath;
+    material->GetTexture(aiTextureType_DIFFUSE, 0, &FilePath);
+    FilePath.C_Str();
+  }
+
+}
+
+void cModel::ExtractTexture(const char * texturePath, cMesh & AfectedMesh, cDevice &device)
+{
+#if DIRECTX
+  HRESULT hr = S_FALSE;
+
+#if UNICODE
+  std::int32_t PathLength = MultiByteToWideChar(CP_UTF8, 0, texturePath, -1, NULL, 0);
+  wchar_t *Temp = new wchar_t[PathLength];
+  MultiByteToWideChar(CP_UTF8, 0, texturePath, -1, Temp, PathLength);
+
+  hr = D3DX11CreateShaderResourceViewFromFile(device.getDevice(), Temp,
+                                              NULL, NULL,
+                                              AfectedMesh.getResourceRef(), NULL);
+
+  delete Temp;
+#ifndef UNICODE
+
+  hr = D3DX11CreateShaderResourceViewFromFile(device.getDevice(), texturePath,
+                                              NULL, NULL,
+                                              AfectedMesh.getResourceRef(), NULL);
+#endif // !UNICODE
+
+#endif // UNICODE
+
+  if (!SUCCEEDED(hr))
+  {
+    assert((SUCCEEDED(hr) && "error with creating textures "));
+  }
+#endif // DIRECTX
+
 }

@@ -14,6 +14,7 @@
 #include "../include/cViewport.h"
 #include "../include/cBuffer.h"
 #include "../include/cShaderResourceView.h"
+#include "../include/cMesh.h"
 // std includes 
 #include <cassert>
 // limits for setting objects 
@@ -250,6 +251,14 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
   {
     assert(("Error asking for too many slots", Slots <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1));
   }
+
+#endif // DIRECTX
+}
+
+void cDeviceContext::PSSetShaderResources(cMesh & ShaderResources,uint32_t Slot)
+{
+#if DIRECTX
+  mptr_deviceContext->PSSetShaderResources(Slot, 1, ShaderResources.getResourceRef());
 
 #endif // DIRECTX
 }
