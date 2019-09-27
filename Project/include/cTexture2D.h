@@ -36,6 +36,10 @@ public:
                   int bindFlags, int CpuAccess = 0,
                   int arraySize = 1);
 
+  sTextureDescriptor
+    getDescriptor();
+
+  void Release();
 private:
 #if DIRECTX
   ID3D11Texture2D * mptr_texture;

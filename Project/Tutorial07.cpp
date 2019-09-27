@@ -35,8 +35,6 @@
 /*****************************************************/
 cDevice my_device;
 cDeviceContext my_deviceContext;
-cTexture2D my_backBuffer;
-cTexture2D my_depthStencil;
 
 cDepthStencilView my_depthStencilView;
 
@@ -316,7 +314,7 @@ HRESULT InitDevice()
   TextureDesc.CpuAccess = 0;
   TextureDesc.arraySize = 1;
 
-  isSuccesful = my_device.CreateTexture2D(TextureDesc, my_depthStencil);
+  isSuccesful = my_device.CreateTexture2D(TextureDesc, my_depthStencilView.getDepthStencil());
   assert(isSuccesful == true && "Error with Texture 2d creation ");
 
   // Create the depth stencil view
@@ -335,7 +333,7 @@ HRESULT InitDevice()
   depthDesc.Dimension = 3;// equivalent to D3D11_DSV_DIMENSION_TEXTURE2D 
   depthDesc.Mip = 0;
 
-  isSuccesful = my_device.CreateDepthStencilView(my_depthStencil, depthDesc, my_depthStencilView);
+  isSuccesful = my_device.CreateDepthStencilView(my_depthStencilView.getDepthStencil(), depthDesc, my_depthStencilView);
   assert(isSuccesful == true && "Error with depth-stencil creation");
 
   my_deviceContext.OMSetRenderTargets(&my_renderTargetView,
@@ -393,7 +391,7 @@ HRESULT InitDevice()
     0}
   };
 
- isSuccesful = my_vertexInputLayout.ReadShaderData(my_vertexShader);
+  isSuccesful = my_vertexInputLayout.ReadShaderData(my_vertexShader);
 
 
   UINT numElements = ARRAYSIZE(my_layout);
@@ -686,19 +684,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
   PAINTSTRUCT ps;
   HDC hdc;
-  switch (message)
+  if (message == WM_PAINT)
   {
-    case WM_PAINT:
-      hdc = BeginPaint(hWnd, &ps);
-      EndPaint(hWnd, &ps);
-      break;
+    hdc = BeginPaint(hWnd, &ps);
+    EndPaint(hWnd, &ps);
+  }
+  else if (message == WM_SIZING)
+  {
+    RECT rc;
+    GetClientRect(g_hWnd, &rc);
+    UINT width = rc.right - rc.left;
+    UINT height = rc.bottom - rc.top;
+    my_swapChain.Resize(my_device, my_depthStencilView, my_renderTarget.getTexture(), my_renderTargetView, g_hWnd, width, height);
 
-    case WM_DESTROY:
-      PostQuitMessage(0);
-      break;
-
-    default:
-      return DefWindowProc(hWnd, message, wParam, lParam);
+    my_deviceContext.OMSetRenderTargets(&my_renderTargetView, my_depthStencilView);
+  }
+  else if (message == WM_DESTROY)
+  {
+    PostQuitMessage(0);
+  }
+  else
+  {
+    return DefWindowProc(hWnd, message, wParam, lParam);
   }
 
   return 0;

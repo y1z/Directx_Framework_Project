@@ -1,6 +1,8 @@
 #pragma once
 
 #include"utiliy/Grafics_libs.h"
+#include "../include/cTexture2D.h"
+
 struct sDepthStencilDescriptor
 {
   int Format{0};
@@ -14,12 +16,25 @@ public:
   cDepthStencilView();
   ~cDepthStencilView();
 public:
-#if DIRECTX
 
+  
+#if DIRECTX
   ID3D11DepthStencilView* getDepthStencilView();
   ID3D11DepthStencilView** getDepthStencilViewRef();
-private:
-  ID3D11DepthStencilView*mptr_depthStencilView;
 
+  ID3D11Texture2D * 
+    getTexture();
+
+  ID3D11Texture2D ** 
+    getTextureRef();
 #endif // DIRECTX
+
+  cTexture2D &getDepthStencil();
+
+  void ReleaseAll();
+private:
+#if DIRECTX
+  ID3D11DepthStencilView*mptr_depthStencilView;
+#endif // DIRECTX
+  cTexture2D m_depthStencil;
 };

@@ -1,9 +1,13 @@
 #pragma once
 #include "../include/utiliy/Grafics_libs.h"
+#include "../include/cDepthStencilView.h"
+#include "../include/cRenderTargetView.h"
 #include <cstdint>
 //forward declarations
 class cRenderTargetView;
 class cTexture2D;
+class cDevice;
+
 /*! controls the settings for the swap-chain*/
 struct sSwapDesc
 {
@@ -70,6 +74,11 @@ public:// functions
   bool//! this is the function that switches the back buffer with front buffer. 
     Present(uint32_t SycroOption, uint32_t PresentationOption= 0,
             unsigned int Program = 0);
+//! resizes the window 
+  bool 
+    Resize(cDevice &device,cDepthStencilView &DepthStencil,
+           cTexture2D &renderTraget, cRenderTargetView &renderTragetView,
+          HWND &handle ,uint32_t width,uint32_t height);
 private:
 #if DIRECTX
   IDXGISwapChain *mptr_swapChain;
