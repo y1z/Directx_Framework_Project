@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{0C809A55-3601-4E43-9842-2C366661454E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>graphicsframework</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\exe\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\intermediate\$(PlatformTarget)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(PlatformTarget)D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\exe\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\intermediate\$(PlatformTarget)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(PlatformTarget)D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\exe\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\intermediate\$(PlatformTarget)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(PlatformTarget)R</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\exe\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\intermediate\$(PlatformTarget)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(PlatformTarget)R</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>wWindMain</EntryPointSymbol>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>wWindMain</EntryPointSymbol>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="dependencies\imgui\imgui\imconfig.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_internal.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imstb_rectpack.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imstb_textedit.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imstb_truetype.h" />
+    <ClInclude Include="include\actor\cActor.h" />
+    <ClInclude Include="include\cApiComponents.h" />
+    <ClInclude Include="include\cBuffer.h" />
+    <ClInclude Include="include\cCamera.h" />
+    <ClInclude Include="include\cCameraBase.h" />
+    <ClInclude Include="include\cConstBuffer.h" />
+    <ClInclude Include="include\cDepthStencilView.h" />
+    <ClInclude Include="include\cDevice.h" />
+    <ClInclude Include="include\cDeviceContext.h" />
+    <ClInclude Include="include\cIndexBuffer.h" />
+    <ClInclude Include="include\cInputLayout.h" />
+    <ClInclude Include="include\cMesh.h" />
+    <ClInclude Include="include\cModel.h" />
+    <ClInclude Include="include\cPixelShader.h" />
+    <ClInclude Include="include\cRenderTarget.h" />
+    <ClInclude Include="include\cRenderTargetView.h" />
+    <ClInclude Include="include\cSampler.h" />
+    <ClInclude Include="include\cShaderBase.h" />
+    <ClInclude Include="include\cShaderResourceView.h" />
+    <ClInclude Include="include\cSwapChain.h" />
+    <ClInclude Include="include\cTexture2D.h" />
+    <ClInclude Include="include\cVertexBuffer.h" />
+    <ClInclude Include="include\cVertexShader.h" />
+    <ClInclude Include="include\cViewport.h" />
+    <ClInclude Include="include\cWindow.h" />
+    <ClInclude Include="include\directx_structs.h" />
+    <ClInclude Include="include\enum_headers\enFormatEnums.h" />
+    <ClInclude Include="include\enum_headers\enumBufferType.h" />
+    <ClInclude Include="include\enum_headers\enumComparasion.h" />
+    <ClInclude Include="include\enum_headers\enumFilter.h" />
+    <ClInclude Include="include\enum_headers\enums.h" />
+    <ClInclude Include="include\enum_headers\enumsActor.h" />
+    <ClInclude Include="include\enum_headers\enumTextureAddress.h" />
+    <ClInclude Include="include\enum_headers\enumTopology.h" />
+    <ClInclude Include="include\imGuiManager.h" />
+    <ClInclude Include="include\utility\CustomStructs.h" />
+    <ClInclude Include="include\utility\enDefs.h" />
+    <ClInclude Include="include\utility\GraficsMacros.h" />
+    <ClInclude Include="include\utility\Grafics_libs.h" />
+    <ClInclude Include="include\utility\HelperFuncs.h" />
+    <ClInclude Include="include\utility\MacroslessWindow.h" />
+    <ClInclude Include="include\utility\Timer.h" />
+    <ClInclude Include="Resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dependencies\imgui\imgui\imgui.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_demo.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_draw.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="include\utility\HelperFuncs.cpp" />
+    <ClCompile Include="include\utility\Timer.cpp" />
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="src\cApiComponents.cpp" />
+    <ClCompile Include="src\cBuffer.cpp" />
+    <ClCompile Include="src\cCamera.cpp" />
+    <ClCompile Include="src\cCameraBase.cpp" />
+    <ClCompile Include="src\cConstBuffer.cpp" />
+    <ClCompile Include="src\cDepthStencilView.cpp" />
+    <ClCompile Include="src\cDevice.cpp" />
+    <ClCompile Include="src\cDeviceContext.cpp" />
+    <ClCompile Include="src\cIndexBuffer.cpp" />
+    <ClCompile Include="src\cInputLayout.cpp" />
+    <ClCompile Include="src\cMesh.cpp" />
+    <ClCompile Include="src\cModel.cpp" />
+    <ClCompile Include="src\cPixelShader.cpp" />
+    <ClCompile Include="src\cRenderTarget.cpp" />
+    <ClCompile Include="src\cRenderTargetView.cpp" />
+    <ClCompile Include="src\cSampler.cpp" />
+    <ClCompile Include="src\cShaderBase.cpp" />
+    <ClCompile Include="src\cShaderResourceView.cpp" />
+    <ClCompile Include="src\cSwapChain.cpp" />
+    <ClCompile Include="src\cTexture2D.cpp" />
+    <ClCompile Include="src\cVertexBuffer.cpp" />
+    <ClCompile Include="src\cVertexShader.cpp" />
+    <ClCompile Include="src\cViewport.cpp" />
+    <ClCompile Include="src\cWindow.cpp" />
+    <ClCompile Include="src\imGuiManager.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

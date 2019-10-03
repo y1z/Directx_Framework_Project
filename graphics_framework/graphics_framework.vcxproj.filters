@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="depencies">
+      <UniqueIdentifier>{727388d4-6ee5-4aea-b23b-6191d5730a74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="depencies\imgui">
+      <UniqueIdentifier>{1da71d1d-fb0b-4c3a-819d-d186723b5479}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="depencies\imgui\include">
+      <UniqueIdentifier>{b5c40345-0845-4ac7-a1d0-8960fc702138}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="depencies\imgui\src">
+      <UniqueIdentifier>{5d7b9c09-c9b6-4ad4-8c9e-43f79e845aa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\utility">
+      <UniqueIdentifier>{52ba915c-26ae-4b79-82a2-7f2d804e0cca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\enums">
+      <UniqueIdentifier>{b5055413-f488-486b-b303-a697ca2a151f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\main">
+      <UniqueIdentifier>{fd3a3a30-f362-46d6-a974-5979f6cc42a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\actor">
+      <UniqueIdentifier>{ffd14b7f-4e57-4db1-adc4-9eb63a1a4987}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\cBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cCamera.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cCameraBase.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cConstBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cDepthStencilView.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cDevice.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cDeviceContext.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cIndexBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cInputLayout.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cMesh.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cModel.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cPixelShader.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cRenderTarget.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cRenderTargetView.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cSampler.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cShaderResourceView.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cSwapChain.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cTexture2D.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cVertexBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cVertexShader.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cViewport.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imconfig.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_dx11.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_win32.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imgui_internal.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imstb_rectpack.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imstb_textedit.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imstb_truetype.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imgui.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\MacroslessWindow.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\directx_structs.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\Timer.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\CustomStructs.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\enDefs.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imGuiManager.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\Grafics_libs.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\GraficsMacros.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cWindow.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cApiComponents.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumTextureAddress.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enFormatEnums.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumBufferType.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enums.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumTopology.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cShaderBase.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumFilter.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumComparasion.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\HelperFuncs.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\actor\cActor.h">
+      <Filter>include\actor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumsActor.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\cBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cCamera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cCameraBase.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cConstBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cDepthStencilView.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cDevice.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cDeviceContext.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cIndexBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cInputLayout.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cMesh.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cModel.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cPixelShader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cRenderTarget.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cRenderTargetView.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cSampler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cShaderResourceView.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cSwapChain.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cTexture2D.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cVertexBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cVertexShader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cViewport.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imGuiManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_dx11.cpp">
+      <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui_draw.cpp">
+      <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_win32.cpp">
+      <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui_widgets.cpp">
+      <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui.cpp">
+      <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui_demo.cpp">
+      <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\utility\Timer.cpp">
+      <Filter>include\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cWindow.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cApiComponents.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cShaderBase.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>src\main</Filter>
+    </ClCompile>
+    <ClCompile Include="include\utility\HelperFuncs.cpp">
+      <Filter>include\utility</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
