@@ -11,7 +11,7 @@
 #include "../include/cDeviceContext.h" //UNFINISHED 
 #include "../include/cTexture2D.h"// UNFINISHED
 #include "../include/cRenderTargetView.h"// UNFINISHED
-#include "../include/cRenderTarget.h"
+#include "../include/cRenderTarget.h"//UNFINISHED 
 #include "../include/cDepthStencilView.h"// UNFINISHED
 #include "../include/cVertexShader.h"// UNFINISHED
 #include "../include/cInputLayout.h"// UNFINISHED
@@ -31,6 +31,7 @@
 #include "cWindow.h"
 #include "cApiComponents.h"
 #include "cCamera.h"
+#include "cCameraManager.h"
 /*****************************************************/
 #include "enum_headers/enFormatEnums.h" 
 #include "enum_headers/enumTextureAddress.h"
@@ -47,11 +48,10 @@
 /*****************************************************/
 #if DIRECTX
 #include "../include/directx_structs.h"
-
 #endif // DIRECTX
 /*****************************************************/
 #include "utility/HelperFuncs.h"
-
+#include <memory>
 /*****************************************************/
 cDevice my_device;
 cDeviceContext my_deviceContext;
@@ -77,6 +77,8 @@ Timer my_timer;
 /*****************************************************/
 cWindow my_window;
 cCamera my_camera;
+std::unique_ptr<cCameraManager>my_cameraManager = std::make_unique<cCameraManager>();
+/**********************************************************/
 cApiComponents my_apiComponent;
 /*****************************************************/
 #include <cassert>
@@ -211,14 +213,13 @@ HRESULT InitDevice()
   //depthDesc.Format = TextureDesc.texFormat;
   //depthDesc.Dimension = 3;// equivalent to D3D11_DSV_DIMENSION_TEXTURE2D 
   //depthDesc.Mip = 0;
-
-  //  my_depthStencilView
+  my_swapChain.setDepthStencilView(Formats::depthStencil_format);
 
   isSuccesful = my_device.CreateDepthStencilView(my_swapChain.getDepthStencilView());
   assert(isSuccesful == true && "Error with depth-stencil creation");
 
   my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargerView(),
-                                      my_depthStencilView);
+                                      my_swapChain.getDepthStencilView());
 
   //g_pImmediateContext->OMSetRenderTargets(1
   //                                        , my_renderTragetView.getRenderTragetViewRef(),
@@ -472,9 +473,15 @@ HRESULT InitDevice()
 #if DIRECTX
   g_World.matrix = dx::XMMatrixIdentity();
 #endif // DIRECTX
+  cCamera orthoCamera;
+  orthoCamera.calculateAndSetView();
+  orthoCamera.calculateAndSetOrthographic(my_window, 100.0f, 0.1f);
 
-  my_camera.initViewMatrix();
-  my_camera.initProjectionMatrix(my_window, 70.0f, 100.0f, 0.1f);
+  my_camera.calculateAndSetView();
+  my_camera.calculateAndSetPerpective(my_window, 70.0f, 100.0f, 0.1f);
+
+  my_cameraManager->pushBackCamera(my_camera);
+  my_cameraManager->pushBackCamera(orthoCamera);
   //g_Projection.matrix = dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4,
   //                                                   width / (FLOAT) height,
   //                                                   0.01f,
@@ -483,13 +490,13 @@ HRESULT InitDevice()
   //g_View.matrix = dx::XMMatrixLookAtLH(Eye, At, Up);
 #if DIRECTX
   CBNeverChanges cbNeverChanges;
-  cbNeverChanges.mView = my_camera.getView().matrix;
+  cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
   my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                      &cbNeverChanges);
 
   // Initialize the projection matrix
   CBChangeOnResize cbChangesOnResize;
-  cbChangesOnResize.mProjection = my_camera.getProjection().matrix;//dx::XMMatrixTranspose(g_Projection.matrix);
+  cbChangesOnResize.mProjection = my_cameraManager->getProjectionMatrix().matrix;//dx::XMMatrixTranspose(g_Projection.matrix);
   my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
                                      &cbChangesOnResize);
 #endif // DIRECTX
@@ -564,49 +571,68 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   {
     // used to alter the view matrix 
     CBNeverChanges cbNeverChanges;
+    CBChangeOnResize ChangeOnProjectionChange;
     // going forwards 
     if (wParam == (WPARAM)'W')
     {
-      my_camera.moveFront(1.0f, my_window);
-      cbNeverChanges.mView = my_camera.getView().matrix;
+      my_cameraManager->moveFront(1.0f, my_window);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
     }//going backwards
     else if (wParam == (WPARAM)'S')
     {
-      my_camera.moveFront(-1.0f, my_window);
-      cbNeverChanges.mView = my_camera.getView().matrix;
+      my_cameraManager->moveFront(-1.0f, my_window);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
     }//going right
     else if (wParam == (WPARAM)'D')
     {
-      my_camera.moveRight(1.0f, my_window);
-      cbNeverChanges.mView = my_camera.getView().matrix;
+      my_cameraManager->moveRight(1.0f, my_window);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
     }//going left 
     else if (wParam == (WPARAM)'A')
     {
-      my_camera.moveRight(-1.0f, my_window);
-      cbNeverChanges.mView = my_camera.getView().matrix;
+      my_cameraManager->moveRight(-1.0f, my_window);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
     }
     //going up 
     else if (wParam == (WPARAM)'E')
     {
-      my_camera.moveUp(1.0f, my_window);
-      cbNeverChanges.mView = my_camera.getView().matrix;
+      my_cameraManager->moveUp(1.0f, my_window);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
     }//going down 
     else if (wParam == (WPARAM)'Q')
     {
-      my_camera.moveUp(-1.0f, my_window);
-      cbNeverChanges.mView = my_camera.getView().matrix;
+      my_cameraManager->moveUp(-1.0f, my_window);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
+    }
+    else if (wParam == (WPARAM)'1')
+    {
+      my_cameraManager->switchCamera(0);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
+                                         &cbNeverChanges);
+    }
+    else if (wParam == (WPARAM)'2')
+    {
+      my_cameraManager->switchCamera(1);
+      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
+                                         &cbNeverChanges);
+      //for changing the projection
+      //ChangeOnProjectionChange.mProjection = my_cameraManager->getProjectionMatrix().matrix;
+      //my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
+      //                                   &ChangeOnProjectionChange);
     }
     else if (wParam == VK_SHIFT)
     {
@@ -616,13 +642,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       POINT newPoint;
       GetCursorPos(&newPoint);
 
-      sVector4 rot{newPoint.x - centerPoint.x, newPoint.y - centerPoint.y,0,0};
-      sVector4  ScalarVector{0.016f,0.016f,0.016f,0.016f};
-      rot.vector4 = dx::XMVectorMultiply(rot.vector4, ScalarVector.vector4);
-      // rot.vector4 *=  rot.vector4 + vector4 ;
-      my_camera.AddToAt(rot, my_window);
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+      //sVector4 rot{newPoint.x - centerPoint.x, newPoint.y - centerPoint.y,0,0};
+      //sVector4  ScalarVector{0.016f,0.016f,0.016f,0.016f};
+      //rot.vector4 = dx::XMVectorMultiply(rot.vector4, ScalarVector.vector4);
+      //// rot.vector4 *=  rot.vector4 + vector4 ;
+      //my_camera.rotateCamera(rot, my_window);
+      //my_deviceContext.UpdateSubresource(&my_constNeverChanges,
+      //                                   &cbNeverChanges);
+
     }
 
   }

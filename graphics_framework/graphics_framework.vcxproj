@@ -102,7 +102,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -122,7 +122,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -144,7 +144,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -168,7 +168,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -196,6 +196,7 @@
     <ClInclude Include="include\cBuffer.h" />
     <ClInclude Include="include\cCamera.h" />
     <ClInclude Include="include\cCameraBase.h" />
+    <ClInclude Include="include\cCameraManager.h" />
     <ClInclude Include="include\cConstBuffer.h" />
     <ClInclude Include="include\cDepthStencilView.h" />
     <ClInclude Include="include\cDevice.h" />
@@ -246,6 +247,7 @@
     <ClCompile Include="dependencies\imgui\imgui\imgui_widgets.cpp" />
     <ClCompile Include="include\actor\src\baseComponent.cpp" />
     <ClCompile Include="include\actor\src\cActor.cpp" />
+    <ClCompile Include="include\cCameraManager.cpp" />
     <ClCompile Include="include\utility\HelperFuncs.cpp" />
     <ClCompile Include="include\utility\Timer.cpp" />
     <ClCompile Include="Source.cpp" />

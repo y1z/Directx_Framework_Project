@@ -55,11 +55,11 @@ cCamera::moveFront(float unit, cWindow &window, float deltaTime)
 #endif // DIRECTX
 }
 
-void cCamera::AddToAt(sVector4 & Off, cWindow &window)
+void cCamera::rotateCamera(sVector4 & Off, cWindow &window)
 {
 #if DIRECTX
   dx::XMVECTOR TEST = dx::XMVectorSet(1, 0, 0, 0);
-  m_at.vector4 = dx::XMVectorAdd(m_at.vector4,dx::XMVectorMultiply(m_at.vector4,TEST));
+  m_at.vector4 = dx::XMVectorAdd(m_at.vector4, dx::XMVectorMultiply(m_at.vector4, TEST));
   this->updateCoords();
   this->updateCamera(window);
 #endif // DIRECTX
@@ -67,7 +67,7 @@ void cCamera::AddToAt(sVector4 & Off, cWindow &window)
 }
 
 void
-cCamera::initViewMatrix()
+cCamera::calculateAndSetView()
 {
 #if DIRECTX
   m_view.matrix = dx::XMMatrixLookAtLH(this->m_eye.vector4,
@@ -80,9 +80,9 @@ cCamera::initViewMatrix()
 }
 
 void
-cCamera::initProjectionMatrix(cWindow &window,
-                              float AngleInDegrees,
-                              float Far, float Near)
+cCamera::calculateAndSetPerpective(cWindow &window,
+                                   float AngleInDegrees,
+                                   float Far, float Near)
 {
   m_fov = helper::degreesToRadians(AngleInDegrees);
   m_far = Far;
@@ -91,12 +91,25 @@ cCamera::initProjectionMatrix(cWindow &window,
   m_projection.matrix = dx::XMMatrixPerspectiveFovLH(m_fov,
                                                      window.getWidth() / (float) window.getHeight(),
                                                      m_near, m_far);
-  //m_projection.matrix = dx::XMMatrixPerspectiveLH(window.getWidth(), window.getHeight(), m_near, m_far);
 
   m_projection.matrix = dx::XMMatrixTranspose(m_projection.matrix);
 
-
+  isOrtho = false;
   updateCoords();
+#else
+#endif // DIRECTX
+}
+
+void
+cCamera::calculateAndSetOrthographic(cWindow & window, float Far, float Near)
+{
+  m_far = Far;
+  m_near = Near;
+#if DIRECTX
+  m_projection.matrix = dx::XMMatrixOrthographicLH(window.getWidth(), window.getHeight(), Near, Far);
+
+  m_projection.matrix = dx::XMMatrixTranspose(m_projection.matrix);
+  this->isOrtho = true;
 #else
 #endif // DIRECTX
 }
@@ -128,12 +141,20 @@ cCamera::updateCamera(cWindow & window)
                                        this->m_up.vector4);
 
   m_view.matrix = dx::XMMatrixTranspose(m_view.matrix);
+  if (this->isOrtho == false)
+  {
+    m_projection.matrix = dx::XMMatrixPerspectiveFovLH(m_fov,
+                                                       window.getWidth() / (float) window.getHeight(),
+                                                       m_near, m_far);
 
-  m_projection.matrix = dx::XMMatrixPerspectiveFovLH(m_fov,
-                                                     window.getWidth() / (float) window.getHeight(),
-                                                     m_near, m_far);
+    m_projection.matrix = dx::XMMatrixTranspose(m_projection.matrix);
+  }
+  else
+  {
+    m_projection.matrix = dx::XMMatrixOrthographicLH(window.getWidth(), window.getHeight(), m_near, m_far);
 
-  m_projection.matrix = dx::XMMatrixTranspose(m_projection.matrix);
+    m_projection.matrix = dx::XMMatrixTranspose(m_projection.matrix);
+  }
 #else 
 #endif // DIRECTX
   updateCoords();
@@ -163,7 +184,7 @@ cCamera::getProjection() const
 }
 
 sMatrix4x4
-cCamera::getTrasfrom() const
+cCamera::getTransfrom() const
 {
   return this->m_trasfrom;
 }
@@ -178,16 +199,21 @@ float cCamera::getFovDeg() const
   return this->m_fov * (180.0f / 3.14159f);
 }
 
-float 
+float
 cCamera::getNear() const
 {
   return  this->m_near;
 }
 
-float 
+float
 cCamera::getFar() const
 {
   return this->m_far;
+}
+
+bool cCamera::getIsOrtho() const
+{
+  return isOrtho;
 }
 
 

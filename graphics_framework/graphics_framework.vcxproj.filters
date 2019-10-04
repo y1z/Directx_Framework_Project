@@ -199,8 +199,11 @@
     <ClInclude Include="include\enum_headers\enumComponentTypes.h">
       <Filter>include\enums</Filter>
     </ClInclude>
-    <ClInclude Include="include\enum_headers\baseComponent.h">
+    <ClInclude Include="include\cCameraManager.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\baseComponent.h">
+      <Filter>include\actor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -310,6 +313,9 @@
       <Filter>include\actor\src</Filter>
     </ClCompile>
     <ClCompile Include="include\actor\src\cActor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\cCameraManager.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

@@ -36,7 +36,10 @@ public:
   /*! set's a value for the 'm_up' variable */
   void setUp(float x, float y, float z, float w = 1.0f);
 protected:
+  //! the position of the camera 
   sVector4    m_eye;
+  //!  the position of what the camera is looking 'at' 
   sVector4    m_at;
+  //! the up direction for the camera 
   sVector4    m_up;
 };

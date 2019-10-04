@@ -189,8 +189,8 @@ void cDeviceContext::ClearDepthStencilView(cDepthStencilView & depthStencilView,
 #if DIRECTX
   int clearFlags = 0x00;
   // adding the flags for the directX api
-  if (ClearStencil) { clearFlags += D3D11_CLEAR_STENCIL; }
-  if (ClearDepth) { clearFlags += D3D11_CLEAR_DEPTH; }
+  if (ClearStencil) { clearFlags |= D3D11_CLEAR_STENCIL; }
+  if (ClearDepth) { clearFlags |= D3D11_CLEAR_DEPTH; }
 
   mptr_deviceContext->ClearDepthStencilView(depthStencilView.getDepthStencilView(), clearFlags,
                                             DepthClearValue, StencilClearValues);
@@ -216,7 +216,7 @@ void cDeviceContext::VSSetConstantBuffers(cConstBuffer & Buffer, uint8_t Slot)
   }
   else
   {
-    assert(("Error used too many slot ", Slot <= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - 1));
+    assert("Error used too many slot " && Slot <= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - 1);
   }
 #endif // DIRECTX
 
@@ -256,7 +256,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
 #endif // DIRECTX
 }
 
-void cDeviceContext::PSSetShaderResources(cMesh & ShaderResources,uint32_t Slot)
+void cDeviceContext::PSSetShaderResources(cMesh & ShaderResources, uint32_t Slot)
 {
 #if DIRECTX
   mptr_deviceContext->PSSetShaderResources(Slot, 1, ShaderResources.getResourceRef());
