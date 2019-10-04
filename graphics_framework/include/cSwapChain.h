@@ -68,19 +68,22 @@ public:// functions
                  uint16_t RefreshNumerator = 60, uint16_t RefreshDenominator = 1,
                  uint8_t SampCount = 1, uint8_t SampQuality = 0,
                  bool isWindowed = true);
-/*!*/
+  /*!*/
   void
     setRenderTarget(uint32 width, uint32 height, Formats format);
-/*!*/
+  /*!returns the swap chain render target*/
   cRenderTarget&
     getRenderTarget();
-/*!*/
+  /*!returns the swap chain depth-stencil-view*/
   cDepthStencilView&
     getDepthStencilView();
-/*!*/
+  /*!returns the swap chain depth-stencil*/
   cTexture2D&
     getDepthStencil();
-/*!*/
+  /*!*/
+  cRenderTargetView&
+    getRenderTargerView();
+  /*!*/
   void
     setDepthStencilView(Formats format, int Dimension = 3, int Mip = 0);
   /*! the swap-chain gets a buffer for swapping
@@ -96,9 +99,8 @@ public:// functions
             unsigned int Program = 0);
   //! resizes the window 
   bool
-    Resize(cDevice &device, cRenderTargetView &renderTragetView,
-           HWND handle, uint32_t width, uint32_t height);
-
+    Resize(cDevice &device,
+           uint32_t width, uint32_t height);
 private:
 #if DIRECTX
   IDXGISwapChain *mptr_swapChain;
@@ -106,5 +108,6 @@ private:
   sSwapDesc m_desc;
   cDepthStencilView m_depthStencilView;
   cRenderTarget m_renderTarget;
+  cRenderTargetView m_renderTargetView;
 };
 

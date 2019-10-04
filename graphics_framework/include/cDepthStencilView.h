@@ -44,5 +44,6 @@ private:
   ID3D11DepthStencilView*mptr_depthStencilView;
 #endif // DIRECTX
   sDepthStencilDescriptor m_Descriptor;
+public:
   cTexture2D m_depthStencil;
 };

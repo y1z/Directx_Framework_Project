@@ -58,9 +58,6 @@ cDeviceContext my_deviceContext;
 /*****************************************************/
 cDepthStencilView my_depthStencilView;
 /*****************************************************/
-cRenderTargetView my_renderTargetView;
-cRenderTarget my_renderTarget;
-/*****************************************************/
 cVertexShader my_vertexShader;
 cPixelShader my_pixelShader;
 cInputLayout my_vertexInputLayout;
@@ -189,7 +186,7 @@ HRESULT InitDevice()
   assert(("Error with swap-chain getting a buffer " &&  isSuccesful == true));
 
   //hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
-  isSuccesful = my_device.CreateRenderTargetView(my_swapChain.getRenderTarget().getTexture(), my_renderTargetView);
+  isSuccesful = my_device.CreateRenderTargetView(my_swapChain.getRenderTarget().getTexture(), my_swapChain.getRenderTargerView());
   assert((isSuccesful == true && "Error with render-target creation"));
   // Create depth stencil texture
 
@@ -220,7 +217,7 @@ HRESULT InitDevice()
   isSuccesful = my_device.CreateDepthStencilView(my_swapChain.getDepthStencilView());
   assert(isSuccesful == true && "Error with depth-stencil creation");
 
-  my_deviceContext.OMSetRenderTargets(&my_renderTargetView,
+  my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargerView(),
                                       my_depthStencilView);
 
   //g_pImmediateContext->OMSetRenderTargets(1
@@ -542,27 +539,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     GetClientRect(my_window.getHandle(), &rc);
     UINT width = rc.right - rc.left;
     UINT height = rc.bottom - rc.top;
-    // get current position of mouse 
-   
-    my_swapChain.Resize(my_device, my_renderTargetView,
-                        my_window.getHandle(), width, height);
 
-    my_deviceContext.OMSetRenderTargets(&my_renderTargetView, my_swapChain.getDepthStencilView());
+    // get current position of mouse 
+    my_swapChain.Resize(my_device, width, height);
+
+    my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargerView(), my_swapChain.getDepthStencilView());
 
     GetClientRect(my_window.getHandle(), &rc);
+
+    //my_camera.initProjectionMatrix(my_window, my_camera.getFovDeg(),
+    //                               my_camera.getFar(), my_camera.getNear());
+
+    //CBChangeOnResize newProjection;
+    //newProjection.mProjection = my_camera.getProjection().matrix;
+
+    //my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
+    //                                   &newProjection);
 
     my_viewport.setViewport(width, height, 0.0f, 1.0f/*std::numeric_limits<float>::max()*/);
 
     my_deviceContext.RSSetViewports(&my_viewport);
-
-    my_camera.initProjectionMatrix(my_window, my_camera.getFovDeg(),
-                                   my_camera.getFar(), my_camera.getNear());
-
-    CBChangeOnResize newProjection;
-    newProjection.mProjection = my_camera.getProjection().matrix;
-
-    my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
-                                       &newProjection);
   }
   else if (message == WM_KEYDOWN)
   {
@@ -676,7 +672,7 @@ void Render()
   // Clear the back buffer
   //
   float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red, green, blue, alpha
-  my_deviceContext.ClearRenderTargetView(my_renderTargetView);
+  my_deviceContext.ClearRenderTargetView(my_swapChain.getRenderTargerView());
   //g_pImmediateContext->ClearRenderTargetView(my_renderTragetView.getRenderTragetView()
 
   my_deviceContext.ClearDepthStencilView(my_swapChain.getDepthStencilView());

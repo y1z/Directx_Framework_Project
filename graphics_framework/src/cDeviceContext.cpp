@@ -102,7 +102,7 @@ cDeviceContext::RSSetViewports(cViewport viewports[], uint8_t numViewports)
   }
   else
   {
-    assert(("Error too many view-ports", numViewports <= c_MaxViewPorts));
+    assert(("Error too many view-ports"&& numViewports <= c_MaxViewPorts));
   }
 #endif // DIRECTX
 

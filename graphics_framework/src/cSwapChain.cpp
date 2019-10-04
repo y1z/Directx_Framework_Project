@@ -103,6 +103,12 @@ cSwapChain::getDepthStencil()
   return this->m_depthStencilView.getDepthStencil();
 }
 
+cRenderTargetView
+& cSwapChain::getRenderTargerView()
+{
+  return this->m_renderTargetView;
+}
+
 void
 cSwapChain::setDepthStencilView(Formats format, int Dimension, int Mip)
 {
@@ -151,22 +157,19 @@ bool cSwapChain::Present(uint32_t SycroOption, uint32_t PresentationOption, unsi
 
 bool
 cSwapChain::Resize(cDevice &device,
-                   cRenderTargetView &renderTragetView,
-                   HWND handle, uint32_t width, uint32_t height)
+                   uint32_t width, uint32_t height)
 {
 #if DIRECTX
   bool isSuccesful = false;
   this->m_depthStencilView.ReleaseAll();
   //DepthStencilView.ReleaseAll();
   this->m_renderTarget.Release();
-  renderTragetView.Release();
+  this->m_renderTargetView.Release();
   //this->m_StencilView.getDepthStencil().Release();
 
   this->m_desc.buffWidth = width;
   this->m_desc.buffHeight = height;
-
-  this->m_depthStencilView.getDepthStencil().setDescriptor(width, height, 45, 0, 0x40L);
-  // renderTraget.setDescriptor(width, height, 45, 0, 0x40L);
+  this->m_depthStencilView.getDepthStencil().setDescriptor(width, height,Formats::depthStencil_format /*45*/, 0, 0x40L);
 
   mptr_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
 
@@ -174,20 +177,11 @@ cSwapChain::Resize(cDevice &device,
   // isSuccesful = this->GetBuffer(renderTraget, 0);
   assert(("error with Getting buffer " && isSuccesful == true));
 
-  isSuccesful = device.CreateRenderTargetView(this->m_renderTarget.getTexture(), renderTragetView);
+  isSuccesful = device.CreateRenderTargetView(this->m_renderTarget.getTexture(), this->m_renderTargetView);
   assert(("error with render traget view " && isSuccesful == true));
 
-  sTextureDescriptor TextureDesc;
-  memset(&TextureDesc, 0, sizeof(TextureDesc));
-  TextureDesc.texHeight = height;
-  TextureDesc.texWidth = width;
-  TextureDesc.texFormat = Formats::depthStencil_format;// equivalent to DXGI_FORMAT_D24_UNORM_S8_UINT
-  TextureDesc.BindFlags = 0x40L;// equivalent to DD3D11_BIND_DEPTH_STENCIL
-  TextureDesc.Usage = 0;// equivalent to D3D11_USAGE_DEFAULT
-  TextureDesc.CpuAccess = 0;
-  TextureDesc.arraySize = 1;
+  isSuccesful = device.CreateTexture2D(m_depthStencilView.m_depthStencil.m_desc, m_depthStencilView.getDepthStencil());
 
-  isSuccesful = device.CreateTexture2D(TextureDesc, m_depthStencilView.getDepthStencil());
   assert(("error with Texture 2d" && isSuccesful == true));
 
   //sDepthStencilDescriptor depthDesc;

@@ -51,9 +51,12 @@ void
 cTexture2D::setDescriptor(float width, float height, int format, int usage, int bindFlags, int CpuAccess, int arraySize)
 {
 #if DIRECTX
-  m_desc.texWidth = width; m_desc.texHeight = height;
-  m_desc.texFormat = format; m_desc.Usage = usage;
-  m_desc.BindFlags = bindFlags; m_desc.CpuAccess;
+  m_desc.texWidth = width;
+  m_desc.texHeight = height;
+  m_desc.texFormat = format; 
+  m_desc.Usage = usage;
+  m_desc.BindFlags = bindFlags; 
+  m_desc.CpuAccess;
   m_desc.arraySize = arraySize;
 #endif // DIRECTX
 }

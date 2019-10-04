@@ -31,8 +31,8 @@ public:
 #endif // DIRECTX
 
   void
-    setDescriptor(float width , float height,
-                  int format,int usage,
+    setDescriptor(float width, float height,
+                  int format, int usage,
                   int bindFlags, int CpuAccess = 0,
                   int arraySize = 1);
 
@@ -44,7 +44,9 @@ private:
 #if DIRECTX
   ID3D11Texture2D * mptr_texture;
 #endif // DIRECTX
+public://make private
   sTextureDescriptor m_desc;
+private:
   cShaderResourceView m_resourceView;
 };
 

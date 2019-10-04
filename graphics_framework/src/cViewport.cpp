@@ -30,6 +30,7 @@ cViewport::setViewport(float width, float height,
 D3D11_VIEWPORT
 cViewport::getViewport()
 {
+  SecureZeroMemory(&m_viewport,sizeof(m_viewport));
   m_viewport.Height = m_viewportDesc.height;
   m_viewport.Width = m_viewportDesc.width;
   m_viewport.MinDepth = m_viewportDesc.minDepth;

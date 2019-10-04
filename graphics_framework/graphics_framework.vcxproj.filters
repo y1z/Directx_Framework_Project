@@ -30,12 +30,16 @@
     </Filter>
     <Filter Include="include\enums">
       <UniqueIdentifier>{b5055413-f488-486b-b303-a697ca2a151f}</UniqueIdentifier>
+      <Extensions>enum*;</Extensions>
     </Filter>
     <Filter Include="src\main">
       <UniqueIdentifier>{fd3a3a30-f362-46d6-a974-5979f6cc42a6}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\actor">
       <UniqueIdentifier>{ffd14b7f-4e57-4db1-adc4-9eb63a1a4987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\actor\src">
+      <UniqueIdentifier>{2f496507-993e-4cbc-bb66-47fca6a1d1d7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -189,7 +193,13 @@
     <ClInclude Include="include\actor\cActor.h">
       <Filter>include\actor</Filter>
     </ClInclude>
-    <ClInclude Include="include\enum_headers\enumsActor.h">
+    <ClInclude Include="include\enum_headers\enumActorTypes.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumComponentTypes.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\baseComponent.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -295,6 +305,12 @@
     </ClCompile>
     <ClCompile Include="include\utility\HelperFuncs.cpp">
       <Filter>include\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="include\actor\src\baseComponent.cpp">
+      <Filter>include\actor\src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\actor\src\cActor.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
