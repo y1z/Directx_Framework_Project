@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <optional>
-#include"utility/enDefs.h"
+#include "utility/enDefs.h"
 #include "cCamera.h"
 // forward declarations
 struct sMatrix4x4;

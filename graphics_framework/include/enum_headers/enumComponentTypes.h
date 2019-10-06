@@ -5,6 +5,6 @@ enum class componentTypes
   NONE = -1,
   Transform,
   AABB,
-  Sphere
-
+  Sphere,
+  Model 
 };

@@ -8,11 +8,10 @@
 #include "../include/cDeviceContext.h"
 #include "../include/cConstBuffer.h"
 #include "../include/utility/Grafics_libs.h"
-
+#include "enum_headers/enFormatEnums.h"
 
 #include <cassert>
-#include <string>
-#include <vector>
+#include <filesystem>
 
 auto comparePaths = [](std::vector<std::string>& alreadyFoundPaths, const char* possibleNewPath) {
   for (const std::string &Path : alreadyFoundPaths)
@@ -25,9 +24,25 @@ auto comparePaths = [](std::vector<std::string>& alreadyFoundPaths, const char* 
   return false;
 };
 
-bool cModel::LoadModelFromFile(const char * filePath, cDevice &device, const char *HardCodedPath)
+cModel::cModel()
+  :m_modelPath(""),
+  m_materialPath("")
 {
-  /**************REMOVED BECUASE OF LINKER ERRORS ***************/
+  setComponentType(componentTypes::Model);
+}
+
+
+cModel::cModel(std::string_view strView)
+  :cModel() 
+{
+  m_modelPath = strView;
+  setReady(true);
+}
+
+bool
+cModel::LoadModelFromFile(cDevice &device) 
+{
+  /************** REMOVED BECUASE OF LINKER ERRORS ***************/
   //Assimp::Importer importer;
   //
   //const aiScene* TheScene = importer.ReadFile(filePath,
@@ -35,26 +50,21 @@ bool cModel::LoadModelFromFile(const char * filePath, cDevice &device, const cha
   //                                            aiProcessPreset_TargetRealtime_MaxQuality |
   //                                            aiProcess_ConvertToLeftHanded);
 
-  const aiScene* Scene = aiImportFile(filePath,
-                                      aiProcess_Triangulate |
+  const aiScene* Scene = aiImportFile(m_modelPath.c_str(),
                                       aiProcessPreset_TargetRealtime_MaxQuality |
                                       aiProcess_ConvertToLeftHanded);
+
 
   std::vector<std::string> texturePaths;
 
   if (Scene == nullptr)
   {
+    aiReleaseImport(Scene);
     return false;
   }
   else
   {
     this->TraversTree(Scene, Scene->mRootNode, device, texturePaths);
-
-    if (HardCodedPath != nullptr)
-    {
-      ExtractTexture(HardCodedPath, m_meshes[0], device);
-    }
-
     aiReleaseImport(Scene);
     return true;
   }
@@ -67,7 +77,7 @@ void cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer
   //m_meshes[2].setTopology(Topology::LineList);
   for (cMesh &mesh : m_meshes)
   {
-    deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), 57);
+    deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), Formats::R16);
     deviceContext.IASetVertexBuffers(&mesh.getVertexBuffer(), 1);
     deviceContext.IASetPrimitiveTopology(static_cast<int>(mesh.getTopology()));
     if (mesh.getResource() != nullptr)
@@ -82,6 +92,32 @@ void cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer
   // red 
   cb.vMeshColor = {0.6f,0.0f,0.0f,0.0f};
   deviceContext.UpdateSubresource(buffers[0], &cb);
+}
+
+void cModel::setModelPath(const std::string_view modelPath) 
+{
+  this->m_modelPath = modelPath;
+  setReady(true);
+}
+
+bool cModel::isReady() const
+{
+  return this->m_Ready;
+}
+
+void cModel::Init(cDevice & device, [[maybe_unused]] cDeviceContext & deviceContext)
+{
+  this->LoadModelFromFile(device);
+}
+
+void cModel::Draw(cDeviceContext & devContext,std::vector<cConstBuffer*> &buffers)
+{
+  DrawMeshes(devContext, buffers);
+}
+
+void cModel::Destroy()
+{
+
 }
 
 

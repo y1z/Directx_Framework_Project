@@ -52,6 +52,8 @@
 /*****************************************************/
 #include "utility/HelperFuncs.h"
 #include <memory>
+#include <filesystem>
+
 /*****************************************************/
 cDevice my_device;
 cDeviceContext my_deviceContext;
@@ -82,13 +84,14 @@ std::unique_ptr<cCameraManager>my_cameraManager = std::make_unique<cCameraManage
 cApiComponents my_apiComponent;
 /*****************************************************/
 #include <cassert>
+#include <iostream>
 
 //--------------------------------------------------------------------------------------
 // Global Variables
 //--------------------------------------------------------------------------------------
 //HINSTANCE                           g_hInst = NULL;
-D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
-D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
+//D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
+//D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
 /*ID3D11Buffer*                       g_pVertexBuffer = NULL;
 ID3D11Buffer*                       g_pIndexBuffer = NULL;
 ID3D11Buffer*                       g_pCBNeverChanges = NULL;
@@ -117,9 +120,8 @@ wWinMain(HINSTANCE hInstance,
          int       nCmdShow)
 {
   HRESULT hr = S_FALSE;
-
+  g_vMeshColor.vector4 = {0.7f, 0.7f, 0.7f, 1.0f};
   // alternate way to get an HINSTANCE  
-  //GetModuleHandle(NULL)
   /* initialized for loading textures */
 #if DIRECTX
   hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
@@ -127,8 +129,13 @@ wWinMain(HINSTANCE hInstance,
   { return 0; }
 #endif // DIRECTX
   my_window.init(WndProc, hInstance);
+  /**init a console **/
+  if (AllocConsole())
+  {
+    freopen("CONOUT$", "w", stdout);
+    std::cout << "This works" << std::endl;
+  }
 
-  g_vMeshColor.vector4 = {0.7f, 0.7f, 0.7f, 1.0f};
   if (FAILED(InitDevice()))
   {
     CleanupDevice();
@@ -151,6 +158,8 @@ wWinMain(HINSTANCE hInstance,
   }
 
   CleanupDevice();
+  /****free the console *****/
+  FreeConsole();
 #if DIRECTX
   /* */
   CoUninitialize();
@@ -400,8 +409,8 @@ HRESULT InitDevice()
   const char *ModelPath = "resources/media/3d models/obj/drakefire_pistol_low.obj";
   const char *TexPath = "resources/media/3d models/textures/drakefire_tex/base_albedo.jpg";
 
-  isSuccesful = my_model.LoadModelFromFile("resources/media/3d models/obj/drakefire_pistol_low.obj",
-                                           my_device, TexPath);
+  my_model.setModelPath(ModelPath);
+  isSuccesful = my_model.LoadModelFromFile(my_device);
   assert(("Error with loading model file" && isSuccesful == true));
 #endif // !MODEL_LOAD
 
@@ -622,6 +631,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
+      ChangeOnProjectionChange.mProjection = my_cameraManager->getProjectionMatrix().matrix;
+      my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
+                                         &ChangeOnProjectionChange);
     }
     else if (wParam == (WPARAM)'2')
     {
@@ -630,9 +642,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                          &cbNeverChanges);
       //for changing the projection
-      //ChangeOnProjectionChange.mProjection = my_cameraManager->getProjectionMatrix().matrix;
-      //my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
-      //                                   &ChangeOnProjectionChange);
+      ChangeOnProjectionChange.mProjection = my_cameraManager->getProjectionMatrix().matrix;
+      my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
+                                         &ChangeOnProjectionChange);
     }
     else if (wParam == VK_SHIFT)
     {

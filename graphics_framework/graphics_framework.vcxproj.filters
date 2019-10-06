@@ -41,6 +41,9 @@
     <Filter Include="include\actor\src">
       <UniqueIdentifier>{2f496507-993e-4cbc-bb66-47fca6a1d1d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\scene">
+      <UniqueIdentifier>{9eec1866-661c-465a-832a-ef01fe0f026d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\cBuffer.h">
@@ -68,12 +71,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\cInputLayout.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\cMesh.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\cModel.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\cPixelShader.h">
@@ -202,7 +199,16 @@
     <ClInclude Include="include\cCameraManager.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\enum_headers\baseComponent.h">
+    <ClInclude Include="include\actor\baseComponent.h">
+      <Filter>include\actor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cMesh.h">
+      <Filter>include\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cModel.h">
+      <Filter>include\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\actor\cTransform.h">
       <Filter>include\actor</Filter>
     </ClInclude>
   </ItemGroup>
@@ -316,6 +322,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="include\cCameraManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\actor\cTransform.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
