@@ -246,9 +246,9 @@
     <ClCompile Include="dependencies\imgui\imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="dependencies\imgui\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="dependencies\imgui\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="include\actor\cTransform.cpp" />
     <ClCompile Include="include\actor\src\baseComponent.cpp" />
     <ClCompile Include="include\actor\src\cActor.cpp" />
+    <ClCompile Include="include\actor\src\cTransform.cpp" />
     <ClCompile Include="include\cCameraManager.cpp" />
     <ClCompile Include="include\utility\HelperFuncs.cpp" />
     <ClCompile Include="include\utility\Timer.cpp" />
