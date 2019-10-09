@@ -1,12 +1,17 @@
 #pragma once
 #include"../include/cMesh.h"
 #include "actor/baseComponent.h"
+#include "glm/matrix.hpp"
+#include "glm/vec4.hpp"
+/*******************/
 #include <vector>
 #include <string>
+#include <filesystem>// TODO : implement this library in this class 
 
-class aiScene;
-class aiNode;
-class aiMesh;
+
+struct aiScene;
+struct aiNode;
+struct aiMesh;
 class cDevice;
 class cDeviceContext;
 class cConstBuffer;
@@ -26,10 +31,14 @@ public:
   void
     DrawMeshes(cDeviceContext &deviceContext,std::vector<cConstBuffer *> &buffers);
 
-  // material 
-  void setModelPath(const std::string_view modelPath );
+  //! this is to set the path to a  
+  void 
+    setModelPath(const std::string_view modelPath );
+  //! this is to set a path to a material 
+  void
+    setMaterialPath(const std::string_view MaterialPath);
 public:// baseComponent functions 
-  //
+  //! make sure the component is ready 
   bool 
     isReady()const override;
 
@@ -56,9 +65,14 @@ private:
   //! just extract a texture from a given path 
   void 
     ExtractTexture(const char *texturePath,cMesh &AfectedMesh ,cDevice &device);
+
 private:
   std::vector<cMesh> m_meshes;
+  //! path to model (TODO: Replace with std::filesystem::path)
   std::string m_modelPath;
-  std::string m_materialPath;
+  //! paths to materials (TODO: Replace with std::filesystem::path)
+  std::vector<std::string> m_materialPaths;
+  //! 
+  glm::mat4x4 m_transform;
 };
 

@@ -1,4 +1,8 @@
 #include "..\include\imGuiManager.h"
+#include "cDevice.h"
+#include "cDeviceContext.h"
+#include "cWindow.h"
+/*******************************/
 #include"imgui/imgui.h"
 #ifdef DIRECTX
 #include "imgui/imgui_impl_win32.h"
@@ -8,8 +12,11 @@
 #include "imgui/imgui_impl_glfw.h"
 #endif // USING_DIRECTX
 //#include "CWindow.h"
-#include <string>
+/*****************************/
+
 #include <cstdint>
+
+namespace ig = ImGui;
 
 static constexpr uint32_t c_fpsSamplesCount = 60;
 //! this variable is for ImGui_ImplOpenGL3_Init
@@ -69,7 +76,6 @@ bool imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, HWND H
 }
 //
 
-
 //bool imGuiManager::Init(CWindow & Window)
 //{
 //	bool isSuccesful = false;
@@ -86,7 +92,14 @@ bool imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, HWND H
 //	return isSuccesful;
 //}
 
-void imGuiManager::MakeBasicWindow(const char * WindowName)
+void
+imGuiManager::setOpenFileFunction(ptr_FileOpenFunc openFileFunc)
+{
+  mptr_FileFunc = openFileFunc;
+}
+
+void 
+imGuiManager::MakeBasicWindow(const char * WindowName)
 {
   // start a imGui frame
 #ifdef DIRECTX
@@ -111,7 +124,8 @@ void imGuiManager::MakeBasicWindow(const char * WindowName)
 #endif // USING_DIRECTX
 }
 
-void imGuiManager::MakeWindowFpsAndVertexCount(const char * WindowName, float DeltaTime, int VertexCount)
+void
+imGuiManager::MakeWindowFpsAndVertexCount(const char * WindowName, float DeltaTime, int VertexCount)
 {
 #ifdef DIRECTX
   ImGui_ImplDX11_NewFrame();
@@ -152,29 +166,16 @@ void imGuiManager::MakeWindowFpsAndVertexCount(const char * WindowName, float De
 
 }
 
-void imGuiManager::FpsCountWindow(const char * windowName, float DeltaTime)
+void
+imGuiManager::FpsCountWindow(const char * windowName, float DeltaTime)
 {
 #if DIRECTX
   ImGui_ImplDX11_NewFrame();
   ImGui_ImplWin32_NewFrame();
+#else 
 #endif// DIRECTX
-  // gets the fps 
-  float fps = 1 / DeltaTime;
-  // contains the results for later to average them out 
-  static float fpsTimes[c_fpsSamplesCount]{0};
-  static uint32_t  currenFpsIndex = 0;
 
-  if (currenFpsIndex > 59) { currenFpsIndex = 0; }
- 
-  fpsTimes[currenFpsIndex] = fps;
-  currenFpsIndex++;
-  
-  float averageFps = 0.0f;
-  for (uint8_t i = 0; i < c_fpsSamplesCount; ++i)
-  {
-    averageFps += fpsTimes[i];
-  }
-  averageFps = averageFps / c_fpsSamplesCount;
+  float averageFps = this->calculateAverageFPS(DeltaTime);
 
   std::string fpsMassage("FPS : ");
   fpsMassage += std::to_string(averageFps);
@@ -186,26 +187,67 @@ void imGuiManager::FpsCountWindow(const char * windowName, float DeltaTime)
   ImGui::EndChild();
 
   this->endFrame();
-  this->darwFrame();
+
 }
 
-void imGuiManager::beginFrame(const char * windowName)
+float
+imGuiManager::calculateAverageFPS(float deltaTime)
+{
+  // gets the fps 
+  float fps = 1 / deltaTime;
+  // contains the results for later to average them out 
+  static float fpsTimes[c_fpsSamplesCount] = {0};
+  static uint32_t  currenFpsIndex = 0;
+
+  if (currenFpsIndex > c_fpsSamplesCount - 1)
+  { currenFpsIndex = 0; }
+
+  fpsTimes[currenFpsIndex] = fps;
+  currenFpsIndex++;
+
+  float averageFps = 0.0f;
+  for (uint8_t i = 0; i < c_fpsSamplesCount; ++i)
+  {
+    averageFps += fpsTimes[i];
+  }
+  return averageFps = averageFps / c_fpsSamplesCount;
+}
+
+void imGuiManager::MenuForOpenFile(cWindow & window, std::string & PathOfFile, bool & used)
+{
+  this->beginFrame("Menu");
+  if (ImGui::Button("Load model from file "))
+  {
+    PathOfFile = mptr_FileFunc(window);
+    used = true;
+  }
+
+  this->endFrame();
+}
+
+std::string
+imGuiManager::OpenFileFunc(cWindow & window) 
+{
+ return this->mptr_FileFunc(window);
+}
+
+void
+imGuiManager::beginFrame(const char * windowName)
 {
   ImGui::NewFrame();
   ImGui::Begin(windowName);
 }
 
-void imGuiManager::endFrame()
+void
+imGuiManager::endFrame()
 {
   ImGui::End();
   ImGui::Render();
-}
 
-void imGuiManager::darwFrame()
-{
 #ifdef DIRECTX
   ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 #elif USING_OPEN_GL
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif // USING_DIRECTX
 }
+

@@ -1,5 +1,6 @@
 #pragma once
 #include "utility/Grafics_libs.h"
+#include <filesystem>
 /*! this class is a container for variables that are used as globals inside 
 a API */
 
@@ -32,6 +33,7 @@ public:
 #endif // DIRECTX
 
 private:
+  std::filesystem::path m_stratingPath;
 #if DIRECTX
   //! used to know information about the hardware 
   D3D_DRIVER_TYPE m_driveType;

@@ -100,10 +100,7 @@ ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;*/
 sMatrix4x4 g_World;
 sMatrix4x4 g_View;
 sMatrix4x4 g_Projection;
-//dx::XMMATRIX                            g_World;
-//dx::XMMATRIX                            g_View;
-//dx::XMMATRIX                            g_Projection;
-// dx::XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
+const std::filesystem::path g_initPath = std::filesystem::current_path();
 sFloat4 g_vMeshColor;
 //--------------------------------------------------------------------------------------
 // Forward declarations
@@ -111,6 +108,7 @@ sFloat4 g_vMeshColor;
 HRESULT InitDevice();
 void CleanupDevice();
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+std::string ModelSelectMenu(cWindow &window);
 void Render();
 
 int APIENTRY
@@ -127,6 +125,7 @@ wWinMain(HINSTANCE hInstance,
   hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
   if (FAILED(hr))
   { return 0; }
+
 #endif // DIRECTX
   my_window.init(WndProc, hInstance);
   /**init a console **/
@@ -135,6 +134,10 @@ wWinMain(HINSTANCE hInstance,
     freopen("CONOUT$", "w", stdout);
     std::cout << "This works" << std::endl;
   }
+
+  my_gui.setOpenFileFunction(helper::openFile);
+
+  my_model.setModelPath(ModelSelectMenu(my_window));
 
   if (FAILED(InitDevice()))
   {
@@ -191,25 +194,17 @@ HRESULT InitDevice()
   my_swapChain.setRenderTarget(width, height, Formats::fR32G32B32A32);
 
   my_swapChain.setDepthStencilView(Formats::depthStencil_format);
-  // Create a render target view
   isSuccesful = my_swapChain.InitBuffer();
   //  isSuccesful = my_swapChain.GetBuffer(my_renderTarget.getTexture(), 0);
   assert(("Error with swap-chain getting a buffer " &&  isSuccesful == true));
 
-  //hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
+  // Create a render target view
   isSuccesful = my_device.CreateRenderTargetView(my_swapChain.getRenderTarget().getTexture(), my_swapChain.getRenderTargerView());
   assert((isSuccesful == true && "Error with render-target creation"));
   // Create depth stencil texture
 
   sTextureDescriptor TextureDesc = helper::createDepthStencilDesc(width, height);
-  //memset(&TextureDesc, 0, sizeof(TextureDesc));
-  //TextureDesc.texHeight = height;
-  //TextureDesc.texWidth = width;
-  //TextureDesc.texFormat = Formats::D24_uniform_S8_UINT;// equivalent to DXGI_FORMAT_D24_UNORM_S8_UINT
-  //TextureDesc.BindFlags = 0x40L;// equivalent to DD3D11_BIND_DEPTH_STENCIL
-  //TextureDesc.Usage = 0;// equivalent to D3D11_USAGE_DEFAULT
-  //TextureDesc.CpuAccess = 0;
-  //TextureDesc.arraySize = 1;
+
 
   isSuccesful = my_device.CreateTexture2D(TextureDesc, my_swapChain.getDepthStencil());
   assert(isSuccesful == true && "Error with Texture 2d creation ");
@@ -217,11 +212,7 @@ HRESULT InitDevice()
   /**********************************************************/
   my_gui.Init(my_device, my_deviceContext, my_window.getHandle());
   /**********************************************************/
-  // my own descriptor 
-  //sDepthStencilDescriptor depthDesc;
-  //depthDesc.Format = TextureDesc.texFormat;
-  //depthDesc.Dimension = 3;// equivalent to D3D11_DSV_DIMENSION_TEXTURE2D 
-  //depthDesc.Mip = 0;
+  // set update depth-stencil-view
   my_swapChain.setDepthStencilView(Formats::depthStencil_format);
 
   isSuccesful = my_device.CreateDepthStencilView(my_swapChain.getDepthStencilView());
@@ -230,9 +221,6 @@ HRESULT InitDevice()
   my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargerView(),
                                       my_swapChain.getDepthStencilView());
 
-  //g_pImmediateContext->OMSetRenderTargets(1
-  //                                        , my_renderTragetView.getRenderTragetViewRef(),
-  //                                        my_depthStencillView.getDepthStencilView());
   // Setup the viewport
   my_viewport.setViewport(width, height,
                           0.0f, 1.0f);
@@ -240,14 +228,16 @@ HRESULT InitDevice()
   my_deviceContext.RSSetViewports(&my_viewport);
   //g_pImmediateContext->RSSetViewports(1, &vp);
 
-  isSuccesful = helper::CompileShader(L"Tutorial07.fx", "vs_4_0",
+  const wchar_t *selectedShader = L"Tutorial07.fx";
+
+  std::filesystem::path shaderPath(g_initPath);
+
+  shaderPath += L"//";
+  shaderPath += selectedShader;
+  isSuccesful = helper::CompileShader( shaderPath.generic_wstring().c_str(),  "vs_4_0",
                                       "VS", my_vertexShader);
 
   // Compile the vertex shader
-  //hr = CompileShaderFromFile(L"Tutorial07.fx",
-  //                           "VS",
-  //                           "vs_4_0",
-  //                           my_vertexShader.getInfoRef());
 
   if (isSuccesful == false)
   {
@@ -275,13 +265,8 @@ HRESULT InitDevice()
   // Set the input layout
   my_deviceContext.IASetInputLayout(my_vertexInputLayout);
 
-  isSuccesful = helper::CompileShader(L"Tutorial07.fx", "ps_4_0",
+  isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str() , "ps_4_0",
                                       "PS", my_pixelShader);
-  // Compile the pixel shader
-  //hr = CompileShaderFromFile(L"Tutorial07.fx"
-  //                           , "PS"
-  //                           , "ps_4_0"
-  //                           , my_pixelShader.getInfoRef());
 
   if (isSuccesful == false)
   {
@@ -293,11 +278,7 @@ HRESULT InitDevice()
   // Create the pixel shader
   isSuccesful = my_device.CreatePixelShader(my_pixelShader);
   assert((isSuccesful == true && "Error creating the pixel shader"));
-  //hr = g_pd3dDevice->CreatePixelShader(
-  //  pPSBlob->GetBufferPointer()
-  //  , pPSBlob->GetBufferSize()
-  //  , NULL
-  //  , &g_pPixelShader);
+
 #ifndef MODEL_LOAD
   // Create vertex buffer
   SimpleVertex vertices[] =
@@ -333,13 +314,6 @@ HRESULT InitDevice()
       { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
   };
 
-
-  //D3D11_BUFFER_DESC bd;
-  //SecureZeroMemory(&bd, sizeof(bd));
-  //bd.Usage = D3D11_USAGE_DEFAULT;
-  //bd.ByteWidth = sizeof(SimpleVertex) * 24;
-  //bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  //bd.CPUAccessFlags = 0;
 
   my_vertexBuffer.setDescription(sizeof(SimpleVertex),
                                  24,
@@ -409,7 +383,6 @@ HRESULT InitDevice()
   const char *ModelPath = "resources/media/3d models/obj/drakefire_pistol_low.obj";
   const char *TexPath = "resources/media/3d models/textures/drakefire_tex/base_albedo.jpg";
 
-  my_model.setModelPath(ModelPath);
   isSuccesful = my_model.LoadModelFromFile(my_device);
   assert(("Error with loading model file" && isSuccesful == true));
 #endif // !MODEL_LOAD
@@ -422,7 +395,7 @@ HRESULT InitDevice()
                                       0);
 
   isSuccesful = my_device.CreateConstBuffer(my_constNeverChanges);
-  assert(isSuccesful == true, "Error Creating constant buffer");
+  assert(isSuccesful == true && "Error Creating constant buffer");
 
   //hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
   //if (FAILED(hr))
@@ -433,7 +406,7 @@ HRESULT InitDevice()
                                         0);
 
   isSuccesful = my_device.CreateConstBuffer(my_constChangeOnResize);
-  assert(isSuccesful == true, "Error Creating constant buffer");
+  assert(isSuccesful == true && "Error Creating constant buffer");
 
   //bd.ByteWidth = sizeof(CBChangeOnResize);
   //hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangeOnResize);
@@ -445,7 +418,7 @@ HRESULT InitDevice()
                                            0);
 
   isSuccesful = my_device.CreateConstBuffer(my_constChangesEveryFrame);
-  assert(isSuccesful == true, "Error Creating constant buffer");
+  assert(isSuccesful == true && "Error Creating constant buffer");
 
   //bd.ByteWidth = sizeof(CBChangesEveryFrame);
   //hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
@@ -454,10 +427,15 @@ HRESULT InitDevice()
 
   // Load the Texture
 #if DIRECTX
+  const wchar_t *SelectedTextureFile = L"//base_albedo.jpg";
+  std::filesystem::path PathToResoure(g_initPath);
+  PathToResoure += SelectedTextureFile;
+
   hr = dx::CreateWICTextureFromFile(my_device.getDevice(),
-                                    L"base_albedo.jpg",
+                                    PathToResoure.generic_wstring().c_str(),
                                     nullptr,
                                     my_shaderResourceView.getShaderResourceRef());
+
   //hr = dx::CreateDDSTextureFromFile(my_device.getDevice(),
   //                                  L"seafloor.dds",
   //                                  nullptr,
@@ -511,7 +489,7 @@ HRESULT InitDevice()
 #endif // DIRECTX
 
   return S_OK;
-}
+  }
 
 
 //--------------------------------------------------------------------------------------
@@ -675,6 +653,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   }
 
   return 0;
+}
+
+std::string
+ModelSelectMenu(cWindow & window)
+{
+  return my_gui.OpenFileFunc(window);
 }
 
 

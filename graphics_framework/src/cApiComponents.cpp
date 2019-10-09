@@ -1,7 +1,11 @@
 #include "cApiComponents.h"
 
+namespace fs = std::filesystem;
+
 cApiComponents::cApiComponents()
-{}
+{
+  m_stratingPath = fs::current_path();
+}
 
 #if DIRECTX
 

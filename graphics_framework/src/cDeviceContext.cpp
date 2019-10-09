@@ -16,6 +16,7 @@
 #include "../include/cBuffer.h"
 #include "../include/cShaderResourceView.h"
 #include "../include/cMesh.h"
+#include "../include/enum_headers/enumTopology.h"
 // std includes 
 #include <cassert>
 // limits for setting objects 

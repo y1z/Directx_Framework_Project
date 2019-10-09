@@ -1,9 +1,9 @@
-
 #include "..//include/cModel.h"
 #include "assimp/cimport.h"
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
+#include "assimp/material.h"
 #include "../include/cDevice.h"
 #include "../include/cDeviceContext.h"
 #include "../include/cConstBuffer.h"
@@ -11,36 +11,39 @@
 #include "enum_headers/enFormatEnums.h"
 
 #include <cassert>
-#include <filesystem>
+#include <iostream>
+#include "glm/glm.hpp"
+#include <WICTextureLoader.h>
+namespace fs = std::filesystem;
 
 auto comparePaths = [](std::vector<std::string>& alreadyFoundPaths, const char* possibleNewPath) {
   for (const std::string &Path : alreadyFoundPaths)
   {
     if (!Path.compare(possibleNewPath))
     {
-      return true;
+      return false;
     }
   }
-  return false;
+  return true;
 };
 
 cModel::cModel()
-  :m_modelPath(""),
-  m_materialPath("")
+// init the identity matrix 
+  :m_transform(1.0f)
 {
   setComponentType(componentTypes::Model);
 }
 
 
 cModel::cModel(std::string_view strView)
-  :cModel() 
+  :cModel()
 {
   m_modelPath = strView;
   setReady(true);
 }
 
 bool
-cModel::LoadModelFromFile(cDevice &device) 
+cModel::LoadModelFromFile(cDevice &device)
 {
   /************** REMOVED BECUASE OF LINKER ERRORS ***************/
   //Assimp::Importer importer;
@@ -94,10 +97,15 @@ void cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer
   deviceContext.UpdateSubresource(buffers[0], &cb);
 }
 
-void cModel::setModelPath(const std::string_view modelPath) 
+void cModel::setModelPath(const std::string_view modelPath)
 {
   this->m_modelPath = modelPath;
   setReady(true);
+}
+
+void cModel::setMaterialPath(const std::string_view MaterialPath)
+{
+  m_materialPaths.push_back(std::string(MaterialPath));
 }
 
 bool cModel::isReady() const
@@ -110,14 +118,17 @@ void cModel::Init(cDevice & device, [[maybe_unused]] cDeviceContext & deviceCont
   this->LoadModelFromFile(device);
 }
 
-void cModel::Draw(cDeviceContext & devContext,std::vector<cConstBuffer*> &buffers)
+void cModel::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*> &buffers)
 {
   DrawMeshes(devContext, buffers);
 }
 
 void cModel::Destroy()
 {
-
+  m_meshes.clear();
+  m_modelPath.clear();
+  m_materialPaths.clear();
+  setReady(false);
 }
 
 
@@ -137,7 +148,10 @@ void cModel::TraversTree(const aiScene * scene, aiNode * node, cDevice & device,
   }
 }
 
-void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device, const aiScene*scene, std::vector<std::string> &texturePaths)
+void
+cModel::ExtractMesh(const aiMesh * assimpMesh,
+                    cDevice &device,
+                    const aiScene*scene, std::vector<std::string> &texturePaths)
 {
   std::vector<WORD> indices;
 #if DIRECTX
@@ -165,7 +179,7 @@ void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device, const aiSce
     vertex.Pos.x = assimpMesh->mVertices[i].x;
     vertex.Pos.y = assimpMesh->mVertices[i].y;
     vertex.Pos.z = assimpMesh->mVertices[i].z;
-    vertex.Pos.w  = 1.0f;
+    vertex.Pos.w = 1.0f;
     if (assimpMesh->HasTextureCoords(0))
     {
       vertex.Tex.x = static_cast<float>(assimpMesh->mTextureCoords[0][i].x);
@@ -174,6 +188,7 @@ void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device, const aiSce
     vertices.emplace_back(vertex);
   }
 
+  this->CheckTexturePaths(scene, assimpMesh, texturePaths);
 
   cMesh result;
   result.initIndexBuffer(indices);
@@ -185,17 +200,61 @@ void cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device, const aiSce
   m_meshes.emplace_back(std::move(result));
 }
 
-void cModel::CheckTexturePaths(const aiScene * scene, const aiMesh *assimpMesh, std::vector<std::string> &texturePaths)
+void 
+cModel::CheckTexturePaths(const aiScene * scene, const aiMesh *assimpMesh, std::vector<std::string> &texturePaths)
 {
+  aiMaterial *material = scene->mMaterials[assimpMesh->mMaterialIndex];
+  aiString matName = material->GetName();
+  std::filesystem::path Path = m_modelPath;
+  Path = Path.parent_path();
+  fs::directory_iterator dirIter(Path);
+  static std::vector<std::string >  ExtensionFormast = {{".jpg"},{".png"}};
 
-  aiMaterial *material = scene->mMaterials[assimpMesh->mNumAnimMeshes];
-  if (material->GetTextureCount(aiTextureType_DIFFUSE));
-  {
-    aiString FilePath;
-    material->GetTexture(aiTextureType_DIFFUSE, 0, &FilePath);
-    FilePath.C_Str();
-  }
+  //TODO : make this dynamic 
+  //for (const fs::path p : dirIter)
+  //{
+  //  for (const std::string &Extensions : ExtensionFormast)
+  //  {
+  //    if (!Extensions.compare(p.extension().generic_string().c_str()))
+  //    {
+  //      if (comparePaths(m_materialPaths, p.generic_string().c_str()))
+  //      {
+  //        m_materialPaths.emplace_back(p.generic_string());
+  //        std::cout << "added material from " << p << std::endl;
+  //        break;
+  //      }
+  //    }
+  //  }
+  //}
 
+
+  //Path += "/";
+  //Path += matName.C_Str();
+  //std::cout << Path.extension() << "\n";
+  //if (comparePaths(m_materialPaths, Path.generic_string().c_str()))
+  //{
+  //  this->m_materialPaths.emplace_back(Path.generic_string().c_str());
+  //  std::cout << "Successfully load material from " << Path.generic_string().c_str() << std::endl;
+  //}
+
+  //if (material->GetTextureCount(aiTextureType_DIFFUSE))
+  //{
+  //  aiString FilePath;
+  //  aiReturn RetCheck = material->GetTexture(aiTextureType_DIFFUSE, assimpMesh->mMaterialIndex, &FilePath);
+  //  //  = material->GetTexture(aiTextureType_DIFFUSE, assimpMesh->mMaterialIndex, &FilePath);
+  //  if (RetCheck != aiReturn_SUCCESS)
+  //  {
+  //    std::cout << "did not load \'" << matName.C_Str() << "\' \n";
+  //  }
+  //  else
+  //  {
+  //    if (comparePaths(m_materialPaths, FilePath.C_Str()))
+  //    {
+  //      this->m_materialPaths.emplace_back(FilePath.C_Str());
+  //      std::cout << "Successfully load material from " << FilePath.C_Str() << std::endl;
+  //    }
+  //  }
+  //}
 }
 
 void cModel::ExtractTexture(const char * texturePath, cMesh & AfectedMesh, cDevice &device)
@@ -208,22 +267,13 @@ void cModel::ExtractTexture(const char * texturePath, cMesh & AfectedMesh, cDevi
   wchar_t *Temp = new wchar_t[PathLength];
   MultiByteToWideChar(CP_UTF8, 0, texturePath, -1, Temp, PathLength);
 
-//  DirectX::CreateWICTextreFromFile();
-  
-  //hr =dx::D3DX11CreateShaderResourceViewFromFile(device.getDevice(), Temp,
-  //                                            NULL, NULL,
-  //                                            AfectedMesh.getResourceRef(), NULL);
-  //hr = dx::CreateWICTextreFromFile() 
-  //  HRESULT CreateWICTextureFromFile(
+  dx::CreateWICTextureFromFile(device.getDevice(),
+                               Temp,
+                               nullptr,
+                               AfectedMesh.getResourceRef());
 
   delete Temp;
-#ifndef UNICODE
-
-  hr = D3DX11CreateShaderResourceViewFromFile(device.getDevice(), texturePath,
-                                              NULL, NULL,
-                                              AfectedMesh.getResourceRef(), NULL);
-#endif // !UNICODE
-
+  Temp = nullptr;
 #endif // UNICODE
 
   if (!SUCCEEDED(hr))

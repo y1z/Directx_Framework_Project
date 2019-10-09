@@ -146,4 +146,30 @@ namespace helper
     return sTextureDescriptor();
   }
 
+  std::string 
+    openFile(cWindow window)
+  {
+    OPENFILENAMEA File;
+    std::memset(&File, 0, sizeof(File));
+    char FileName[4096];
+
+    std::memset(&FileName, 0, sizeof(FileName));
+    /* First \0 describes the name of the options
+    that the user will be presented with, the second \0
+    will discribe the type of files to look for */
+ //   static constexpr const char* FileTypes = 
+    File.lStructSize = sizeof(OPENFILENAMEA);
+    File.hwndOwner = window.getHandle();
+    File.lpstrFile = FileName;
+    File.lpstrFile[0] = '\0';
+    File.nMaxFile = 4096;
+    File.lpstrFilter = "All files\0*.*\0obj files\0*.obj\0fbx files\0*.fbx\0";
+//FileTypes;
+    File.nFilterIndex = 1;
+
+    GetOpenFileNameA(&File);
+    
+    return std::string(FileName);
+  }
+
 }

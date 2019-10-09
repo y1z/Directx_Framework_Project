@@ -1,5 +1,6 @@
 #pragma once
 #include "enDefs.h"
+#include <string>
 // forward Declaration
 class cDevice;
 class cDeviceContext;
@@ -16,19 +17,26 @@ struct sTextureDescriptor;
 namespace helper
 {
   /*! Create and unite the swap-chain device */
-  bool  CreateDeviceAndSwapchain(cDevice &device, cDeviceContext &deviceContext, 
-                                cSwapChain &swapChian, cWindow &window,
-                                cApiComponents &ApiComponent);
+  bool
+    CreateDeviceAndSwapchain(cDevice &device, cDeviceContext &deviceContext,
+                             cSwapChain &swapChian, cWindow &window,
+                             cApiComponents &ApiComponent);
 
-/*! used to compile a shader */
-  bool CompileShader(const wchar_t *FileName,const char*shaderModel,
-                     const char*entryPoint , cShaderBase &shader);
+  /*! used to compile a shader */
+  bool
+    CompileShader(const wchar_t *FileName, const char*shaderModel,
+                  const char*entryPoint, cShaderBase &shader);
 
-  float radiansToDegrees(float radians);
+  float
+    radiansToDegrees(float radians);
 
-  float degreesToRadians(float degrees);
+  float
+    degreesToRadians(float degrees);
 
-  sTextureDescriptor createDepthStencilDesc(uint32 width ,uint32 height);
+  sTextureDescriptor
+    createDepthStencilDesc(uint32 width, uint32 height);
 
+  std::string
+    openFile(cWindow handel);
 }
 
