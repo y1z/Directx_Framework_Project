@@ -4,12 +4,9 @@
 
 cCameraBase::cCameraBase()
 {// default values taken from the tutorial 
-#if DIRECTX
-  m_eye.vector4 = dx::XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
-  m_at.vector4 = dx::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-  m_up.vector4 = dx::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-#else 
-#endif // DIRECTX
+  m_eye.vector4 = glm::vec4(0.0f, 3.0f, -6.0f, 0.0f);
+  m_at.vector4 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+  m_up.vector4 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 }
 
 cCameraBase::~cCameraBase()
@@ -37,24 +34,15 @@ cCameraBase::getUp()const
 
 void cCameraBase::setEye(float x, float y, float z, float w)
 {
-#if DIRECTX
-  m_eye.vector4 = dx::XMVectorSet(x, y, z, w);
-#else 
-#endif // DIRECTX
+  m_eye.vector4 = glm::vec4(x, y, z, w);
 }
 
 void cCameraBase::setAt(float x, float y, float z, float w)
 {
-#if DIRECTX
-  m_at.vector4 = dx::XMVectorSet(x, y, z, w);
-#else 
-#endif // DIRECTX
+  m_at.vector4 = glm::vec4(x, y, z, w);
 }
 
 void cCameraBase::setUp(float x, float y, float z, float w)
 {
-#if DIRECTX
-  m_up.vector4 = dx::XMVectorSet(x, y, z, w);
-#else 
-#endif // DIRECTX
+  m_up.vector4 = glm::vec4(x, y, z, w);
 }

@@ -12,11 +12,11 @@ public:
   virtual ~cCameraBase();
 public:
 
-  virtual void moveRight(float unit, cWindow &window,float deltaTime) = 0;
+  virtual void moveRight(float unit, cWindow &window, float deltaTime) = 0;
 
-  virtual void moveUp(float unit,cWindow &window, float deltaTime) = 0;
+  virtual void moveUp(float unit, cWindow &window, float deltaTime) = 0;
 
-  virtual void moveFront(float unit,cWindow &window, float deltaTime) = 0;
+  virtual void moveFront(float unit, cWindow &window, float deltaTime) = 0;
 protected:
   virtual void updateCamera(cWindow &window) = 0;
 public:
@@ -30,14 +30,14 @@ public:
   sVector4
     getUp() const;
   /*! set's a value for the 'm_eye' variable */
-  void setEye(float x, float y, float z, float w = 1.0f);
+  void setEye(float x, float y, float z,float w = 1.0f);
   /*! set's a value for the 'm_at' variable */
-  void setAt(float x, float y, float z, float w = 1.0f);
+  void setAt(float x, float y, float z,float w = 1.0f) ;
   /*! set's a value for the 'm_up' variable */
-  void setUp(float x, float y, float z, float w = 1.0f);
+  void setUp(float x, float y, float z,float w = 1.0f) ;
 protected:
   //! the position of the camera 
-  sVector4    m_eye;
+  sVector4  m_eye;
   //!  the position of what the camera is looking 'at' 
   sVector4    m_at;
   //! the up direction for the camera 

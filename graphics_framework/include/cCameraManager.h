@@ -8,6 +8,7 @@ struct sMatrix4x4;
 struct sVector4;
 class cWindow;
 
+
 class cCameraManager
 {
 public://constructor and destructor
@@ -41,11 +42,11 @@ public://functions
   /*! set the 'eye' of the current camera */
   void
     setEye(float x, float y, float z, float w = 1.0f);
-  /*! set the 'at' of the current camera */
-  void 
+    /*! set the 'at' of the current camera */
+  void
     setAt(float x, float y, float z, float w = 1.0f);
   /*! set the 'up' of the current camera */
-  void 
+  void
     setUp(float x, float y, float z, float w = 1.0f);
 /*! adds a camera to the last index */
   bool

@@ -3,15 +3,16 @@
 #include "actor/baseComponent.h"
 #include "glm/matrix.hpp"
 #include "glm/vec4.hpp"
+#include "utility/enDefs.h"
 /*******************/
 #include <vector>
 #include <string>
 #include <filesystem>// TODO : implement this library in this class 
 
-
 struct aiScene;
 struct aiNode;
 struct aiMesh;
+struct sColorf;
 class cDevice;
 class cDeviceContext;
 class cConstBuffer;
@@ -29,14 +30,19 @@ public:
     LoadModelFromFile(cDevice &device);
   /*! this functions draws all the meshes to the back buffer */
   void
-    DrawMeshes(cDeviceContext &deviceContext,std::vector<cConstBuffer *> &buffers);
-
+    DrawMeshes(cDeviceContext &deviceContext, std::vector<cConstBuffer *> &buffers, const sColorf &color = {0.0f,0.0f,0.7f,1.0f});
   //! this is to set the path to a  
   void 
-    setModelPath(const std::string_view modelPath );
+    setModelPath(const std::string_view modelPath);
   //! this is to set a path to a material 
   void
     setMaterialPath(const std::string_view MaterialPath);
+
+  std::size_t 
+    getMeshCount() const;
+
+  [[nodiscard]]const cMesh*
+    getMesh(std::size_t index) const ;
 public:// baseComponent functions 
   //! make sure the component is ready 
   bool 
@@ -48,10 +54,18 @@ public:// baseComponent functions
   void 
     Draw(cDeviceContext &devContext, std::vector<cConstBuffer *>&buffers)override;
 
+  void
+    update(cDeviceContext &deviceContext) override;
+
   void 
     Destroy() override;
-private:
 
+  void
+    setTransform(glm::mat4 &matrix);
+
+  glm::mat4
+    getTransform()const;
+private:
   //! traverses the tree to get the data from the meshes 
   void 
     TraversTree(const aiScene*scene,aiNode *node,cDevice &device,std::vector<std::string> &texturePaths);

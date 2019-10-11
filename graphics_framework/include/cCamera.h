@@ -23,7 +23,7 @@ public:
   void
     moveFront(float unit,cWindow &window, float deltaTime = 0.01666f)override;
   /*! TODO: FIX*/
-  void rotateCamera(sVector4 &Off,cWindow &window);
+  void rotateCamera(sVector3 &Off,cWindow &window);
   /*! */
   void
     calculateAndSetView();
@@ -79,9 +79,9 @@ private:
   sMatrix4x4 m_trasfrom;
 /***********************/
   //! the direction where camera is point to  
-  sVector4 m_front;
+  sVector3 m_front;
   //! the right relative to  camera 
-  sVector4 m_right;
+  sVector3 m_right;
 /***********************/
   float m_fov;
   float m_far;

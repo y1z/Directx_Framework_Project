@@ -1,5 +1,8 @@
 #pragma once
 #include"../include/utility/Grafics_libs.h"
+#include "glm/glm.hpp"
+#include "glm/vec4.hpp"
+#include "glm/matrix.hpp"
 
 #if DIRECTX
 
@@ -27,3 +30,4 @@ struct CBChangesEveryFrame
 
 
 #endif // DIRECTX
+

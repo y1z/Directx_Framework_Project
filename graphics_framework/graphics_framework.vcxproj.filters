@@ -211,6 +211,9 @@
     <ClInclude Include="include\actor\cTransform.h">
       <Filter>include\actor</Filter>
     </ClInclude>
+    <ClInclude Include="include\actor\cAABB.h">
+      <Filter>include\actor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cBuffer.cpp">
@@ -325,7 +328,10 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="include\actor\src\cTransform.cpp">
-      <Filter>src</Filter>
+      <Filter>include\actor\src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\actor\src\cAABB.cpp">
+      <Filter>include\actor\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

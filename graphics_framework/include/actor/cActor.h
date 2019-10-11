@@ -1,13 +1,16 @@
 #pragma once
 #include "baseComponent.h"
+#include "../include/actor/cTransform.h"
 #include <vector>
+
 class cConstBuffer;
 
 class cActor
 {
 public:
-  cActor() = default;
+  cActor();
    ~cActor();
+
 public:
   /*!draws a component if possible*/
   void 
@@ -27,6 +30,8 @@ public:
 
   baseComponent* 
     getComponent(std::size_t Index );
+
+  cTransform  m_transform;
 private:
   std::vector<baseComponent*> m_components;
   // TODO : this is not used at the moment 

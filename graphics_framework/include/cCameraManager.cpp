@@ -68,19 +68,22 @@ void cCameraManager::moveUp(float unit, cWindow & window, float deltaTime)
 }
 
 
-void cCameraManager::setEye(float x, float y, float z, float w)
+void cCameraManager::setEye(float x, float y, float z,float w)
 {
-  m_cameras[m_currentCamera].setEye(x, y, z, w);
+  //m_cameras[m_currentCamera].setEye(x, y, z);
+  m_cameras[m_currentCamera].setEye(x, y, z,w);
 }
 
-void cCameraManager::setAt(float x, float y, float z, float w)
+void cCameraManager::setAt(float x, float y, float z,float w)
 {
-  m_cameras[m_currentCamera].setAt(x, y, z, w);
+  //m_cameras[m_currentCamera].setAt(x, y, z);
+  m_cameras[m_currentCamera].setAt(x, y, z,w);
 }
 
-void cCameraManager::setUp(float x, float y, float z, float w)
+void cCameraManager::setUp(float x, float y, float z,float w)
 {
-  m_cameras[m_currentCamera].setUp(x, y, z, w);
+  //m_cameras[m_currentCamera].setUp(x, y, z);
+  m_cameras[m_currentCamera].setUp(x, y, z,w);
 }
 
 bool cCameraManager::pushBackCamera(const cCamera & newCamera)

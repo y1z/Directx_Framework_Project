@@ -6,6 +6,7 @@
 class cDeviceContext;
 class cDevice;
 class cConstBuffer;
+//class cTransform;
 
 /*! this is a interface to component objects 
 */
@@ -16,16 +17,24 @@ public://constructor and destructor
   virtual ~baseComponent() = default;
 public:// functions 
   /*! this function will be used to know if the component is ready to be used */
-  virtual bool 
+  virtual 
+    bool 
     isReady()const = 0;
   /*! use when isReady returns true */
-  virtual void 
+  virtual
+    void 
     Init(cDevice &device, cDeviceContext &deviceContext) = 0;
   /*! this is so the component can draw it self */
-  virtual void 
+  virtual 
+    void 
     Draw(cDeviceContext &devContext,std::vector<cConstBuffer*> &constBuffers) = 0;
+  /*! this is so */
+  virtual 
+    void
+    update(cDeviceContext &deviceContext ) = 0;
   /*! use this to eliminate resources associated with component*/
-  virtual void 
+  virtual 
+    void 
     Destroy() = 0;
 protected:
   /*! use this to signal that the component is ready to be used */

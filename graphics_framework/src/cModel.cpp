@@ -9,11 +9,15 @@
 #include "../include/cConstBuffer.h"
 #include "../include/utility/Grafics_libs.h"
 #include "enum_headers/enFormatEnums.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "utility/CustomStructs.h"
 
 #include <cassert>
 #include <iostream>
-#include "glm/glm.hpp"
+#include <memory>
 #include <WICTextureLoader.h>
+
 namespace fs = std::filesystem;
 
 auto comparePaths = [](std::vector<std::string>& alreadyFoundPaths, const char* possibleNewPath) {
@@ -34,9 +38,8 @@ cModel::cModel()
   setComponentType(componentTypes::Model);
 }
 
-
 cModel::cModel(std::string_view strView)
-  :cModel()
+  : cModel()
 {
   m_modelPath = strView;
   setReady(true);
@@ -74,12 +77,17 @@ cModel::LoadModelFromFile(cDevice &device)
 
 }
 
-void cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &buffers)
+void 
+cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &buffers,const sColorf &color)
 {
-  CBChangesEveryFrame cb;
+  GlChangeEveryFrame Cb;
   //m_meshes[2].setTopology(Topology::LineList);
+  const glm::mat4 Identidad(1.0f);
+
   for (cMesh &mesh : m_meshes)
   {
+    glm::mat4 Transform(Identidad * this->m_transform );
+    mesh.setTransform(Transform);
     deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), Formats::R16);
     deviceContext.IASetVertexBuffers(&mesh.getVertexBuffer(), 1);
     deviceContext.IASetPrimitiveTopology(static_cast<int>(mesh.getTopology()));
@@ -87,43 +95,67 @@ void cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer
     { deviceContext.PSSetShaderResources(mesh); }
 
     deviceContext.DrawIndexed(mesh.getIndexBuffer().getElementCount(), 0);
-  }
-#if DIRECTX
-  cb.mWorld = dx::XMMatrixIdentity();
 
-#endif // DIRECTX
-  // red 
-  cb.vMeshColor = {0.6f,0.0f,0.0f,0.0f};
-  deviceContext.UpdateSubresource(buffers[0], &cb);
+    Cb.world = glm::transpose(Transform);
+    Cb.color = color;
+    deviceContext.UpdateSubresource(buffers[0], &Cb);
+  }
 }
 
-void cModel::setModelPath(const std::string_view modelPath)
+void
+cModel::setModelPath(const std::string_view modelPath)
 {
   this->m_modelPath = modelPath;
   setReady(true);
 }
 
-void cModel::setMaterialPath(const std::string_view MaterialPath)
+void
+cModel::setMaterialPath(const std::string_view MaterialPath)
 {
   m_materialPaths.push_back(std::string(MaterialPath));
 }
 
-bool cModel::isReady() const
+std::size_t
+cModel::getMeshCount() const
+{
+  return m_meshes.size();
+}
+
+const cMesh *
+cModel::getMesh(std::size_t index) const
+{
+  if (m_meshes.size() - 1 >= index)
+  {
+    return &m_meshes[index];
+  }
+  return nullptr;
+}
+
+bool
+cModel::isReady() const
 {
   return this->m_Ready;
 }
 
-void cModel::Init(cDevice & device, [[maybe_unused]] cDeviceContext & deviceContext)
+void
+cModel::Init(cDevice & device, [[maybe_unused]] cDeviceContext & deviceContext)
 {
   this->LoadModelFromFile(device);
 }
 
-void cModel::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*> &buffers)
+void
+cModel::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*> &buffers)
 {
   DrawMeshes(devContext, buffers);
 }
 
-void cModel::Destroy()
+void cModel::update(cDeviceContext & deviceContext)
+{
+
+}
+
+void
+cModel::Destroy()
 {
   m_meshes.clear();
   m_modelPath.clear();
@@ -132,7 +164,8 @@ void cModel::Destroy()
 }
 
 
-void cModel::TraversTree(const aiScene * scene, aiNode * node, cDevice & device, std::vector<std::string> &texturePaths)
+void
+cModel::TraversTree(const aiScene * scene, aiNode * node, cDevice & device, std::vector<std::string> &texturePaths)
 {
   // extract the current mesh
   for (uint32_t i = 0; i < node->mNumMeshes; ++i)
@@ -149,58 +182,59 @@ void cModel::TraversTree(const aiScene * scene, aiNode * node, cDevice & device,
 }
 
 void
-cModel::ExtractMesh(const aiMesh * assimpMesh,
-                    cDevice &device,
+cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device,
                     const aiScene*scene, std::vector<std::string> &texturePaths)
 {
-  std::vector<WORD> indices;
-#if DIRECTX
-  std::vector<SimpleVertex> vertices;
-#else
-#endif // DIRECTX
+  std::unique_ptr< std::vector<uint16>> ptr_indices = std::make_unique<std::vector<uint16>>();
+  std::unique_ptr<std::vector<sVertexPosTex>> ptr_vertices = std::make_unique<std::vector<sVertexPosTex>>();
+
+  ptr_indices->reserve(assimpMesh->mNumFaces * 3);
+  ptr_vertices->reserve(assimpMesh->mNumVertices);
 
   // get the indices of a the model 
   for (uint32_t i = 0; i < assimpMesh->mNumFaces; ++i)
   {
-    WORD tri[3];
+    uint16 tri[3];
     for (uint32_t j = 0; j < assimpMesh->mFaces[i].mNumIndices; ++j)
     {
       tri[j] = assimpMesh->mFaces[i].mIndices[j];
     }
-    indices.emplace_back(tri[0]);
-    indices.emplace_back(tri[1]);
-    indices.emplace_back(tri[2]);
+    ptr_indices->emplace_back(tri[0]);
+    ptr_indices->emplace_back(tri[1]);
+    ptr_indices->emplace_back(tri[2]);
   }
 
   // get the vertices of the model
   for (uint32_t i = 0; i < assimpMesh->mNumVertices; ++i)
   {
-    SimpleVertex vertex;
-    vertex.Pos.x = assimpMesh->mVertices[i].x;
-    vertex.Pos.y = assimpMesh->mVertices[i].y;
-    vertex.Pos.z = assimpMesh->mVertices[i].z;
-    vertex.Pos.w = 1.0f;
+    sVertexPosTex vertex;
+    vertex.pos.x = assimpMesh->mVertices[i].x;
+    vertex.pos.y = assimpMesh->mVertices[i].y;
+    vertex.pos.z = assimpMesh->mVertices[i].z;
+    vertex.pos.w = 1.0f;
     if (assimpMesh->HasTextureCoords(0))
     {
-      vertex.Tex.x = static_cast<float>(assimpMesh->mTextureCoords[0][i].x);
-      vertex.Tex.y = static_cast<float>(assimpMesh->mTextureCoords[0][i].y);
+      vertex.tex.x = static_cast<float>(assimpMesh->mTextureCoords[0][i].x);
+      vertex.tex.y = static_cast<float>(assimpMesh->mTextureCoords[0][i].y);
     }
-    vertices.emplace_back(vertex);
+    ptr_vertices->emplace_back(vertex);
   }
 
   this->CheckTexturePaths(scene, assimpMesh, texturePaths);
 
   cMesh result;
-  result.initIndexBuffer(indices);
-  result.initVertexBuffer(vertices);
+  result.initIndexBuffer(ptr_indices);
+  result.initVertexBuffer(ptr_vertices);
+  assert(ptr_indices == nullptr);
+  assert(ptr_vertices == nullptr);
   bool IndexSuccessful = result.createIndexBuffer(device);
   bool VertexSuccessful = result.createVertexBuffer(device);
 
-  assert((IndexSuccessful & VertexSuccessful, "error with index or vertex buffer creation"));
+  assert((IndexSuccessful && VertexSuccessful, "error with index or vertex buffer creation"));
   m_meshes.emplace_back(std::move(result));
 }
 
-void 
+void
 cModel::CheckTexturePaths(const aiScene * scene, const aiMesh *assimpMesh, std::vector<std::string> &texturePaths)
 {
   aiMaterial *material = scene->mMaterials[assimpMesh->mMaterialIndex];
@@ -282,4 +316,16 @@ void cModel::ExtractTexture(const char * texturePath, cMesh & AfectedMesh, cDevi
   }
 #endif // DIRECTX
 
+}
+
+void
+cModel::setTransform(glm::mat4 & matrix)
+{
+  m_transform = matrix;
+}
+
+glm::mat4
+cModel::getTransform() const
+{
+  return  this->m_transform;
 }

@@ -37,9 +37,10 @@
 #include "enum_headers/enumTextureAddress.h"
 #include "enum_headers/enumFilter.h"
 #include "enum_headers/enumComparasion.h"
-
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/matrix_inverse.hpp"
 /*****************************************************/
-/* FOR LOADING IMAGES FOR WINDOW */
+/* FOR LOADING IMAGES FOR directX*/
 #if DIRECTX
 #include <wrl.h>
 #include "WICTextureLoader.h"
@@ -97,17 +98,20 @@ ID3D11Buffer*                       g_pIndexBuffer = NULL;
 ID3D11Buffer*                       g_pCBNeverChanges = NULL;
 ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
 ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;*/
+
 sMatrix4x4 g_World;
 sMatrix4x4 g_View;
 sMatrix4x4 g_Projection;
 const std::filesystem::path g_initPath = std::filesystem::current_path();
 sFloat4 g_vMeshColor;
+
+float g_Shearing = 1.0f;
 //--------------------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------------------
+
 HRESULT InitDevice();
-void CleanupDevice();
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 std::string ModelSelectMenu(cWindow &window);
 void Render();
 
@@ -141,7 +145,6 @@ wWinMain(HINSTANCE hInstance,
 
   if (FAILED(InitDevice()))
   {
-    CleanupDevice();
     return 0;
   }
 
@@ -160,7 +163,6 @@ wWinMain(HINSTANCE hInstance,
     }
   }
 
-  CleanupDevice();
   /****free the console *****/
   FreeConsole();
 #if DIRECTX
@@ -205,7 +207,6 @@ HRESULT InitDevice()
 
   sTextureDescriptor TextureDesc = helper::createDepthStencilDesc(width, height);
 
-
   isSuccesful = my_device.CreateTexture2D(TextureDesc, my_swapChain.getDepthStencil());
   assert(isSuccesful == true && "Error with Texture 2d creation ");
 
@@ -234,11 +235,10 @@ HRESULT InitDevice()
 
   shaderPath += L"//";
   shaderPath += selectedShader;
-  isSuccesful = helper::CompileShader( shaderPath.generic_wstring().c_str(),  "vs_4_0",
+  isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str(), "vs_4_0",
                                       "VS", my_vertexShader);
 
   // Compile the vertex shader
-
   if (isSuccesful == false)
   {
     MessageBox(NULL,
@@ -265,7 +265,7 @@ HRESULT InitDevice()
   // Set the input layout
   my_deviceContext.IASetInputLayout(my_vertexInputLayout);
 
-  isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str() , "ps_4_0",
+  isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str(), "ps_4_0",
                                       "PS", my_pixelShader);
 
   if (isSuccesful == false)
@@ -390,7 +390,7 @@ HRESULT InitDevice()
   // Set primitive topology
   //my_deviceContext.IASetPrimitiveTopology(static_cast<int>(Topology::PointList));//equivalent to D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
   // Create the constant buffers
-  my_constNeverChanges.setDescription(sizeof(CBNeverChanges),
+  my_constNeverChanges.setDescription(sizeof(GlViewMatrix),
                                       1,
                                       0);
 
@@ -401,7 +401,7 @@ HRESULT InitDevice()
   //if (FAILED(hr))
   //  return hr;
 
-  my_constChangeOnResize.setDescription(sizeof(CBChangeOnResize),
+  my_constChangeOnResize.setDescription(sizeof(GlProjectionMatrix),
                                         1,
                                         0);
 
@@ -413,7 +413,7 @@ HRESULT InitDevice()
   //if (FAILED(hr))
   //return hr;
 
-  my_constChangesEveryFrame.setDescription(sizeof(CBChangesEveryFrame),
+  my_constChangesEveryFrame.setDescription(sizeof(GlChangeEveryFrame),
                                            1,
                                            0);
 
@@ -451,15 +451,12 @@ HRESULT InitDevice()
                             10);
 
   isSuccesful = my_device.CreateSamplerState(my_sampler);
-  assert(isSuccesful == true, "Error with creating sampler state");
+  assert(isSuccesful == true && "Error with creating sampler state");
   //hr = g_pd3dDevice->CreateSamplerState(&sampDesc, &g_pSamplerLinear);
   //if (FAILED(hr))
   //  return hr;
   // Initialize the world matrices
-
-#if DIRECTX
-  g_World.matrix = dx::XMMatrixIdentity();
-#endif // DIRECTX
+  g_World.matrix = glm::identity<glm::mat4>();
   cCamera orthoCamera;
   orthoCamera.calculateAndSetView();
   orthoCamera.calculateAndSetOrthographic(my_window, 100.0f, 0.1f);
@@ -475,28 +472,26 @@ HRESULT InitDevice()
   //                                                   100.0f);
 
   //g_View.matrix = dx::XMMatrixLookAtLH(Eye, At, Up);
-#if DIRECTX
-  CBNeverChanges cbNeverChanges;
-  cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+  GlViewMatrix cbNeverChanges;
+  cbNeverChanges.matrix = my_cameraManager->getViewMatrix().matrix;
+
+  //cbNeverChanges.matrix = glm::transpose(cbNeverChanges.matrix);
+
   my_deviceContext.UpdateSubresource(&my_constNeverChanges,
                                      &cbNeverChanges);
 
   // Initialize the projection matrix
-  CBChangeOnResize cbChangesOnResize;
-  cbChangesOnResize.mProjection = my_cameraManager->getProjectionMatrix().matrix;//dx::XMMatrixTranspose(g_Projection.matrix);
+  GlProjectionMatrix cbChangesOnResize;
+  cbChangesOnResize.matrix = my_cameraManager->getProjectionMatrix().matrix;//dx::XMMatrixTranspose(g_Projection.matrix);
+
+//cbChangesOnResize.matrix = glm::transpose(cbChangesOnResize.matrix);
   my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
                                      &cbChangesOnResize);
-#endif // DIRECTX
 
   return S_OK;
-  }
+}
 
 
-//--------------------------------------------------------------------------------------
-// Clean up the objects we've created
-//--------------------------------------------------------------------------------------
-void CleanupDevice()
-{}
 
 
 //--------------------------------------------------------------------------------------
@@ -557,72 +552,82 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   else if (message == WM_KEYDOWN)
   {
     // used to alter the view matrix 
-    CBNeverChanges cbNeverChanges;
-    CBChangeOnResize ChangeOnProjectionChange;
+    GlViewMatrix ChangeWithViewMatrix;
+    GlProjectionMatrix  ChangeOnProjectionChange;
     // going forwards 
     if (wParam == (WPARAM)'W')
     {
       my_cameraManager->moveFront(1.0f, my_window);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+                                         &ChangeWithViewMatrix);
     }//going backwards
     else if (wParam == (WPARAM)'S')
     {
       my_cameraManager->moveFront(-1.0f, my_window);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+                                         &ChangeWithViewMatrix);
     }//going right
     else if (wParam == (WPARAM)'D')
     {
       my_cameraManager->moveRight(1.0f, my_window);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+                                         &ChangeWithViewMatrix);
     }//going left 
     else if (wParam == (WPARAM)'A')
     {
       my_cameraManager->moveRight(-1.0f, my_window);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+                                         &ChangeWithViewMatrix);
     }
     //going up 
     else if (wParam == (WPARAM)'E')
     {
       my_cameraManager->moveUp(1.0f, my_window);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+                                         &ChangeWithViewMatrix);
     }//going down 
     else if (wParam == (WPARAM)'Q')
     {
       my_cameraManager->moveUp(-1.0f, my_window);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+                                         &ChangeWithViewMatrix);
     }
     else if (wParam == (WPARAM)'1')
     {
       my_cameraManager->switchCamera(0);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
-      ChangeOnProjectionChange.mProjection = my_cameraManager->getProjectionMatrix().matrix;
+                                         &ChangeWithViewMatrix);
+      ChangeOnProjectionChange.matrix = my_cameraManager->getProjectionMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
                                          &ChangeOnProjectionChange);
     }
     else if (wParam == (WPARAM)'2')
     {
       my_cameraManager->switchCamera(1);
-      cbNeverChanges.mView = my_cameraManager->getViewMatrix().matrix;
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &cbNeverChanges);
+                                         &ChangeWithViewMatrix);
       //for changing the projection
-      ChangeOnProjectionChange.mProjection = my_cameraManager->getProjectionMatrix().matrix;
+      ChangeOnProjectionChange.matrix = my_cameraManager->getProjectionMatrix().matrix;
       my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
                                          &ChangeOnProjectionChange);
+    }
+    else if (wParam == (WPARAM)'U')
+    {
+
+      g_Shearing--;
+
+    }
+    else if (wParam == (WPARAM)'I')
+    {
+      g_Shearing++;
     }
     else if (wParam == VK_SHIFT)
     {
@@ -661,7 +666,6 @@ ModelSelectMenu(cWindow & window)
   return my_gui.OpenFileFunc(window);
 }
 
-
 //--------------------------------------------------------------------------------------
 // Render a frame
 //--------------------------------------------------------------------------------------
@@ -685,7 +689,7 @@ void Render()
   }
 
   // Rotate cube around the origin
-  g_World.matrix = dx::XMMatrixRotationY(t);
+  g_World.matrix = glm::rotate(g_World.matrix, t, glm::vec3(0, 1.0f, 0));
 
   // Modify the color
   g_vMeshColor.vector4.x = (sinf(t * 1.0f) + 1.0f) * 0.5f;
@@ -702,26 +706,31 @@ void Render()
   //g_pImmediateContext->ClearDepthStencilView(my_depthStencilView.getDepthStencilView()
   //                                           , D3D11_CLEAR_DEPTH, 1.0f
   //                                           , 0);
-
+  glm::vec4 glMoveVector = {2,1,1,1};
+  glm::vec4 glScaleVector = {1,1,std::fabs(std::cosf(t)),1};
+  glm::vec4 glRotVector = {-t,0, t,1};
   /* setup for manipulating 3d models */
-  dx::XMVECTOR moveVector = {2,1,1,1};
-  dx::XMVECTOR scaleVector = {1,1,std::fabs(std::cosf(t)),1};
-  dx::XMVECTOR rotVector = {-t,0, t,1};
+  //dx::XMVECTOR moveVector = {2,1,1,1};
+  //dx::XMVECTOR scaleVector = {1,1,std::fabs(std::cosf(t)),1};
+  //dx::XMVECTOR rotVector = {-t,0, t,1};
+
   // CBChangesEveryFrame cb;
-  dx::XMMATRIX tempMatrixMove = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector(moveVector));
-  dx::XMMATRIX tempMatrixScale = dx::XMMatrixScalingFromVector(scaleVector);
-  dx::XMMATRIX tempMatrixRotate = dx::XMMatrixRotationRollPitchYawFromVector(rotVector);//XMMatrixRotationZ(-t);
+  //dx::XMMATRIX tempMatrixMove = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector(moveVector));
+  //dx::XMMATRIX tempMatrixScale = dx::XMMatrixScalingFromVector(scaleVector);
+  //dx::XMMATRIX tempMatrixRotate = dx::XMMatrixRotationRollPitchYawFromVector(rotVector);//XMMatrixRotationZ(-t);
 
-  dx::XMVECTOR moveVector2 = {0,1,-1,1};
-  dx::XMVECTOR scaleVector2 = {1,1,std::fabs(std::cosf(t)) * 2,1};
-  dx::XMVECTOR rotVector2 = {0,0, -t,1};
+  //dx::XMVECTOR moveVector2 = {0,1,-1,1};
+  //dx::XMVECTOR scaleVector2 = {1,1,std::fabs(std::cosf(t)) * 2,1};
+  //dx::XMVECTOR rotVector2 = {0,0, -t,1};
 
-  dx::XMMATRIX tempMatrixMove2 = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector(moveVector2));
-  dx::XMMATRIX tempMatrixScale2 = dx::XMMatrixScalingFromVector(scaleVector2);
-  dx::XMMATRIX tempMatrixRotate2 = dx::XMMatrixRotationRollPitchYawFromVector(rotVector2);//XMMatrixRotationZ(-t);
+  //dx::XMMATRIX tempMatrixMove2 = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector(moveVector2));
+  //dx::XMMATRIX tempMatrixScale2 = dx::XMMatrixScalingFromVector(scaleVector2);
+  //dx::XMMATRIX tempMatrixRotate2 = dx::XMMatrixRotationRollPitchYawFromVector(rotVector2);//XMMatrixRotationZ(-t);
 
-  CBChangesEveryFrame cb;
+
+
 #ifndef MODEL_LOAD
+  CBChangesEveryFrame cb;
   cb.mWorld = XMMatrixMultiply(XMMatrixMultiply(tempMatrixMove2, tempMatrixRotate2), tempMatrixScale2);
   cb.vMeshColor = g_vMeshColor;
   my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
@@ -766,13 +775,22 @@ void Render()
     &my_constChangeOnResize,
     &my_constNeverChanges
   };
+  glm::mat4 RandomTransform(1.0f);
+  glm::mat4 reflec(1.0f);
+  reflec[1][0] = -g_Shearing;
+  glm::vec3 MoveRight(-2.5, 1, 1);
+  //glm::reflect(RandomTransform, glm::vec3(0, -1, 0));
+  glm::mat4 result = glm::translate(RandomTransform, MoveRight);
+  my_model.setTransform(reflec);
 
   my_model.DrawMeshes(my_deviceContext, bufferArray);
-  dx::XMMATRIX MoveGunLeft = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector({-2,1,1,1}));
-  cb.mWorld = XMMatrixMultiply(MoveGunLeft, dx::XMMatrixRotationY(t));// XMMatrixTranslationFromVector(moveVector)
-  cb.vMeshColor = {0.81f,0.17f,0.8314f,1.0f};
+  GlChangeEveryFrame  Cb;
+  Cb.world = glm::mat4(1.0f);
+  Cb.color = {0.81f,1.0f,0.8314f,1.0f};
+  ////cb.mWorld = XMMatrixMultiply(MoveGunLeft, dx::XMMatrixRotationY(t));// XMMatrixTranslationFromVector(moveVector)
+  ////cb.vMeshColor = {0.81f,1.0f,0.8314f,1.0f};
 
-  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
+//  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &Cb);
 
 #endif // !MODEL_LOAD
   my_timer.EndTiming();

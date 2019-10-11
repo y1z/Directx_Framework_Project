@@ -8,8 +8,8 @@ struct sViewportDesc
   float height{1.0f};
   float minDepth{0.0f};
   float maxDepth{0.0f};
-  float TopLeftX{0 };
-  float TopLeftY{0 };
+  float TopLeftX{0.0f};
+  float TopLeftY{0.0f};
 };
 
 //! will control the view port
@@ -21,9 +21,9 @@ public:
   ~cViewport();
 public:
   void/*! sets all the values of the viewport*/
-    setViewport(float width,float height,
-                float minDepth,float maxDepth,
-                float TopLeftX =0.0f,float TopLeftY = 0.0f);
+    setViewport(float width, float height,
+                float minDepth, float maxDepth,
+                float TopLeftX = 0.0f, float TopLeftY = 0.0f);
 
 #if DIRECTX
   //! returns the descriptor for the view-port

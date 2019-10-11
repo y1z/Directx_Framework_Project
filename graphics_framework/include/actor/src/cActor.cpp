@@ -1,6 +1,12 @@
 #include "..\cActor.h"
 #include <cassert>
 
+cActor::cActor()
+{
+
+
+}
+
 cActor::~cActor()
 {
   for (baseComponent* Componet : m_components)
