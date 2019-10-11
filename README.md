@@ -1,5 +1,5 @@
 # Project DirectX/OpenGl framework 
-This is the repository that will house a framework that can chose in-between open_gl and directX
+This repository will house a graphics framework that can chose between 2 api's open_gl and directX
 ## Tools used 
 - visual sudio 2017 
 ## Language 
