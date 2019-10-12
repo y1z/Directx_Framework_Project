@@ -8,6 +8,9 @@
 #include "cApiComponents.h"
 #include "enum_headers/enFormatEnums.h"
 #include  "cShaderBase.h"
+#include "actor/cActor.h"
+#include "../include/cModel.h"
+#include "../include/cCameraManager.h"
 
 namespace helper
 {
@@ -146,7 +149,7 @@ namespace helper
     return sTextureDescriptor();
   }
 
-  std::string 
+  std::string
     openFile(cWindow window)
   {
     OPENFILENAMEA File;
@@ -157,19 +160,111 @@ namespace helper
     /* First \0 describes the name of the options
     that the user will be presented with, the second \0
     will discribe the type of files to look for */
- //   static constexpr const char* FileTypes = 
+    //   static constexpr const char* FileTypes = 
     File.lStructSize = sizeof(OPENFILENAMEA);
     File.hwndOwner = window.getHandle();
     File.lpstrFile = FileName;
     File.lpstrFile[0] = '\0';
     File.nMaxFile = 4096;
     File.lpstrFilter = "All files\0*.*\0obj files\0*.obj\0fbx files\0*.fbx\0";
-//FileTypes;
+    //FileTypes;
     File.nFilterIndex = 1;
 
     GetOpenFileNameA(&File);
-    
+
     return std::string(FileName);
+  }
+
+  cModel *
+    findModelComponent(cActor & actor)
+  {
+    for (size_t i = 0; i < actor.getComponentCount() - 1; ++i)
+    {
+      baseComponent *ptr_possibleModel = actor.getComponent(i);
+      cModel * model = dynamic_cast<cModel*>(ptr_possibleModel);
+      if (model == nullptr) { continue; }
+      else { return model; }
+    }
+    return nullptr;
+  }
+
+  void handelCameraKeyInput(const uint8 pressedKey, cCameraManager & currentCamera,
+                            cWindow & window,cDeviceContext &deviceContext,
+                         cConstBuffer *neverChange, cConstBuffer *resizeChange) 
+  {
+  #if DIRECTX
+
+    // used to alter the view matrix 
+    GlViewMatrix ChangeWithViewMatrix;
+    GlProjectionMatrix  ChangeOnProjectionChange;
+    // going forwards 
+    if (pressedKey == (WPARAM)'W')
+    {
+      currentCamera.moveFront(1.0f, window);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource( reinterpret_cast<cBuffer*>( neverChange) ,
+                                         &ChangeWithViewMatrix);
+    }//going backwards
+    else if (pressedKey == (WPARAM)'S')
+    {
+      currentCamera.moveFront(-1.0f, window);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(neverChange),
+                                         &ChangeWithViewMatrix);
+    }//going right
+    else if (pressedKey == (WPARAM)'D')
+    {
+      currentCamera.moveRight(1.0f, window);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(neverChange),
+                                         &ChangeWithViewMatrix);
+    }//going left 
+    else if (pressedKey == (WPARAM)'A')
+    {
+      currentCamera.moveRight(-1.0f, window);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(neverChange),
+                                         &ChangeWithViewMatrix);
+    }
+    //going up 
+    else if (pressedKey == (WPARAM)'E')
+    {
+      currentCamera.moveUp(1.0f, window);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(neverChange),
+                                         &ChangeWithViewMatrix);
+    }//going down 
+    else if (pressedKey == (WPARAM)'Q')
+    {
+      currentCamera.moveUp(-1.0f, window);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(neverChange),
+                                         &ChangeWithViewMatrix);
+    }
+    else if (pressedKey == (WPARAM)'2')
+    {
+      currentCamera.switchCamera(1);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(neverChange),
+                                         &ChangeWithViewMatrix);
+      ChangeOnProjectionChange.matrix = currentCamera.getProjectionMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(resizeChange),
+                                         &ChangeOnProjectionChange);
+    }
+    else if (pressedKey == (WPARAM)'3')
+    {
+      currentCamera.switchCamera(2);
+      ChangeWithViewMatrix.matrix = currentCamera.getViewMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(neverChange),
+                                         &ChangeWithViewMatrix);
+      //for changing the projection
+      ChangeOnProjectionChange.matrix = currentCamera.getProjectionMatrix().matrix;
+      deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(resizeChange),
+                                         &ChangeOnProjectionChange);
+    }
+  #else 
+  #endif // DIRECTX
+
   }
 
 }

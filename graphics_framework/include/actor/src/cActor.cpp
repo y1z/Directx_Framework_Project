@@ -1,10 +1,11 @@
 #include "..\cActor.h"
 #include <cassert>
 
+constexpr static std::size_t c_defaultSize = 16u;
+
 cActor::cActor()
 {
-
-
+  m_components.reserve(c_defaultSize); 
 }
 
 cActor::~cActor()

@@ -110,8 +110,8 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -130,8 +130,8 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -154,8 +154,8 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -178,8 +178,8 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

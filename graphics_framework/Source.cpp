@@ -8,8 +8,8 @@
 #include "utility/Grafics_libs.h"
 /******************************************************/
 #include "../include/cDevice.h"// FINISHED
-#include "../include/cDeviceContext.h" //UNFINISHED 
-#include "../include/cTexture2D.h"// UNFINISHED
+#include "../include/cDeviceContext.h" //FINISHED 
+#include "../include/cTexture2D.h"// FINISHED
 #include "../include/cRenderTargetView.h"// UNFINISHED
 #include "../include/cRenderTarget.h"//UNFINISHED 
 #include "../include/cDepthStencilView.h"// UNFINISHED
@@ -32,11 +32,14 @@
 #include "cApiComponents.h"
 #include "cCamera.h"
 #include "cCameraManager.h"
+#include "actor/cActor.h"
+
 /*****************************************************/
 #include "enum_headers/enFormatEnums.h" 
 #include "enum_headers/enumTextureAddress.h"
 #include "enum_headers/enumFilter.h"
 #include "enum_headers/enumComparasion.h"
+/*****************************************************/
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
 /*****************************************************/
@@ -102,6 +105,8 @@ ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;*/
 sMatrix4x4 g_World;
 sMatrix4x4 g_View;
 sMatrix4x4 g_Projection;
+bool g_isInit(false);
+//! this is the path local to the solution of the program
 const std::filesystem::path g_initPath = std::filesystem::current_path();
 sFloat4 g_vMeshColor;
 
@@ -128,16 +133,19 @@ wWinMain(HINSTANCE hInstance,
 #if DIRECTX
   hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
   if (FAILED(hr))
-  { return 0; }
+  { return -1; }
 
 #endif // DIRECTX
-  my_window.init(WndProc, hInstance);
+  /*init's the window*/
+  if (!my_window.init(WndProc, hInstance))
+  { return -1; }
   /**init a console **/
   if (AllocConsole())
   {
     freopen("CONOUT$", "w", stdout);
     std::cout << "This works" << std::endl;
   }
+
 
   my_gui.setOpenFileFunction(helper::openFile);
 
@@ -147,7 +155,6 @@ wWinMain(HINSTANCE hInstance,
   {
     return 0;
   }
-
   // Main message loop
   MSG msg = {0};
   while (WM_QUIT != msg.message)
@@ -162,7 +169,6 @@ wWinMain(HINSTANCE hInstance,
       Render();
     }
   }
-
   /****free the console *****/
   FreeConsole();
 #if DIRECTX
@@ -488,6 +494,8 @@ HRESULT InitDevice()
   my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
                                      &cbChangesOnResize);
 
+  g_isInit = true;
+
   return S_OK;
 }
 
@@ -516,13 +524,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   POINT centerPoint;
   centerPoint.x = (rect.right - rect.left) * 0.5f;
   centerPoint.y = (rect.bottom - rect.top) * 0.5f;
+  //SetCapture(my_window.getHandle());
 
   if (message == WM_PAINT)
   {
     hdc = BeginPaint(hWnd, &ps);
     EndPaint(hWnd, &ps);
   }
-  else if (message == WM_SIZING)
+  if (message == WM_SIZING)
   {
     RECT rc;
     GetClientRect(my_window.getHandle(), &rc);
@@ -549,106 +558,54 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     my_deviceContext.RSSetViewports(&my_viewport);
   }
-  else if (message == WM_KEYDOWN)
+  if (message == WM_KEYDOWN)
   {
     // used to alter the view matrix 
     GlViewMatrix ChangeWithViewMatrix;
     GlProjectionMatrix  ChangeOnProjectionChange;
     // going forwards 
-    if (wParam == (WPARAM)'W')
-    {
-      my_cameraManager->moveFront(1.0f, my_window);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-    }//going backwards
-    else if (wParam == (WPARAM)'S')
-    {
-      my_cameraManager->moveFront(-1.0f, my_window);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-    }//going right
-    else if (wParam == (WPARAM)'D')
-    {
-      my_cameraManager->moveRight(1.0f, my_window);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-    }//going left 
-    else if (wParam == (WPARAM)'A')
-    {
-      my_cameraManager->moveRight(-1.0f, my_window);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-    }
-    //going up 
-    else if (wParam == (WPARAM)'E')
-    {
-      my_cameraManager->moveUp(1.0f, my_window);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-    }//going down 
-    else if (wParam == (WPARAM)'Q')
-    {
-      my_cameraManager->moveUp(-1.0f, my_window);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-    }
-    else if (wParam == (WPARAM)'1')
-    {
-      my_cameraManager->switchCamera(0);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-      ChangeOnProjectionChange.matrix = my_cameraManager->getProjectionMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
-                                         &ChangeOnProjectionChange);
-    }
-    else if (wParam == (WPARAM)'2')
-    {
-      my_cameraManager->switchCamera(1);
-      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-                                         &ChangeWithViewMatrix);
-      //for changing the projection
-      ChangeOnProjectionChange.matrix = my_cameraManager->getProjectionMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
-                                         &ChangeOnProjectionChange);
-    }
-    else if (wParam == (WPARAM)'U')
-    {
+    helper::handelCameraKeyInput(wParam, *my_cameraManager,
+                                 my_window, my_deviceContext,
+                                 &my_constNeverChanges, &my_constChangeOnResize);
 
+    if (wParam == (WPARAM)'U')
+    {
       g_Shearing--;
 
     }
-    else if (wParam == (WPARAM)'I')
+    if (wParam == (WPARAM)'I')
     {
       g_Shearing++;
     }
-    else if (wParam == VK_SHIFT)
+
+  }
+  if (message == WM_MOUSEMOVE && g_isInit)
+  {
+
+    if (wParam & MK_SHIFT)
     {
-      // set position to middle of window 
-      SetCursorPos(centerPoint.y, centerPoint.y);
-      // get the new position 
+      GlViewMatrix ChangeWithViewMatrix;
       POINT newPoint;
       GetCursorPos(&newPoint);
 
-      //sVector4 rot{newPoint.x - centerPoint.x, newPoint.y - centerPoint.y,0,0};
-      //sVector4  ScalarVector{0.016f,0.016f,0.016f,0.016f};
-      //rot.vector4 = dx::XMVectorMultiply(rot.vector4, ScalarVector.vector4);
-      //// rot.vector4 *=  rot.vector4 + vector4 ;
-      //my_camera.rotateCamera(rot, my_window);
-      //my_deviceContext.UpdateSubresource(&my_constNeverChanges,
-      //                                   &cbNeverChanges);
+      sVector3 newVector;
+      newVector.vector3 = glm::vec3(newPoint.x,  newPoint.y, 0.0f);
+      // set position to middle of window 
+      SetCursorPos(centerPoint.x, centerPoint.y);
+      sVector3 centerVector;
+      centerVector.vector3 = {centerPoint.x, centerPoint.y,0.0f};
 
+      sVector3 rotation;
+      rotation.vector3 = (newVector.vector3 - centerVector.vector3) * 0.016f;
+      rotation.vector3.y = -rotation.vector3.y;
+
+      my_cameraManager->rotateCamera(rotation, my_window);
+      ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
+      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
+                                         &ChangeWithViewMatrix);
     }
-
   }
-  else if (message == WM_DESTROY)
+  if (message == WM_DESTROY)
   {
     PostQuitMessage(0);
   }
@@ -656,7 +613,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   {
     return DefWindowProc(hWnd, message, wParam, lParam);
   }
-
+  //  ReleaseCapture();
   return 0;
 }
 
@@ -776,12 +733,12 @@ void Render()
     &my_constNeverChanges
   };
   glm::mat4 RandomTransform(1.0f);
-  glm::mat4 reflec(1.0f);
-  reflec[1][0] = -g_Shearing;
+  glm::mat4 ShearMatrix(1.0f);
+  ShearMatrix[1][0] = -g_Shearing;
   glm::vec3 MoveRight(-2.5, 1, 1);
   //glm::reflect(RandomTransform, glm::vec3(0, -1, 0));
   glm::mat4 result = glm::translate(RandomTransform, MoveRight);
-  my_model.setTransform(reflec);
+  my_model.setTransform(ShearMatrix);
 
   my_model.DrawMeshes(my_deviceContext, bufferArray);
   GlChangeEveryFrame  Cb;

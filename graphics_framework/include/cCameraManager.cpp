@@ -67,6 +67,11 @@ void cCameraManager::moveUp(float unit, cWindow & window, float deltaTime)
   m_cameras[m_currentCamera].moveUp(unit, window, deltaTime);
 }
 
+void cCameraManager::rotateCamera(sVector3 & OffSet, cWindow & window)
+{
+  m_cameras[m_currentCamera].rotateCamera(OffSet, window); 
+}
+
 
 void cCameraManager::setEye(float x, float y, float z,float w)
 {

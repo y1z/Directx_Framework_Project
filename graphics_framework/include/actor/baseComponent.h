@@ -6,7 +6,6 @@
 class cDeviceContext;
 class cDevice;
 class cConstBuffer;
-//class cTransform;
 
 /*! this is a interface to component objects 
 */

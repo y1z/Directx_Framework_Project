@@ -22,7 +22,7 @@ public:
   //! moves the camera to it's relative Front side(assuming the unit is positive)
   void
     moveFront(float unit,cWindow &window, float deltaTime = 0.01666f)override;
-  /*! TODO: FIX*/
+  /*! TODO: rotates the camera by moving the focal point.*/
   void rotateCamera(sVector3 &Off,cWindow &window);
   /*! */
   void
@@ -41,7 +41,7 @@ public:
     moveTransform(sVector4 &Vector);
 
   void 
-    copyMatrixTransform(sMatrix4x4 &newTransform);
+    copyMatrixTransform( const sMatrix4x4 &newTransform);
 /*! update the current view and projection matrices*/
   void
     updateCamera(cWindow &window) override;

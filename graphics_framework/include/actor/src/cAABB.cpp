@@ -67,7 +67,8 @@ cAABB::init(const cModel & model)
 
 }
 
-bool cAABB::checkCollision(const cAABB & otherAABB)
+bool 
+cAABB::checkCollision(const cAABB & otherAABB)
 {
   if (std::fabsf(this->m_middlePoint.x - otherAABB.m_middlePoint.x) < (this->m_radius.x + otherAABB.m_radius.x))
   { return true; }
@@ -81,8 +82,10 @@ bool cAABB::checkCollision(const cAABB & otherAABB)
   return false;
 }
 
-void cAABB::moveAABB(const glm::mat4 & newTransform)
+void 
+cAABB::moveAABB(const glm::mat4 & newTransform)
 {
+  m_middlePoint = newTransform * glm::vec4(m_middlePoint,1.0f);
 }
 
 glm::vec3

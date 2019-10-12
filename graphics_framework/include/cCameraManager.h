@@ -8,7 +8,7 @@ struct sMatrix4x4;
 struct sVector4;
 class cWindow;
 
-
+/*! contains multiple cameras and can switch between them*/
 class cCameraManager
 {
 public://constructor and destructor
@@ -33,6 +33,9 @@ public://functions
 /*! move the current camera up or down*/
   void
     moveUp(float unit, cWindow &window, float deltaTime = 0.016f);
+/*! rotates the currently selected camera */
+  void 
+    rotateCamera(sVector3 &Off,cWindow &window);
 /*! returns the current cameras view matrix */
   sMatrix4x4 
     getViewMatrix()const ;

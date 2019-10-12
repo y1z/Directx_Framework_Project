@@ -65,8 +65,8 @@ cWindow::init(LRESULT(__stdcall*ptr_proc)(HWND, UINT, WPARAM, LPARAM)
   m_height = rc.bottom - rc.top;
 
   m_handle = CreateWindow(L"TutorialWindowClass", L"Direct3D 11 Tutorial 7", WS_OVERLAPPEDWINDOW,
-                           CW_USEDEFAULT, CW_USEDEFAULT, m_width, m_height, NULL, NULL, m_instance,
-                           NULL);
+                          CW_USEDEFAULT, CW_USEDEFAULT, m_width, m_height, NULL, NULL, m_instance,
+                          NULL);
   if (!m_handle)
     return false;
 
@@ -75,6 +75,7 @@ cWindow::init(LRESULT(__stdcall*ptr_proc)(HWND, UINT, WPARAM, LPARAM)
   return true;
 
 #endif // DIRECTX
+  return false;
 }
 
 HWND
@@ -89,13 +90,13 @@ cWindow::getInstance() const
   return  m_instance;
 }
 
-uint32 
+uint32
 cWindow::getWidth() const
 {
   return m_width;
 }
 
-uint32 
+uint32
 cWindow::getHeight() const
 {
   return m_height;
