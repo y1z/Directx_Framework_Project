@@ -1,15 +1,18 @@
 #include "..\include\imGuiManager.h"
 #include "cDevice.h"
+
 #include "cDeviceContext.h"
 #include "cWindow.h"
+#include <string_view>
+using namespace std::string_literals;
 /*******************************/
 #include"imgui/imgui.h"
 #ifdef DIRECTX
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
-#elif USING_OPEN_GL
+#elif OPEN_GL
 #include "imgui/imgui_impl_opengl3.h"
-#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_glfw.h";
 #endif // USING_DIRECTX
 //#include "CWindow.h"
 /*****************************/
@@ -40,6 +43,8 @@ static constexpr const char *GlslVersion = "#version 430 core";
 //----------------------------------------
 
 imGuiManager::imGuiManager()
+  :m_childCount(0),
+  mptr_FileFunc(nullptr)
 {}
 
 /*!  Highly  Important to free the memory*/
@@ -57,7 +62,8 @@ imGuiManager::~imGuiManager()
   ImGui::DestroyContext();
 }
 
-bool imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, HWND Handle)
+bool
+imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, HWND Handle)
 {
   bool isSuccesful = false;
   isSuccesful = IMGUI_CHECKVERSION();
@@ -74,7 +80,6 @@ bool imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, HWND H
 
   return isSuccesful;
 }
-//
 
 //bool imGuiManager::Init(CWindow & Window)
 //{
@@ -98,95 +103,17 @@ imGuiManager::setOpenFileFunction(ptr_FileOpenFunc openFileFunc)
   mptr_FileFunc = openFileFunc;
 }
 
-void 
-imGuiManager::MakeBasicWindow(const char * WindowName)
-{
-  // start a imGui frame
-#ifdef DIRECTX
-  ImGui_ImplDX11_NewFrame();
-  ImGui_ImplWin32_NewFrame();
-#elif USING_OPEN_GL
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-#endif // USING_DIRECTX
-  ImGui::NewFrame();
-  // creates Imgui Test window 
-  ImGui::Begin(WindowName);
-  ImGui::End();
-
-  // assemble together Draw Data
-  ImGui::Render();
-  //this is what actually draws the window ONLY work on DirectX 
-#ifdef DIRECTX
-  ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-#elif USING_OPEN_GL
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif // USING_DIRECTX
-}
 
 void
-imGuiManager::MakeWindowFpsAndVertexCount(const char * WindowName, float DeltaTime, int VertexCount)
+imGuiManager::FpsCountWindow(float DeltaTime)
 {
-#ifdef DIRECTX
-  ImGui_ImplDX11_NewFrame();
-  ImGui_ImplWin32_NewFrame();
-#elif USING_OPEN_GL
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-#endif // USING_DIRECTX
-
-  // Formating for the FPS counter 
-  std::string fpsMessage("FPS ");
-  fpsMessage += std::to_string(1 / DeltaTime);
-
-  std::string VertexMessage("Vertex Count # ");
-  VertexMessage += std::to_string(VertexCount);
-
-  ImGui::NewFrame();
-  // creates Imgui Test window 
-  ImGui::Begin(WindowName);
-
-  ImGui::BeginChild("VertexCount", ImVec2(200, 200));
-  ImGui::Text(VertexMessage.c_str());
-  ImGui::EndChild();
-
-  ImGui::BeginChild("FPS", ImVec2(200, 200));
-  ImGui::Text(fpsMessage.c_str());
-  ImGui::EndChild();
-
-  ImGui::End();
-  // assemble together Draw Data
-  ImGui::Render();
-  //this is what actually draws the window ONLY work on DirectX 
-#ifdef DIRECTX
-  ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-#elif USING_OPEN_GL
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif // USING_DIRECTX
-
-}
-
-void
-imGuiManager::FpsCountWindow(const char * windowName, float DeltaTime)
-{
-#if DIRECTX
-  ImGui_ImplDX11_NewFrame();
-  ImGui_ImplWin32_NewFrame();
-#else 
-#endif// DIRECTX
-
+  m_childCount++;
   float averageFps = this->calculateAverageFPS(DeltaTime);
-
   std::string fpsMassage("FPS : ");
   fpsMassage += std::to_string(averageFps);
 
-  this->beginFrame(windowName);
-
-  ImGui::BeginChild("FPS", ImVec2(200, 200));
+  ImGui::BeginChild("FPS", ImVec2(300, 50));
   ImGui::Text(fpsMassage.c_str());
-  ImGui::EndChild();
-
-  this->endFrame();
 
 }
 
@@ -213,29 +140,51 @@ imGuiManager::calculateAverageFPS(float deltaTime)
   return averageFps = averageFps / c_fpsSamplesCount;
 }
 
-void imGuiManager::MenuForOpenFile(cWindow & window, std::string & PathOfFile, bool & used)
+void 
+imGuiManager::MenuForOpenFile(cWindow & window, std::string & PathOfFile, bool & used)
 {
-  this->beginFrame("Menu");
   if (ImGui::Button("Load model from file "))
   {
     PathOfFile = mptr_FileFunc(window);
     used = true;
   }
 
-  this->endFrame();
 }
 
 std::string
-imGuiManager::OpenFileFunc(cWindow & window) 
+imGuiManager::OpenFileFunc(cWindow & window)
 {
- return this->mptr_FileFunc(window);
+  return this->mptr_FileFunc(window);
 }
 
 void
 imGuiManager::beginFrame(const char * windowName)
 {
+#if DIRECTX
+  ImGui_ImplDX11_NewFrame();
+  ImGui_ImplWin32_NewFrame();
+#elif OPEN_GL 
+#endif// DIRECTX
   ImGui::NewFrame();
   ImGui::Begin(windowName);
+}
+
+void 
+imGuiManager::beginChildWithItemCount(const char* childId, std::string_view itemName, uint32 itemCount) {
+  m_childCount++;
+  ig::BeginChild(childId, ImVec2(200, 200));
+  ig::Text(itemName.data());
+  ig::TextColored(ImVec4(0.98, 0.88, 0.20, 1.0f), "Count = %d ", itemCount);
+}
+
+void imGuiManager::endAllChildren()
+{
+  for (uint32 i = 0; i < m_childCount; ++i)
+  {
+    ig::EndChild();
+  }
+
+  m_childCount = 0;
 }
 
 void

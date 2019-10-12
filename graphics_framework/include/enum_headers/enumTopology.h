@@ -7,7 +7,7 @@ enum class Topology
   TriList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
   PointList = D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
   LineList = D3D_PRIMITIVE_TOPOLOGY_LINELIST
-#else
+#elif OPEN_GL
   TriList = 1,
   PointList = 2,
   LineList = 3

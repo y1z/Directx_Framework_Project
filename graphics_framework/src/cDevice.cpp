@@ -177,9 +177,12 @@ bool cDevice::CreateInputLayout(cInputLayout &inputLayout
 bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vertexShader)
 {
 #if DIRECTX
+  //directX native input layout struct 
   std::vector<D3D11_INPUT_ELEMENT_DESC> directxInputLayout;
+  // my input layout struct 
   std::vector<sInputDescriptor> intermidateLayout = inputLayout.getInputDescriptor();
-
+  /*convert my intermediate input layout format to 
+  directX input layout format */
   for (const sInputDescriptor &intermidate : intermidateLayout)
   {
     D3D11_INPUT_ELEMENT_DESC directxDesc;
@@ -192,8 +195,6 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
     directxDesc.InstanceDataStepRate = intermidate.InstanceData;
     directxInputLayout.emplace_back(directxDesc);
   }
-  //for (std::size_t i = 0; i < intermidateLayout.size() - 1; ++i) {
-  //}
 
   HRESULT  hr = mptr_device->CreateInputLayout(&directxInputLayout[0],
                                                intermidateLayout.size(),
@@ -204,6 +205,7 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
   {
     return true;
   }
+#elif OPEN_GL
 #endif // DIRECTX
   return false;
 }

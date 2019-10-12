@@ -6,7 +6,6 @@ cCameraManager::cCameraManager()
   m_cameraCount(0)
 {}
 
-
 cCamera *
 cCameraManager::getCurrentCamera()
 {
@@ -25,7 +24,8 @@ cCameraManager::getProjectionMatrix() const
   return this->m_cameras[m_currentCamera].getProjection();
 }
 
-void cCameraManager::switchCamera(uint8 chosenCamera)
+void 
+cCameraManager::switchCamera(uint8 chosenCamera)
 {
   if (CheckIsInBound(chosenCamera))
   {
@@ -37,7 +37,8 @@ void cCameraManager::switchCamera(uint8 chosenCamera)
   }
 }
 
-void cCameraManager::initCameraMatrixes(cWindow & window, float fov, float Far, float Near)
+void 
+cCameraManager::initCameraMatrixes(cWindow & window, float fov, float Far, float Near)
 {
   m_cameras[m_currentCamera].calculateAndSetView();
 
@@ -52,46 +53,53 @@ void cCameraManager::initCameraMatrixes(cWindow & window, float fov, float Far, 
 
 }
 
-void cCameraManager::moveFront(float unit, cWindow & window, float deltaTime)
+void 
+cCameraManager::moveFront(float unit, cWindow & window, float deltaTime)
 {
   m_cameras[m_currentCamera].moveFront(unit, window, deltaTime);
 }
 
-void cCameraManager::moveRight(float unit, cWindow & window, float deltaTime)
+void 
+cCameraManager::moveRight(float unit, cWindow & window, float deltaTime)
 {
   m_cameras[m_currentCamera].moveRight(unit, window, deltaTime);
 }
 
-void cCameraManager::moveUp(float unit, cWindow & window, float deltaTime)
+void 
+cCameraManager::moveUp(float unit, cWindow & window, float deltaTime)
 {
   m_cameras[m_currentCamera].moveUp(unit, window, deltaTime);
 }
 
-void cCameraManager::rotateCamera(sVector3 & OffSet, cWindow & window)
+void 
+cCameraManager::rotateCamera(sVector3 & OffSet, cWindow & window)
 {
   m_cameras[m_currentCamera].rotateCamera(OffSet, window); 
 }
 
-
-void cCameraManager::setEye(float x, float y, float z,float w)
+void 
+cCameraManager::setEye(float x, float y, float z,float w)
 {
   //m_cameras[m_currentCamera].setEye(x, y, z);
   m_cameras[m_currentCamera].setEye(x, y, z,w);
 }
 
-void cCameraManager::setAt(float x, float y, float z,float w)
+void
+cCameraManager::setAt(float x, float y, float z,float w)
 {
   //m_cameras[m_currentCamera].setAt(x, y, z);
   m_cameras[m_currentCamera].setAt(x, y, z,w);
 }
 
-void cCameraManager::setUp(float x, float y, float z,float w)
+void
+cCameraManager::setUp(float x, float y, float z,float w)
 {
   //m_cameras[m_currentCamera].setUp(x, y, z);
   m_cameras[m_currentCamera].setUp(x, y, z,w);
 }
 
-bool cCameraManager::pushBackCamera(const cCamera & newCamera)
+bool
+cCameraManager::pushBackCamera(const cCamera & newCamera)
 {
   if (m_cameraCount < c_cameraLimit)
   {
@@ -101,7 +109,8 @@ bool cCameraManager::pushBackCamera(const cCamera & newCamera)
   return false;
 }
 
-bool cCameraManager::CheckIsInBound(uint8 cameraIndex) const
+bool
+cCameraManager::CheckIsInBound(uint8 cameraIndex) const
 {
   if (cameraIndex <= c_cameraLimit)
   {

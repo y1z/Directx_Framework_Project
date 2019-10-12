@@ -215,7 +215,7 @@ struct stbrp_context
 #ifdef _MSC_VER
 #define STBRP__NOTUSED(v)  (void)(v)
 #define STBRP__CDECL __cdecl
-#else
+#else 
 #define STBRP__NOTUSED(v)  (void)sizeof(v)
 #define STBRP__CDECL
 #endif
@@ -304,7 +304,7 @@ static int stbrp__skyline_find_min_y(stbrp_context *c, stbrp_node *first, int x0
    // skip in case we're past the node
    while (node->next->x <= x0)
       ++node;
-   #else
+   #else 
    STBRP_ASSERT(node->next->x > x0); // we ended up handling this in the caller for efficiency
    #endif
 

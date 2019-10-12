@@ -1,5 +1,4 @@
-#include <d3d11.h>
-#include <d3dcompiler.h>
+#include "utility/Grafics_libs.h"
 #include "HelperFuncs.h"
 #include "cDevice.h"
 #include "cDeviceContext.h"
@@ -78,7 +77,7 @@ namespace helper
       }
     }
     return false;
-  #else
+  #elif OPEN_GL
   #endif // DIRECTX
   } // end function
 
@@ -114,7 +113,7 @@ namespace helper
     if (pErrorBlob) pErrorBlob->Release();
 
     return true;
-  #else
+  #elif OPEN_GL
   #endif // DIRECTX
     return false;
   }
@@ -144,7 +143,7 @@ namespace helper
     TextureDesc.CpuAccess = 0;
     TextureDesc.arraySize = 1;
     return TextureDesc;
-  #else
+  #elif OPEN_GL
   #endif // DIRECTX
     return sTextureDescriptor();
   }
@@ -175,6 +174,7 @@ namespace helper
     return std::string(FileName);
   }
 
+
   cModel *
     findModelComponent(cActor & actor)
   {
@@ -187,6 +187,9 @@ namespace helper
     }
     return nullptr;
   }
+  /*************/
+
+
 
   void handelCameraKeyInput(const uint8 pressedKey, cCameraManager & currentCamera,
                             cWindow & window,cDeviceContext &deviceContext,
@@ -262,9 +265,10 @@ namespace helper
       deviceContext.UpdateSubresource(reinterpret_cast<cBuffer*>(resizeChange),
                                          &ChangeOnProjectionChange);
     }
-  #else 
+  #elif OPEN_GL 
   #endif // DIRECTX
 
   }
+  /*****************/
 
 }

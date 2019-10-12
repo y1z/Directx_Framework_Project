@@ -51,8 +51,9 @@ public:
                         ,uint32_t NumDesc
                         , sInputDescriptor Desc[]
                         ,cVertexShader &vertexShader);
-/*!*/ 
- bool CreateInputLayout(cInputLayout &inputLayout, cVertexShader &vertexShader);
+/*!  */ 
+ bool CreateInputLayout(cInputLayout &inputLayout, 
+                        cVertexShader &vertexShader);
 
 //! Creates a vertex buffer 
  bool CreateVertexBuffer(cVertexBuffer &VertexBuffer);
@@ -64,11 +65,16 @@ public:
  bool CreateSamplerState(cSampler &sampler);
 
 #ifdef DIRECTX
-  ID3D11Device * getDevice();
-  ID3D11Device **getDeviceRef();
+ /*! returns a point directX device */
+  ID3D11Device *
+    getDevice();
+/*! returns a reference to a pointer of a directX device */
+  ID3D11Device **
+    getDeviceRef();
 private:
   ID3D11Device *mptr_device = nullptr;
-#else 
+
+#elif OPEN_GL  // DIRECTX 
 #endif 
 };
 

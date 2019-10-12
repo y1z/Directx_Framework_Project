@@ -3,7 +3,7 @@
 #if UNICODE
 constexpr static const wchar_t *defualName = L"nameless window";
 constexpr static const wchar_t *defualClassName = L"entropy window";
-#else
+#else 
 constexpr static const char *defualName = "nameless window";
 constexpr static const char *defualClassName = "entropy window";
 #endif // UNICODE
@@ -109,7 +109,7 @@ void cWindow::update()
   GetClientRect(this->m_handle, &rc);
   m_width = rc.right - rc.left;
   m_height = rc.bottom - rc.top;
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 }
 

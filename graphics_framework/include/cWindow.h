@@ -28,7 +28,7 @@ public:
   /*! returns the current HINSTANCE of the window */
   HINSTANCE
     getInstance() const;
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 
   uint32 

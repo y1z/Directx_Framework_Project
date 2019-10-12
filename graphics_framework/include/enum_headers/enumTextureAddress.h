@@ -9,7 +9,7 @@ enum class TextureAddress : int
   Clamp = D3D11_TEXTURE_ADDRESS_CLAMP,
   Border = D3D11_TEXTURE_ADDRESS_BORDER,
   Mirror_once = D3D11_TEXTURE_ADDRESS_MIRROR_ONCE
-#else
+#elif OPEN_GL
   Wrap,
   Mirror,
   Clamp,

@@ -30,7 +30,7 @@ struct sFloat4
 {
 #if DIRECTX
   dx::XMFLOAT4 vector4;
-#else 
+#elif OPEN_GL 
   glm::vec4 vector4;
 #endif // DIRECTX
 };

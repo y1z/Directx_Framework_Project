@@ -27,13 +27,13 @@ public:
   //! for interfacing with directX 
   D3D11_SUBRESOURCE_DATA
     getSubresource();
-#else 
+#elif OPEN_GL 
 #endif // DIRECTX
 private:
 
 #if DIRECTX
   D3D11_SUBRESOURCE_DATA m_data;
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 };
 

@@ -27,7 +27,7 @@ public:
   // so i just going a dummy function 
   unsigned int  getGlobalComponent();
   void setGlobalComponent(unsigned int Component);
-#else
+#elif OPEN_GL
   
   unsigned int &getGlobalComponent();
 #endif // DIRECTX
@@ -39,7 +39,7 @@ private:
   D3D_DRIVER_TYPE m_driveType;
   //! used to know which version of the api is needed 
   D3D_FEATURE_LEVEL m_version;
-#else
+#elif OPEN_GL
   unsigned int m_program{0};
-#endif // DIRECTX
+#endif
 };

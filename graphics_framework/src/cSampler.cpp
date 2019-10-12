@@ -4,7 +4,7 @@
 cSampler::cSampler()
 #if DIRECTX
   :mptr_sampler(nullptr)
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 {
   std::memset(&m_Description, 0, sizeof(m_Description));

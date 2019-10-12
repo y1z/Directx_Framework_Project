@@ -4491,7 +4491,7 @@ void ShowExampleAppDocuments(bool* p_open)
 }
 
 // End of Demo code
-#else
+#else 
 
 void ImGui::ShowAboutWindow(bool*) {}
 void ImGui::ShowDemoWindow(bool*) {}

@@ -978,7 +978,7 @@ CODE
 #include <stdio.h>      // vsnprintf, sscanf, printf
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
-#else
+#else 
 #include <stdint.h>     // intptr_t
 #endif
 
@@ -1108,7 +1108,7 @@ ImGuiContext*   GImGui = NULL;
 #ifndef IMGUI_DISABLE_DEFAULT_ALLOCATORS
 static void*   MallocWrapper(size_t size, void* user_data)    { IM_UNUSED(user_data); return malloc(size); }
 static void    FreeWrapper(void* ptr, void* user_data)        { IM_UNUSED(user_data); free(ptr); }
-#else
+#else 
 static void*   MallocWrapper(size_t size, void* user_data)    { IM_UNUSED(user_data); IM_UNUSED(size); IM_ASSERT(0); return NULL; }
 static void    FreeWrapper(void* ptr, void* user_data)        { IM_UNUSED(user_data); IM_UNUSED(ptr); IM_ASSERT(0); }
 #endif
@@ -1217,7 +1217,7 @@ ImGuiIO::ImGuiIO()
     MouseDrawCursor = false;
 #ifdef __APPLE__
     ConfigMacOSXBehaviors = true;  // Set Mac OS X style defaults based on __APPLE__ compile time flag
-#else
+#else 
     ConfigMacOSXBehaviors = false;
 #endif
     ConfigInputTextCursorBlink = true;
@@ -1470,7 +1470,7 @@ int ImFormatStringV(char* buf, size_t buf_size, const char* fmt, va_list args)
 {
 #ifdef IMGUI_USE_STB_SPRINTF
     int w = stbsp_vsnprintf(buf, (int)buf_size, fmt, args);
-#else
+#else 
     int w = vsnprintf(buf, buf_size, fmt, args);
 #endif
     if (buf == NULL)
@@ -2161,7 +2161,7 @@ bool ImGuiTextFilter::PassFilter(const char* text, const char* text_end) const
 #ifndef va_copy
 #if defined(__GNUC__) || defined(__clang__)
 #define va_copy(dest, src) __builtin_va_copy(dest, src)
-#else
+#else 
 #define va_copy(dest, src) (dest = src)
 #endif
 #endif
@@ -7530,7 +7530,7 @@ static void ImGui::NavProcessItem(ImGuiWindow* window, const ImRect& nav_bb, con
         if (!g.NavMoveRequest)
             g.NavMoveDir = g.NavMoveDirLast;
         bool new_best = NavScoreItem(result, nav_bb) && g.NavMoveRequest;
-#else
+      #else
         bool new_best = g.NavMoveRequest && NavScoreItem(result, nav_bb);
 #endif
         if (new_best)
@@ -9461,7 +9461,7 @@ static void SettingsHandlerWindow_WriteAll(ImGuiContext* ctx, ImGuiSettingsHandl
 #endif
 #ifndef __MINGW32__
 #include <Windows.h>
-#else
+#else 
 #include <windows.h>
 #endif
 #endif
@@ -9516,7 +9516,7 @@ static void SetClipboardTextFn_DefaultImpl(void*, const char* text)
     ::CloseClipboard();
 }
 
-#else
+#else 
 
 // Local ImGui-only clipboard implementation, if user hasn't defined better clipboard handlers
 static const char* GetClipboardTextFn_DefaultImpl(void*)
@@ -9561,7 +9561,7 @@ static void ImeSetInputScreenPosFn_DefaultImpl(int x, int y)
         }
 }
 
-#else
+#else 
 
 static void ImeSetInputScreenPosFn_DefaultImpl(int, int) {}
 

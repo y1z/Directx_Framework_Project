@@ -11,7 +11,7 @@ cCamera::cCamera()
 #if DIRECTX
   m_trasfrom.matrix = glm::identity<glm::mat4x4>();
   this->updateCoords();
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -96,7 +96,7 @@ cCamera::calculateAndSetOrthographic(cWindow & window, float Far, float Near)
                                             m_near, m_far);
 
   m_projection.matrix = glm::transpose(m_projection.matrix);
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 
   this->isOrtho = true;
@@ -143,7 +143,7 @@ cCamera::updateCamera(cWindow & window)
                                               m_near, m_far);
 
     m_projection.matrix = glm::transpose(m_projection.matrix);
-  #else
+  #elif OPEN_GL
   #endif // DIRECTX
     this->isOrtho = true;
   }
@@ -169,7 +169,7 @@ cCamera::updateCoords()
                                               static_cast<glm::vec3>(m_front.vector3)));
 
   m_up.vector4 = glm::vec4(glm::normalize(glm::cross(m_front.vector3, m_right.vector3)), 0.0f);
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 }
 

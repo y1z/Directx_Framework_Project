@@ -40,7 +40,7 @@ Index of this file:
 #include <ctype.h>      // toupper
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
-#else
+#else 
 #include <stdint.h>     // intptr_t
 #endif
 
@@ -89,14 +89,14 @@ static const ImU32          IM_U32_MAX = UINT_MAX;   // (0xFFFFFFFF)
 #ifdef LLONG_MIN
 static const ImS64          IM_S64_MIN = LLONG_MIN;  // (-9223372036854775807ll - 1ll);
 static const ImS64          IM_S64_MAX = LLONG_MAX;  // (9223372036854775807ll);
-#else
+#else 
 static const ImS64          IM_S64_MIN = -9223372036854775807LL - 1;
 static const ImS64          IM_S64_MAX = 9223372036854775807LL;
 #endif
 static const ImU64          IM_U64_MIN = 0;
 #ifdef ULLONG_MAX
 static const ImU64          IM_U64_MAX = ULLONG_MAX; // (0xFFFFFFFFFFFFFFFFull);
-#else
+#else 
 static const ImU64          IM_U64_MAX = (2ULL * 9223372036854775807LL + 1);
 #endif
 
@@ -1560,7 +1560,7 @@ static const ImGuiDataTypeInfo GDataTypeInfo[] =
 #ifdef _MSC_VER
     { sizeof(ImS64),            "%I64d","%I64d" },  // ImGuiDataType_S64
     { sizeof(ImU64),            "%I64u","%I64u" },
-#else
+#else 
     { sizeof(ImS64),            "%lld", "%lld"  },  // ImGuiDataType_S64
     { sizeof(ImU64),            "%llu", "%llu"  },
 #endif
@@ -1586,7 +1586,7 @@ static const char* PatchFormatStringFloatToInt(const char* fmt)
         ImGuiContext& g = *GImGui;
         ImFormatString(g.TempBuffer, IM_ARRAYSIZE(g.TempBuffer), "%.*s%%d%s", (int)(fmt_start - fmt), fmt, fmt_end); // Honor leading and trailing decorations, but lose alignment/precision.
         return g.TempBuffer;
-#else
+# else
         IM_ASSERT(0 && "DragInt(): Invalid format string!"); // Old versions used a default parameter of "%.0f", please replace with e.g. "%d"
 #endif
     }

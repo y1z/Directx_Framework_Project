@@ -13,7 +13,7 @@ enum class Filter
   Anisotropic_Comperasion = D3D11_FILTER_COMPARISON_ANISOTROPIC,
   Anisotropic_Minimum = D3D11_FILTER_MINIMUM_ANISOTROPIC,
   Anisotropic_Maximum = D3D11_FILTER_MAXIMUM_ANISOTROPIC
-#else
+#elif OPEN_GL
   MinMagMip_Point ,
   MinMagMip_Point_Linear, 
   MinMagMip_Linear_Mip_Point, 

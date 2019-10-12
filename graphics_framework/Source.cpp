@@ -83,6 +83,7 @@ Timer my_timer;
 /*****************************************************/
 cWindow my_window;
 cCamera my_camera;
+std::unique_ptr <cActor>my_actor = std::make_unique<cActor>();
 std::unique_ptr<cCameraManager>my_cameraManager = std::make_unique<cCameraManager>();
 /**********************************************************/
 cApiComponents my_apiComponent;
@@ -145,7 +146,6 @@ wWinMain(HINSTANCE hInstance,
     freopen("CONOUT$", "w", stdout);
     std::cout << "This works" << std::endl;
   }
-
 
   my_gui.setOpenFileFunction(helper::openFile);
 
@@ -752,7 +752,12 @@ void Render()
 #endif // !MODEL_LOAD
   my_timer.EndTiming();
   float deltaTime = my_timer.GetResultSeconds();
-  my_gui.FpsCountWindow("Data", deltaTime);
+  my_gui.beginFrame("Data");
+  my_gui.FpsCountWindow(deltaTime);
+  my_gui.beginChildWithItemCount("count ", "Meshes", my_model.getMeshCount());
+
+  my_gui.endAllChildren();
+  my_gui.endFrame();
   // Present our back buffer to our front buffer
 
   // returns a boolean value 

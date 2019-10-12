@@ -16,7 +16,7 @@ cMesh::cMesh()
 #if DIRECTX
  //dx::XMVECTOR defualtPos = dx::XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f);
  // m_transform.matrix = dx::XMMatrixTranslationFromVector(defualtPos);
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -96,7 +96,7 @@ void cMesh::setTransform(const sMatrix4x4 & newTransform)
 {
 #if DIRECTX
 //  m_transform = newTransform;
-#else
+#elif OPEN_GL
 #endif // DIRECTX
 
 }

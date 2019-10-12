@@ -502,7 +502,7 @@ int main(int arg, char **argv)
 
 #ifdef STBTT_STATIC
 #define STBTT_DEF static
-#else
+#else 
 #define STBTT_DEF extern
 #endif
 
@@ -1104,7 +1104,7 @@ typedef int stbtt__test_oversample_pow2[(STBTT_MAX_OVERSAMPLE & (STBTT_MAX_OVERS
 
 #ifdef _MSC_VER
 #define STBTT__NOTUSED(v)  (void)(v)
-#else
+#else 
 #define STBTT__NOTUSED(v)  (void)sizeof(v)
 #endif
 
@@ -2730,7 +2730,7 @@ typedef struct stbtt__active_edge
    float direction;
    float sy;
    float ey;
-   #else
+   #else 
    #error "Unrecognized value of STBTT_RASTERIZER_VERSION"
    #endif
 } stbtt__active_edge;
@@ -2779,7 +2779,7 @@ static stbtt__active_edge *stbtt__new_active(stbtt__hheap *hh, stbtt__edge *e, i
    z->next = 0;
    return z;
 }
-#else
+#else 
 #error "Unrecognized value of STBTT_RASTERIZER_VERSION"
 #endif
 
@@ -3230,7 +3230,7 @@ static void stbtt__rasterize_sorted_edges(stbtt__bitmap *result, stbtt__edge *e,
    if (scanline != scanline_data)
       STBTT_free(scanline, userdata);
 }
-#else
+#else 
 #error "Unrecognized value of STBTT_RASTERIZER_VERSION"
 #endif
 
@@ -3336,7 +3336,7 @@ static void stbtt__rasterize(stbtt__bitmap *result, stbtt__point *pts, int *wcou
    int vsubsample = result->h < 8 ? 15 : 5;
 #elif STBTT_RASTERIZER_VERSION == 2
    int vsubsample = 1;
-#else
+#else  
    #error "Unrecognized value of STBTT_RASTERIZER_VERSION"
 #endif
    // vsubsample should divide 255 evenly; otherwise we won't reach full opacity

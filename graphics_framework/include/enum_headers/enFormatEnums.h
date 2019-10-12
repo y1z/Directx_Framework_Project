@@ -19,7 +19,7 @@ enum Formats
   fR32G32B32A32 = DXGI_FORMAT_R32G32B32A32_FLOAT,
 /* other */
   depthStencil_format= DXGI_FORMAT_D24_UNORM_S8_UINT
-#else//TODO : GL
+#elif OPEN_GL//TODO : GL
   /* one channel */
   R16,
   fR16,
