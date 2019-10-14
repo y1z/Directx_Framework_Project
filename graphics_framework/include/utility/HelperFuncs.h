@@ -20,6 +20,7 @@ struct sTextureDescriptor;
 
 namespace helper
 {
+
   /*! Create and unite the swap-chain device */
   bool
     CreateDeviceAndSwapchain(cDevice &device, cDeviceContext &deviceContext,
@@ -30,9 +31,11 @@ namespace helper
   bool
     CompileShader(const wchar_t *FileName, const char*shaderModel,
                   const char*entryPoint, cShaderBase &shader);
+
   /*!converts radians to degrees*/
   float
     radiansToDegrees(float radians);
+
   /*!converts degrees to radians*/
   float
     degreesToRadians(float degrees);
@@ -42,9 +45,11 @@ namespace helper
 
   [[nodiscard]]std::string
     openFile(cWindow handel);
+
   /*! return a pointer to a model if the actor happens to have one */
   [[nodiscard]] cModel* 
     findModelComponent(cActor &actor);
+
 /*! take care of operation that uses a key press and the camera */
   void
     handelCameraKeyInput(const uint8 pressedKey, cCameraManager &currentCamera, 

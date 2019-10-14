@@ -1,11 +1,15 @@
 #pragma once 
 #include "utility/Grafics_libs.h"
 #include "utility/enDefs.h"
+#include "utility/CustomStructs.h"
 #include <string>
 
 class cDevice;
 class cDeviceContext;
 class cWindow;
+
+struct sColorf;
+
 
 class imGuiManager
 {
@@ -19,19 +23,22 @@ public:
 	/*! init the imgui library*/
 	bool 
     Init(cDevice &Device, cDeviceContext &DeviceContext, HWND Handle);
+
   /*! set a function pointer to a function that 
   opens file explorer 
   \param [in] openFileFunc the function that open file explorer*/
   void 
     setOpenFileFunction(ptr_FileOpenFunc openFileFunc);
+
 /*! calculates and displays the average fps 
 \param [in] DeltaTime it's how much time it took to render a frame */
   void 
-    FpsCountWindow(float DeltaTime);
+    beginChildWithFpsCount(float DeltaTime);
   
   void
     MenuForOpenFile(cWindow &window, std::string &PathOfFile, bool &used);
 
+  /*! calls the open file function pointer */
 std::string 
     OpenFileFunc(cWindow & window);
 
@@ -43,11 +50,25 @@ std::string
   \param [in] itemName this is the name the user give the item 
   \param [in] itemCount how many instances of a certain item exist*/
   void
-    beginChildWithItemCount(const char* childId,std::string_view itemName,uint32 itemCount );
+    addItemCountToChild(const char* childId,std::string_view itemName,uint32 itemCount );
+
+  /*! just add a text to the current frame/child */
+  void
+    addText(std::string_view message, sColorf TextColor = {1.0f,1.0f,1.0f,1.0f});
+
+  /*! add a slider that uses a float to control it
+  \param Value [in] [out] this is value that the value represent
+  \param lowerRange [in] */
+  void 
+    addSliderFloat(std::string_view NameOfValue,float &Value, float lowerRange = 0.0f, float upperRange = 1.0f); 
+  /*! just creates a child for imGui, other methods add functionality*/
+  void 
+    beginChild(const char* childID); 
 
   /*! remove all children made by imGuiManager*/
   void
     endAllChildren();
+
   //! end and renders the frame 
   void
     endFrame();

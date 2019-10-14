@@ -25,24 +25,33 @@ public:
   cModel(std::string_view  strView);
   ~cModel() = default;
 public:
+
   //! this function it where we load the file from
   bool 
     LoadModelFromFile(cDevice &device);
+
   /*! this functions draws all the meshes to the back buffer */
   void
     DrawMeshes(cDeviceContext &deviceContext, std::vector<cConstBuffer *> &buffers, const sColorf &color = {0.0f,0.0f,0.7f,1.0f});
+
   //! this is to set the path to a  
   void 
     setModelPath(const std::string_view modelPath);
+
   //! this is to set a path to a material 
   void
     setMaterialPath(const std::string_view MaterialPath);
 
+  /*! returns the total number of mesh the model has */
   std::size_t 
     getMeshCount() const;
-
+  /*! returns the number of vertex the model is composed of. */
+  std::size_t 
+    getVertexCount()const;
+  /*! returns a pointer to a that the model contains */
   [[nodiscard]]const cMesh*
     getMesh(std::size_t index) const ;
+
 public:// baseComponent functions 
   //! make sure the component is ready 
   bool 
@@ -55,7 +64,7 @@ public:// baseComponent functions
     Draw(cDeviceContext &devContext, std::vector<cConstBuffer *>&buffers)override;
 
   void
-    update(cDeviceContext &deviceContext) override;
+    update(cDeviceContext &deviceContext, const sMatrix4x4 &Transform ) override;
 
   void 
     Destroy() override;
@@ -86,7 +95,7 @@ private:
   std::string m_modelPath;
   //! paths to materials (TODO: Replace with std::filesystem::path)
   std::vector<std::string> m_materialPaths;
-  //! 
-  glm::mat4x4 m_transform;
+  //! this keeps track 
+  sMatrix4x4 m_transform;
 };
 

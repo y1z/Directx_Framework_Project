@@ -13,7 +13,7 @@ struct sVertexPosTex
 
 struct sMatrix4x4
 {
-  glm::mat4x4 matrix;
+  glm::mat4x4 matrix{1.0f};
 };
 
 struct sVector4
@@ -24,15 +24,6 @@ struct sVector4
 struct sVector3
 {
   glm::vec3 vector3;
-};
-
-struct sFloat4
-{
-#if DIRECTX
-  dx::XMFLOAT4 vector4;
-#elif OPEN_GL 
-  glm::vec4 vector4;
-#endif // DIRECTX
 };
 
 struct sColorf

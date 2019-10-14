@@ -33,8 +33,8 @@ auto comparePaths = [](std::vector<std::string>& alreadyFoundPaths, const char* 
 
 cModel::cModel()
 // init the identity matrix 
-  :m_transform(1.0f)
 {
+  m_transform.matrix = glm::identity<glm::mat4>();
   setComponentType(componentTypes::Model);
 }
 
@@ -77,8 +77,8 @@ cModel::LoadModelFromFile(cDevice &device)
 
 }
 
-void 
-cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &buffers,const sColorf &color)
+void
+cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &buffers, const sColorf &color)
 {
   GlChangeEveryFrame Cb;
   //m_meshes[2].setTopology(Topology::LineList);
@@ -86,7 +86,7 @@ cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &
 
   for (cMesh &mesh : m_meshes)
   {
-    glm::mat4 Transform(Identidad * this->m_transform );
+    glm::mat4 Transform(Identidad * this->m_transform.matrix);
     mesh.setTransform(Transform);
     deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), Formats::R16);
     deviceContext.IASetVertexBuffers(&mesh.getVertexBuffer(), 1);
@@ -121,6 +121,18 @@ cModel::getMeshCount() const
   return m_meshes.size();
 }
 
+std::size_t 
+cModel::getVertexCount() const
+{
+  std::size_t Result(0);
+  for (const cMesh & mesh : m_meshes)
+  {
+    Result += mesh.getVertexData()->size();
+  }
+
+  return  Result;
+}
+
 const cMesh *
 cModel::getMesh(std::size_t index) const
 {
@@ -149,9 +161,9 @@ cModel::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*> &buffers)
   DrawMeshes(devContext, buffers);
 }
 
-void cModel::update(cDeviceContext & deviceContext)
+void cModel::update(cDeviceContext & deviceContext, const sMatrix4x4 &Transform )
 {
-
+  m_transform = Transform;
 }
 
 void
@@ -321,11 +333,11 @@ void cModel::ExtractTexture(const char * texturePath, cMesh & AfectedMesh, cDevi
 void
 cModel::setTransform(glm::mat4 & matrix)
 {
-  m_transform = matrix;
+  m_transform.matrix = matrix;
 }
 
 glm::mat4
 cModel::getTransform() const
 {
-  return  this->m_transform;
+  return this->m_transform.matrix;
 }

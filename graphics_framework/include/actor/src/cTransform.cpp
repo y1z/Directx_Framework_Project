@@ -4,61 +4,102 @@
 #include "../include/cConstBuffer.h"
 #include "glm/matrix.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/matrix_access.hpp"
 
 cTransform::cTransform()
-  :m_transformMatrix(1.0f)
 {
   setReady(true);
   setComponentType(componentTypes::Transform);
 }
 
-void 
+void
 cTransform::moveTransform(float x, float y, float z, float w)
 {
   glm::vec3 moveVector(x, y, z);
-  m_transformMatrix = glm::translate(m_transformMatrix, moveVector);
+  m_transformMatrix.matrix = glm::translate(m_transformMatrix.matrix, moveVector);
 }
 
 void
 cTransform::rotateInXAxis(float AngleInDegrees)
 {
-  m_transformMatrix = glm::rotate(m_transformMatrix, AngleInDegrees, glm::vec3(AngleInDegrees, 0.0f, 0.0f));
+  m_transformMatrix.matrix = glm::rotate(m_transformMatrix.matrix, glm::radians(AngleInDegrees), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void
 cTransform::rotateInYAxis(float AngleInDegrees)
 {
-  m_transformMatrix = glm::rotate(m_transformMatrix, AngleInDegrees, glm::vec3(0.0f, AngleInDegrees, 0.0f));
+  m_transformMatrix.matrix = glm::rotate(m_transformMatrix.matrix, glm::radians(AngleInDegrees), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void
-cTransform::rotateInZAxis(float AngleInDgrees)
+cTransform::rotateInZAxis(float AngleInDegrees)
 {
-  m_transformMatrix = glm::rotate(m_transformMatrix, AngleInDgrees, glm::vec3(0.0f, 0.0f, AngleInDgrees));
+  m_transformMatrix.matrix = glm::rotate(m_transformMatrix.matrix, glm::radians(AngleInDegrees), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
-void 
+void
 cTransform::resetToIdentity()
 {
-  m_transformMatrix = glm::mat4(1.0f);
+  m_transformMatrix.matrix = glm::mat4(1.0f);
 }
 
-void 
+void
 cTransform::shearTransformInXAxis(float shearingAmount)
 {
-  glm::mat4 reflec(1.0f);
-  reflec[1][0] = shearingAmount;
-  m_transformMatrix = reflec;
+  glm::mat4 shearMatrix(1.0f);
+  glm::vec4 ShearingVec(1.0f, shearingAmount, 0.0f, 0.0f);
+  shearMatrix = glm::column(shearMatrix, 0, ShearingVec);
+  m_transformMatrix.matrix *= shearMatrix;
+}
+
+void cTransform::shearTransformInYAxis(float shearingAmount)
+{
+  glm::mat4 shearMatrix(1.0f);
+  glm::vec4 ShearingVec(0.0f, 1.0f, shearingAmount, 0.0f);
+  shearMatrix = glm::column(shearMatrix, 1, ShearingVec);
+  m_transformMatrix.matrix *= shearMatrix;
+}
+
+void cTransform::shearTransformInZAxis(float shearingAmount)
+{
+  glm::mat4 shearMatrix(1.0f);
+  glm::vec4 ShearingVec(0.0f, shearingAmount, 1.0f, 0.0f);
+  shearMatrix = glm::column(shearMatrix, 2, ShearingVec);
+  m_transformMatrix.matrix *= shearMatrix;
+}
+
+void cTransform::reflectTransfromInXAxis(float Amount)
+{
+  glm::vec4 reflectionColum(-Amount, 0.0f, 0.0f, 0.0f);
+  m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 0, reflectionColum);
+}
+
+void cTransform::reflectTransfromInYAxis(float Amount)
+{
+  glm::vec4 reflectionColum(0.0f, -Amount, 0.0f, 0.0f);
+  m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 1, reflectionColum);
+}
+
+void cTransform::reflectTransfromInZAxis(float Amount)
+{
+  glm::vec4 reflectionColum(0.0f, 0.0f, -Amount, 0.0f);
+  m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 2, reflectionColum);
+}
+
+sMatrix4x4
+cTransform::getMatrix() const
+{
+  return  m_transformMatrix;
 }
 
 //! checks if the component is ready
-bool 
+bool
 cTransform::isReady() const
 {
   return this->m_Ready;
 }
 
-void 
+void
 cTransform::Init(cDevice & device, cDeviceContext & deviceContext)
 {
   //foo 
@@ -67,7 +108,7 @@ cTransform::Init(cDevice & device, cDeviceContext & deviceContext)
 void cTransform::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*>& constBuffers)
 {}
 
-void cTransform::update(cDeviceContext & deviceContext)
+void cTransform::update(cDeviceContext & deviceContext, const sMatrix4x4 &Transform)
 {
 
 }

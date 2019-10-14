@@ -56,12 +56,19 @@ cDeviceContext::getDeviceContextRef()
   return &mptr_deviceContext;
 }
 
-void
-cDeviceContext::ClearState()
-{ mptr_deviceContext->ClearState(); }
+#elif OPEN_GL
 
 #endif // DIRECTX
 
+void
+cDeviceContext::ClearState()
+{
+#if DIRECTX
+  mptr_deviceContext->ClearState();
+#elif OPEN_GL
+
+#endif // DIRECTX
+}
 void
 cDeviceContext::OMSetRenderTargets(cRenderTargetView renderTargetsViews[],
                                    cDepthStencilView &depthStencilViews,
@@ -84,6 +91,7 @@ cDeviceContext::OMSetRenderTargets(cRenderTargetView renderTargetsViews[],
   {
     assert(("Error two many render targets", numRenderTargets <= c_MaxRenderTargets));
   }
+#elif OPEN_GL
 #endif // DIRECTX
 
 }
@@ -105,6 +113,7 @@ cDeviceContext::RSSetViewports(cViewport viewports[], uint8_t numViewports)
   {
     assert(("Error too many view-ports"&& numViewports <= c_MaxViewPorts));
   }
+#elif OPEN_GL 
 #endif // DIRECTX
 
 }
@@ -114,6 +123,7 @@ cDeviceContext::IASetInputLayout(cInputLayout & inputLayout)
 {
 #if DIRECTX
   mptr_deviceContext->IASetInputLayout(inputLayout.getInputLayout());
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -125,8 +135,8 @@ cDeviceContext::IASetVertexBuffers(cVertexBuffer vertexBuffer[], uint32_t numBuf
   if (numBuffers <= c_MaxVertexBuffers)
   {
     ID3D11Buffer *BufferTempPtrArr[c_MaxVertexBuffers];
-    UINT strides[c_MaxVertexBuffers];
-    UINT offSets[c_MaxVertexBuffers]{0}; // use later 
+    uint32_t strides[c_MaxVertexBuffers];
+    uint32_t offSets[c_MaxVertexBuffers]{0}; // use later 
     for (uint32_t i = 0; i < numBuffers; ++i)
     {
       BufferTempPtrArr[i] = vertexBuffer[i].getBuffer();
@@ -141,6 +151,7 @@ cDeviceContext::IASetVertexBuffers(cVertexBuffer vertexBuffer[], uint32_t numBuf
     assert(("Error too many vertex buffer ", numBuffers <= c_MaxVertexBuffers));
   }
 
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -148,6 +159,7 @@ void cDeviceContext::IASetIndexBuffer(cIndexBuffer & indexBuffer, int Format, in
 {
 #if DIRECTX
   mptr_deviceContext->IASetIndexBuffer(indexBuffer.getBuffer(), static_cast<DXGI_FORMAT>(Format), offSet);
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -155,6 +167,7 @@ void cDeviceContext::IASetPrimitiveTopology(int Topology)
 {
 #if DIRECTX
   mptr_deviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(Topology));
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -162,7 +175,7 @@ void cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfDa
 {
 #if DIRECTX
   mptr_deviceContext->UpdateSubresource(Buffer->getBuffer(), 0, nullptr, originOfData, 0, 0);
-
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -179,7 +192,7 @@ void cDeviceContext::ClearRenderTargetView(cRenderTargetView & renderTargetView,
   {
     mptr_deviceContext->ClearRenderTargetView(renderTargetView.getRenderTragetView(), color);
   }
-
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -195,7 +208,7 @@ void cDeviceContext::ClearDepthStencilView(cDepthStencilView & depthStencilView,
 
   mptr_deviceContext->ClearDepthStencilView(depthStencilView.getDepthStencilView(), clearFlags,
                                             DepthClearValue, StencilClearValues);
-
+#elif OPEN_GL
 #endif // DIRECTX
 }
 
@@ -204,6 +217,8 @@ void cDeviceContext::VSSetShader(cVertexShader & vertexShader)
 #if DIRECTX
   mptr_deviceContext->VSSetShader(vertexShader.getVertexShader(), nullptr,
                                   0);
+#elif OPEN_GL
+
 #endif // DIRECTX
 }
 
@@ -219,6 +234,7 @@ void cDeviceContext::VSSetConstantBuffers(cConstBuffer & Buffer, uint8_t Slot)
   {
     assert("Error used too many slot " && Slot <= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - 1);
   }
+#elif OPEN_GL
 #endif // DIRECTX
 
 }
@@ -227,6 +243,8 @@ void cDeviceContext::PSSetShader(cPixelShader & pixelShader)
 {
 #if DIRECTX
   mptr_deviceContext->PSSetShader(pixelShader.getPixelShader(), nullptr, 0);
+#elif OPEN_GL
+
 #endif // DIRECTX
 }
 
@@ -253,6 +271,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
   {
     assert(("Error asking for too many slots", Slots <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1));
   }
+#elif OPEN_GL
 
 #endif // DIRECTX
 }
@@ -261,6 +280,7 @@ void cDeviceContext::PSSetShaderResources(cMesh & ShaderResources, uint32_t Slot
 {
 #if DIRECTX
   mptr_deviceContext->PSSetShaderResources(Slot, 1, ShaderResources.getResourceRef());
+#elif OPEN_GL
 
 #endif // DIRECTX
 }
@@ -278,6 +298,7 @@ void cDeviceContext::PSSetConstantBuffers(cConstBuffer & Buffer, uint32_t Slots)
   {
     assert(("Error setting PSSetConstantBuffer ", Slots <= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - 1));
   }
+#elif OPEN_GL
 
 #endif // DIRECTX
 }
@@ -299,6 +320,8 @@ void cDeviceContext::PSSetSamplers(cSampler samplers[], uint32_t numSamplers, ui
   {
     assert(("Error setting Sampler PSSetSamplers", slot <= D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT - 1));
   }
+#elif OPEN_GL
+
 #endif // DIRECTX
 }
 
@@ -306,7 +329,7 @@ void cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset, unsi
 {
 #if DIRECTX
   mptr_deviceContext->DrawIndexed(indexCount, 0, 0);
+#elif OPEN_GL
 #endif // DIRECTX
 }
-
 

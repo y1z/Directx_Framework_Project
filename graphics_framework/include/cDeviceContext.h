@@ -39,12 +39,14 @@ public:// functions
   //! for function that need 2 pointers to pointers 
   ID3D11DeviceContext **
     getDeviceContextRef();
+#endif // DIRECTX
+
   //! resets all things set by device context to default settings 
   void
     ClearState();
-#endif // DIRECTX
+
   /*! set render-targets and can set multiple render-targets
-      \param renderTragetsViews [out] the set render-targets
+      \param renderTragetsViews [out] the render-targets to be set 
       \param  depthStencilView [out] the set depth-stencil view(note there can only be 1)
       \param numRenderTargets [in] to tell how many render target there are */
   void

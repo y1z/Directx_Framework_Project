@@ -81,22 +81,6 @@ imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, HWND Handle
   return isSuccesful;
 }
 
-//bool imGuiManager::Init(CWindow & Window)
-//{
-//	bool isSuccesful = false;
-//	isSuccesful = IMGUI_CHECKVERSION();
-//	ImGui::CreateContext();
-//	ImGuiIO& GuiIo = ImGui::GetIO(); 
-//	// check for possible error 
-//#ifdef USING_OPEN_GL
-//	isSuccesful = ImGui_ImplGlfw_InitForOpenGL(Window.GetHandler(), true);
-//	isSuccesful = ImGui_ImplOpenGL3_Init(GlslVersion);
-//#endif // USING_DIRECTX
-//	ImGui::StyleColorsDark();
-//
-//	return isSuccesful;
-//}
-
 void
 imGuiManager::setOpenFileFunction(ptr_FileOpenFunc openFileFunc)
 {
@@ -105,15 +89,15 @@ imGuiManager::setOpenFileFunction(ptr_FileOpenFunc openFileFunc)
 
 
 void
-imGuiManager::FpsCountWindow(float DeltaTime)
+imGuiManager::beginChildWithFpsCount(float DeltaTime)
 {
   m_childCount++;
   float averageFps = this->calculateAverageFPS(DeltaTime);
-  std::string fpsMassage("FPS : ");
-  fpsMassage += std::to_string(averageFps);
+  std::string fpsMassage("Average FPS :%f ");
+  //fpsMassage += std::to_string(averageFps);
 
-  ImGui::BeginChild("FPS", ImVec2(300, 50));
-  ImGui::Text(fpsMassage.c_str());
+  ImGui::BeginChild("FPS", ImVec2(420, 130));
+  ImGui::Text(fpsMassage.c_str(), averageFps);
 
 }
 
@@ -170,14 +154,42 @@ imGuiManager::beginFrame(const char * windowName)
 }
 
 void 
-imGuiManager::beginChildWithItemCount(const char* childId, std::string_view itemName, uint32 itemCount) {
-  m_childCount++;
-  ig::BeginChild(childId, ImVec2(200, 200));
-  ig::Text(itemName.data());
-  ig::TextColored(ImVec4(0.98, 0.88, 0.20, 1.0f), "Count = %d ", itemCount);
+imGuiManager::addItemCountToChild(const char* childId, std::string_view itemName, uint32 itemCount) {
+
+  static std::string messageStr = "Item Name : ";
+ // get the data in the string view 
+  messageStr += itemName.data();
+  ig::Text(messageStr.c_str());
+
+  messageStr = "Item Count =  %d";
+
+  ig::TextColored(ImVec4(0.98, 0.88, 0.20, 1.0f), messageStr.c_str() , itemCount);
+  // reset the static string 
+  messageStr = "Item Name : ";
+
 }
 
-void imGuiManager::endAllChildren()
+void 
+imGuiManager::addText(std::string_view message,sColorf TextColor)
+{
+  ig::TextColored(ImVec4(TextColor.red, TextColor.green, TextColor.blue, TextColor.alpha),message.data());
+
+}
+
+void imGuiManager::addSliderFloat(std::string_view NameOfValue,float & Value, float lowerRange, float upperRange)
+{
+  ig::SliderFloat(NameOfValue.data(), &Value, lowerRange, upperRange);
+}
+
+void
+imGuiManager::beginChild(const char * childID)
+{
+  m_childCount++;
+  ig::BeginChild(childID);
+}
+
+void 
+imGuiManager::endAllChildren()
 {
   for (uint32 i = 0; i < m_childCount; ++i)
   {
@@ -195,7 +207,7 @@ imGuiManager::endFrame()
 
 #ifdef DIRECTX
   ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-#elif USING_OPEN_GL
+#elif OPEN_GL
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif // USING_DIRECTX
 }

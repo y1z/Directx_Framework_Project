@@ -77,7 +77,7 @@ cSampler my_sampler;
 cViewport my_viewport;
 cShaderResourceView my_shaderResourceView;
 cSwapChain my_swapChain;
-cModel my_model;
+cModel* my_modelPtr = new cModel();
 imGuiManager my_gui;
 Timer my_timer;
 /*****************************************************/
@@ -109,14 +109,18 @@ sMatrix4x4 g_Projection;
 bool g_isInit(false);
 //! this is the path local to the solution of the program
 const std::filesystem::path g_initPath = std::filesystem::current_path();
-sFloat4 g_vMeshColor;
+sColorf g_vMeshColor;
 
-float g_Shearing = 1.0f;
+float g_TransfromAmount = 1.0f;
 //--------------------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------------------
 
 HRESULT InitDevice();
+/*!this function only exits so i can keep track of when i destroy all obj in
+ the actor */
+void DestroyAllComponentsFromActor(cActor &actor);
+
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 std::string ModelSelectMenu(cWindow &window);
 void Render();
@@ -128,18 +132,24 @@ wWinMain(HINSTANCE hInstance,
          int       nCmdShow)
 {
   HRESULT hr = S_FALSE;
-  g_vMeshColor.vector4 = {0.7f, 0.7f, 0.7f, 1.0f};
+  g_vMeshColor = {0.7f, 0.7f, 0.7f, 1.0f};
   // alternate way to get an HINSTANCE  
   /* initialized for loading textures */
 #if DIRECTX
+
+  /*Initializes the COM library
+  this is so I can load images for directX */
   hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
   if (FAILED(hr))
   { return -1; }
+#elif OPEN_GL
 
 #endif // DIRECTX
+
   /*init's the window*/
   if (!my_window.init(WndProc, hInstance))
   { return -1; }
+
   /**init a console **/
   if (AllocConsole())
   {
@@ -149,7 +159,12 @@ wWinMain(HINSTANCE hInstance,
 
   my_gui.setOpenFileFunction(helper::openFile);
 
-  my_model.setModelPath(ModelSelectMenu(my_window));
+  //  my_modelPtr->setModelPath(ModelSelectMenu(my_window));
+
+  cModel *ptr_model = new cModel();
+
+  /* the actor now owns the model */
+  my_actor->AddComponents(ptr_model);
 
   if (FAILED(InitDevice()))
   {
@@ -169,27 +184,31 @@ wWinMain(HINSTANCE hInstance,
       Render();
     }
   }
+
   /****free the console *****/
   FreeConsole();
+
+  /********remove all component from my actor **********/
+  DestroyAllComponentsFromActor(*my_actor);
+  my_actor.release();
 #if DIRECTX
-  /* */
+  /*Uninitialized the comm library*/
   CoUninitialize();
 #endif // DIRECTX
   return (int) msg.wParam;
 }
 
-
-
 //--------------------------------------------------------------------------------------
 // Create Direct3D device and swap chain
 //--------------------------------------------------------------------------------------
-HRESULT InitDevice()
+HRESULT
+InitDevice()
 {
   helper::CreateDeviceAndSwapchain(my_device, my_deviceContext,
                                    my_swapChain, my_window,
                                    my_apiComponent);
 
-  HRESULT hr = S_OK;
+  HRESULT hr = S_FALSE;
   bool isSuccesful = true;
   //
   RECT rc;
@@ -247,9 +266,11 @@ HRESULT InitDevice()
   // Compile the vertex shader
   if (isSuccesful == false)
   {
+  #if WIND_OS
     MessageBox(NULL,
                L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
     return hr;
+  #endif // WIND_OS
   }
 
   // Create the vertex shader
@@ -257,10 +278,12 @@ HRESULT InitDevice()
   assert(isSuccesful == true && "Error creating vertex shader");
 
   isSuccesful = my_vertexInputLayout.ReadShaderData(my_vertexShader);
+  assert(isSuccesful == true && "Error reading the vertex-shader data");
 
   // Create the input layout
   isSuccesful = my_device.CreateInputLayout(my_vertexInputLayout,
                                             my_vertexShader);
+
   assert(isSuccesful == true && "Error creating Input layout ");
   //hr = g_pd3dDevice->CreateInputLayout(layout,
   //                                     numElements,
@@ -276,9 +299,11 @@ HRESULT InitDevice()
 
   if (isSuccesful == false)
   {
+  #if WIND_OS
     MessageBox(NULL,
                L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
     return hr;
+  #endif // WIND_OS
   }
 
   // Create the pixel shader
@@ -338,6 +363,7 @@ HRESULT InitDevice()
   UINT stride = sizeof(SimpleVertex);
   UINT offset = 0;
   my_deviceContext.IASetVertexBuffers(&my_vertexBuffer, 1);
+
   //g_pImmediateContext->IASetVertexBuffers(0,
   //                                        1,
   //                                        my_vertexBuffer.getBufferRef(),
@@ -389,13 +415,16 @@ HRESULT InitDevice()
   const char *ModelPath = "resources/media/3d models/obj/drakefire_pistol_low.obj";
   const char *TexPath = "resources/media/3d models/textures/drakefire_tex/base_albedo.jpg";
 
-  isSuccesful = my_model.LoadModelFromFile(my_device);
+  cModel* ptr_toModel = helper::findModelComponent(*my_actor);
+  assert(ptr_toModel != nullptr && "Error component 'model' does NOT exist in current actor");
+
+  ptr_toModel->setModelPath(ModelSelectMenu(my_window));
+  isSuccesful = ptr_toModel->LoadModelFromFile(my_device);
   assert(("Error with loading model file" && isSuccesful == true));
+
 #endif // !MODEL_LOAD
 
   // Set primitive topology
-  //my_deviceContext.IASetPrimitiveTopology(static_cast<int>(Topology::PointList));//equivalent to D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-  // Create the constant buffers
   my_constNeverChanges.setDescription(sizeof(GlViewMatrix),
                                       1,
                                       0);
@@ -413,11 +442,6 @@ HRESULT InitDevice()
 
   isSuccesful = my_device.CreateConstBuffer(my_constChangeOnResize);
   assert(isSuccesful == true && "Error Creating constant buffer");
-
-  //bd.ByteWidth = sizeof(CBChangeOnResize);
-  //hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangeOnResize);
-  //if (FAILED(hr))
-  //return hr;
 
   my_constChangesEveryFrame.setDescription(sizeof(GlChangeEveryFrame),
                                            1,
@@ -499,8 +523,11 @@ HRESULT InitDevice()
   return S_OK;
 }
 
-
-
+void
+DestroyAllComponentsFromActor(cActor & actor)
+{
+  actor.DestroyAllComponents();
+}
 
 //--------------------------------------------------------------------------------------
 // Called every time the application receives a message
@@ -524,7 +551,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   POINT centerPoint;
   centerPoint.x = (rect.right - rect.left) * 0.5f;
   centerPoint.y = (rect.bottom - rect.top) * 0.5f;
+
   //SetCapture(my_window.getHandle());
+  /*this helps select the axis for the transforms*/
+  static uint8 chosenAxis{0};
 
   if (message == WM_PAINT)
   {
@@ -568,16 +598,118 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                  my_window, my_deviceContext,
                                  &my_constNeverChanges, &my_constChangeOnResize);
 
+    if (wParam == (WPARAM)'R')
+    {
+      my_actor->m_transform.resetToIdentity();
+    }
+
+    if (wParam == (WPARAM)'X')
+    {
+      chosenAxis = 0;
+    }
+    if (wParam == (WPARAM)'Y')
+    {
+      chosenAxis = 1;
+    }
+    if (wParam == (WPARAM)'Z')
+    {
+      chosenAxis = 2;
+    }
+    else if (wParam == VK_RIGHT)
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          my_actor->m_transform.rotateInXAxis(g_TransfromAmount);
+          break;
+
+        case 1:
+          my_actor->m_transform.rotateInYAxis(g_TransfromAmount);
+          break;
+
+        case 2:
+          my_actor->m_transform.rotateInZAxis(g_TransfromAmount);
+          break;
+      }
+    }
+    else if (wParam == VK_LEFT)
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          my_actor->m_transform.rotateInXAxis(-g_TransfromAmount);
+          break;
+        case 1:
+          my_actor->m_transform.rotateInYAxis(-g_TransfromAmount);
+          break;
+        case 2:
+          my_actor->m_transform.rotateInZAxis(-g_TransfromAmount);
+          break;
+      }
+    }
     if (wParam == (WPARAM)'U')
     {
-      g_Shearing--;
-
+      switch (chosenAxis)
+      {
+        case 0:
+          my_actor->m_transform.shearTransformInXAxis(g_TransfromAmount);
+          break;
+        case 1:
+          my_actor->m_transform.shearTransformInYAxis(g_TransfromAmount);
+          break;
+        case 2:
+          my_actor->m_transform.shearTransformInZAxis(g_TransfromAmount);
+          break;
+      }
     }
-    if (wParam == (WPARAM)'I')
+
+    else if (wParam == (WPARAM)'I')
     {
-      g_Shearing++;
+      switch (chosenAxis)
+      {
+        case 0:
+          my_actor->m_transform.shearTransformInXAxis(-g_TransfromAmount);
+          break;
+        case 1:
+          my_actor->m_transform.shearTransformInYAxis(-g_TransfromAmount);
+          break;
+        case 2:
+          my_actor->m_transform.shearTransformInZAxis(-g_TransfromAmount);
+          break;
+      }
     }
 
+    else if (wParam == (WPARAM)'O')
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          my_actor->m_transform.reflectTransfromInXAxis(g_TransfromAmount);
+          break;
+        case 1:
+          my_actor->m_transform.reflectTransfromInYAxis(g_TransfromAmount);
+          break;
+        case 2:
+          my_actor->m_transform.reflectTransfromInZAxis(g_TransfromAmount);
+          break;
+      }
+    }
+
+    if (wParam == (WPARAM)'P')
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          my_actor->m_transform.reflectTransfromInXAxis(-g_TransfromAmount);
+          break;
+        case 1:
+          my_actor->m_transform.reflectTransfromInYAxis(-g_TransfromAmount);
+          break;
+        case 2:
+          my_actor->m_transform.reflectTransfromInZAxis(-g_TransfromAmount);
+          break;
+      }
+    }
   }
   if (message == WM_MOUSEMOVE && g_isInit)
   {
@@ -589,7 +721,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       GetCursorPos(&newPoint);
 
       sVector3 newVector;
-      newVector.vector3 = glm::vec3(newPoint.x,  newPoint.y, 0.0f);
+      newVector.vector3 = glm::vec3(newPoint.x, newPoint.y, 0.0f);
       // set position to middle of window 
       SetCursorPos(centerPoint.x, centerPoint.y);
       sVector3 centerVector;
@@ -631,6 +763,7 @@ void Render()
   // Update our time
   static float t = 0.0f;
   my_timer.StartTiming();
+  cModel* ptr_toModel = helper::findModelComponent(*my_actor);
 
   if (my_apiComponent.getHardwareVersion() == D3D_DRIVER_TYPE_REFERENCE)
   {
@@ -649,9 +782,9 @@ void Render()
   g_World.matrix = glm::rotate(g_World.matrix, t, glm::vec3(0, 1.0f, 0));
 
   // Modify the color
-  g_vMeshColor.vector4.x = (sinf(t * 1.0f) + 1.0f) * 0.5f;
-  g_vMeshColor.vector4.y = (cosf(t * 3.0f) + 1.0f) * 0.5f;
-  g_vMeshColor.vector4.z = (sinf(t * 5.0f) + 1.0f) * 0.5f;
+  g_vMeshColor.red = (sinf(t * 1.0f) + 1.0f) * 0.5f;
+  g_vMeshColor.green = (cosf(t * 3.0f) + 1.0f) * 0.5f;
+  g_vMeshColor.blue = (sinf(t * 5.0f) + 1.0f) * 0.5f;
   //
   // Clear the back buffer
   //
@@ -665,42 +798,30 @@ void Render()
   //                                           , 0);
   glm::vec4 glMoveVector = {2,1,1,1};
   glm::vec4 glScaleVector = {1,1,std::fabs(std::cosf(t)),1};
-  glm::vec4 glRotVector = {-t,0, t,1};
-  /* setup for manipulating 3d models */
-  //dx::XMVECTOR moveVector = {2,1,1,1};
-  //dx::XMVECTOR scaleVector = {1,1,std::fabs(std::cosf(t)),1};
-  //dx::XMVECTOR rotVector = {-t,0, t,1};
-
-  // CBChangesEveryFrame cb;
-  //dx::XMMATRIX tempMatrixMove = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector(moveVector));
-  //dx::XMMATRIX tempMatrixScale = dx::XMMatrixScalingFromVector(scaleVector);
-  //dx::XMMATRIX tempMatrixRotate = dx::XMMatrixRotationRollPitchYawFromVector(rotVector);//XMMatrixRotationZ(-t);
-
-  //dx::XMVECTOR moveVector2 = {0,1,-1,1};
-  //dx::XMVECTOR scaleVector2 = {1,1,std::fabs(std::cosf(t)) * 2,1};
-  //dx::XMVECTOR rotVector2 = {0,0, -t,1};
-
-  //dx::XMMATRIX tempMatrixMove2 = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector(moveVector2));
-  //dx::XMMATRIX tempMatrixScale2 = dx::XMMatrixScalingFromVector(scaleVector2);
-  //dx::XMMATRIX tempMatrixRotate2 = dx::XMMatrixRotationRollPitchYawFromVector(rotVector2);//XMMatrixRotationZ(-t);
-
-
+  glm::vec3 glRotVector = {1,0,0};
 
 #ifndef MODEL_LOAD
-  CBChangesEveryFrame cb;
-  cb.mWorld = XMMatrixMultiply(XMMatrixMultiply(tempMatrixMove2, tempMatrixRotate2), tempMatrixScale2);
+  GlChangeEveryFrame Cb;
+  Cb.world = glm::rotate(Cb.world, t, glRotVector);
+  Cb.color.red = 0.5f;
+  Cb.color.green = 0.5f;
+  Cb.color.blue = 0.6f;
+  Cb.color.alpha = 1.0f;
+
   cb.vMeshColor = g_vMeshColor;
-  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
+  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &Cb);
 
 #endif // !MODEL_LOAD
   //
   // Render the cube
   //
+
   /*setting values for the vertex shader*/
   my_deviceContext.VSSetShader(my_vertexShader);
   my_deviceContext.VSSetConstantBuffers(my_constNeverChanges, 0);
   my_deviceContext.VSSetConstantBuffers(my_constChangeOnResize, 1);
   my_deviceContext.VSSetConstantBuffers(my_constChangesEveryFrame, 2);
+
   /*setting values for the pixel shader */
   my_deviceContext.PSSetShader(my_pixelShader);
   my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, 2);
@@ -726,41 +847,54 @@ void Render()
 
   my_deviceContext.DrawIndexed(36, 0);
 #else
+
   static std::vector<cConstBuffer *> bufferArray =
   {
     &my_constChangesEveryFrame,
     &my_constChangeOnResize,
     &my_constNeverChanges
   };
+
   glm::mat4 RandomTransform(1.0f);
   glm::mat4 ShearMatrix(1.0f);
-  ShearMatrix[1][0] = -g_Shearing;
+  ShearMatrix[1][0] = -g_TransfromAmount;
   glm::vec3 MoveRight(-2.5, 1, 1);
-  //glm::reflect(RandomTransform, glm::vec3(0, -1, 0));
   glm::mat4 result = glm::translate(RandomTransform, MoveRight);
-  my_model.setTransform(ShearMatrix);
 
-  my_model.DrawMeshes(my_deviceContext, bufferArray);
-  GlChangeEveryFrame  Cb;
-  Cb.world = glm::mat4(1.0f);
-  Cb.color = {0.81f,1.0f,0.8314f,1.0f};
-  ////cb.mWorld = XMMatrixMultiply(MoveGunLeft, dx::XMMatrixRotationY(t));// XMMatrixTranslationFromVector(moveVector)
-  ////cb.vMeshColor = {0.81f,1.0f,0.8314f,1.0f};
+  //ptr_toModel->setTransform(ShearMatrix);
+  //my_actor->m_transform.shearTransformInXAxis(g_Shearing);
+  //my_actor->m_transform.rotateInYAxis(std::sinf(t));
+  my_actor->update(my_deviceContext);
 
-//  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &Cb);
+  sColorf color;
+  color.red = std::sinf(t);
+  color.green = 0.5f;
+  color.blue = 1.0f;
+  color.alpha = 1.0f;
+
+  //my_modelPtr->DrawMeshes(my_deviceContext, bufferArray, color);
+  ptr_toModel->DrawMeshes(my_deviceContext, bufferArray, color);
+  //GlChangeEveryFrame  Cb;
+  //Cb.world = glm::mat4(1.0f);
+  //Cb.color = {0.81f,1.0f,0.8314f,1.0f};
 
 #endif // !MODEL_LOAD
   my_timer.EndTiming();
   float deltaTime = my_timer.GetResultSeconds();
   my_gui.beginFrame("Data");
-  my_gui.FpsCountWindow(deltaTime);
-  my_gui.beginChildWithItemCount("count ", "Meshes", my_model.getMeshCount());
+  my_gui.beginChildWithFpsCount(deltaTime);
+  my_gui.addItemCountToChild("Mesh count ", "Mesh", ptr_toModel->getMeshCount());
+  my_gui.addItemCountToChild("vertices count ", "vertices", ptr_toModel->getVertexCount());
+  my_gui.addSliderFloat("Transform amount", g_TransfromAmount, -5.0f, 5.0f);
+  my_gui.addText("\nControls \n"
+                 "chose axis with keys 'x' , 'y' , 'z'\n"
+                 "do rotation with left and right arrow keys\n"
+                 "use the 'u' and 'i' keys to shear the model\n"
+                 "use the 'o' and 'p' keys to apply reflection Transform \n");
 
   my_gui.endAllChildren();
   my_gui.endFrame();
   // Present our back buffer to our front buffer
-
-  // returns a boolean value 
   my_swapChain.Present(0, 0);
   my_window.update();
 }

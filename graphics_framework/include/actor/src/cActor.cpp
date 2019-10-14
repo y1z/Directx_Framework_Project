@@ -1,11 +1,18 @@
 #include "..\cActor.h"
+#include <iostream>
+#include "utility/enDefs.h"
 #include <cassert>
 
 constexpr static std::size_t c_defaultSize = 16u;
 
 cActor::cActor()
 {
-  m_components.reserve(c_defaultSize); 
+  m_components.reserve(c_defaultSize);
+
+  for (baseComponent *component : m_components)
+  {
+    component = nullptr;
+  }
 }
 
 cActor::~cActor()
@@ -33,7 +40,7 @@ cActor::DrawComponent(std::size_t Index, cDeviceContext &deviceContext, std::vec
   }
 }
 
-void 
+void
 cActor::InitComponent(std::size_t Index, cDeviceContext & deviceContext, cDevice & device)
 {
   if (m_components.size() - 1 > Index)
@@ -62,6 +69,20 @@ cActor::DestroyComponent(std::size_t Index)
   }
 }
 
+void cActor::DestroyAllComponents()
+{
+  for (auto component : m_components)
+  {
+    if (component != nullptr)
+    {
+      component->Destroy();
+      delete component;
+      component = nullptr;
+    }
+  }
+
+}
+
 void
 cActor::AddComponents(baseComponent * component)
 {
@@ -77,7 +98,7 @@ cActor::getComponentCount() const
 baseComponent *
 cActor::getComponent(std::size_t Index)
 {
-  if (m_components.size() - 1 > Index)
+  if (m_components.size() > Index && !m_components.empty())
   {
     return m_components[Index];
   }
@@ -85,4 +106,36 @@ cActor::getComponent(std::size_t Index)
   {
     assert("Error out of vector Bounds " && m_components.size() - 1 > Index);
   }
+}
+
+
+std::vector<baseComponent*>::iterator
+cActor::getIteratorBegin()
+{
+  return  m_components.begin();
+}
+
+std::vector<baseComponent*>::const_iterator
+cActor::getIteratorEnd()
+{
+  return  m_components.end();
+}
+
+
+bool 
+cActor::update(cDeviceContext &deviceContext)
+{
+  for (baseComponent *component : m_components)
+  {
+    if (!component->isReady())
+    {
+      EN_LOG_ERROR
+      return false;
+    }
+    else{
+      component->update(deviceContext,m_transform.getMatrix());
+    }
+
+  }
+  return true;
 }
