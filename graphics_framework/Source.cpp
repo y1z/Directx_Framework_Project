@@ -111,7 +111,7 @@ bool g_isInit(false);
 const std::filesystem::path g_initPath = std::filesystem::current_path();
 sColorf g_vMeshColor;
 
-float g_TransfromAmount = 1.0f;
+float g_TransformAmount = 1.0f;
 //--------------------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------------------
@@ -553,7 +553,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   centerPoint.y = (rect.bottom - rect.top) * 0.5f;
 
   //SetCapture(my_window.getHandle());
-  /*this helps select the axis for the transforms*/
+  /*this helps select the axis for the transforms
+  x = 0
+  y = 1
+  z = 2*/
   static uint8 chosenAxis{0};
 
   if (message == WM_PAINT)
@@ -598,10 +601,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                  my_window, my_deviceContext,
                                  &my_constNeverChanges, &my_constChangeOnResize);
 
-    if (wParam == (WPARAM)'R')
-    {
-      my_actor->m_transform.resetToIdentity();
-    }
+    helper::handelActorTransforms(*my_actor, chosenAxis, wParam, g_TransformAmount);
+
 
     if (wParam == (WPARAM)'X')
     {
@@ -615,101 +616,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
       chosenAxis = 2;
     }
-    else if (wParam == VK_RIGHT)
+  }
+  if (message == WM_RBUTTONDOWN)
+  {
+    if (wParam == (WPARAM)'W')
     {
-      switch (chosenAxis)
-      {
-        case 0:
-          my_actor->m_transform.rotateInXAxis(g_TransfromAmount);
-          break;
-
-        case 1:
-          my_actor->m_transform.rotateInYAxis(g_TransfromAmount);
-          break;
-
-        case 2:
-          my_actor->m_transform.rotateInZAxis(g_TransfromAmount);
-          break;
-      }
-    }
-    else if (wParam == VK_LEFT)
-    {
-      switch (chosenAxis)
-      {
-        case 0:
-          my_actor->m_transform.rotateInXAxis(-g_TransfromAmount);
-          break;
-        case 1:
-          my_actor->m_transform.rotateInYAxis(-g_TransfromAmount);
-          break;
-        case 2:
-          my_actor->m_transform.rotateInZAxis(-g_TransfromAmount);
-          break;
-      }
-    }
-    if (wParam == (WPARAM)'U')
-    {
-      switch (chosenAxis)
-      {
-        case 0:
-          my_actor->m_transform.shearTransformInXAxis(g_TransfromAmount);
-          break;
-        case 1:
-          my_actor->m_transform.shearTransformInYAxis(g_TransfromAmount);
-          break;
-        case 2:
-          my_actor->m_transform.shearTransformInZAxis(g_TransfromAmount);
-          break;
-      }
+      my_actor->m_transform.moveTransform(0.0f, 0.0f, 1.0f);
     }
 
-    else if (wParam == (WPARAM)'I')
-    {
-      switch (chosenAxis)
-      {
-        case 0:
-          my_actor->m_transform.shearTransformInXAxis(-g_TransfromAmount);
-          break;
-        case 1:
-          my_actor->m_transform.shearTransformInYAxis(-g_TransfromAmount);
-          break;
-        case 2:
-          my_actor->m_transform.shearTransformInZAxis(-g_TransfromAmount);
-          break;
-      }
-    }
-
-    else if (wParam == (WPARAM)'O')
-    {
-      switch (chosenAxis)
-      {
-        case 0:
-          my_actor->m_transform.reflectTransfromInXAxis(g_TransfromAmount);
-          break;
-        case 1:
-          my_actor->m_transform.reflectTransfromInYAxis(g_TransfromAmount);
-          break;
-        case 2:
-          my_actor->m_transform.reflectTransfromInZAxis(g_TransfromAmount);
-          break;
-      }
-    }
-
-    if (wParam == (WPARAM)'P')
-    {
-      switch (chosenAxis)
-      {
-        case 0:
-          my_actor->m_transform.reflectTransfromInXAxis(-g_TransfromAmount);
-          break;
-        case 1:
-          my_actor->m_transform.reflectTransfromInYAxis(-g_TransfromAmount);
-          break;
-        case 2:
-          my_actor->m_transform.reflectTransfromInZAxis(-g_TransfromAmount);
-          break;
-      }
-    }
   }
   if (message == WM_MOUSEMOVE && g_isInit)
   {
@@ -745,7 +659,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   {
     return DefWindowProc(hWnd, message, wParam, lParam);
   }
-  //  ReleaseCapture();
+
   return 0;
 }
 
@@ -857,7 +771,7 @@ void Render()
 
   glm::mat4 RandomTransform(1.0f);
   glm::mat4 ShearMatrix(1.0f);
-  ShearMatrix[1][0] = -g_TransfromAmount;
+  ShearMatrix[1][0] = -g_TransformAmount;
   glm::vec3 MoveRight(-2.5, 1, 1);
   glm::mat4 result = glm::translate(RandomTransform, MoveRight);
 
@@ -885,12 +799,14 @@ void Render()
   my_gui.beginChildWithFpsCount(deltaTime);
   my_gui.addItemCountToChild("Mesh count ", "Mesh", ptr_toModel->getMeshCount());
   my_gui.addItemCountToChild("vertices count ", "vertices", ptr_toModel->getVertexCount());
-  my_gui.addSliderFloat("Transform amount", g_TransfromAmount, -5.0f, 5.0f);
+  my_gui.addSliderFloat("Transform amount", g_TransformAmount, -5.0f, 5.0f);
   my_gui.addText("\nControls \n"
                  "chose axis with keys 'x' , 'y' , 'z'\n"
                  "do rotation with left and right arrow keys\n"
                  "use the 'u' and 'i' keys to shear the model\n"
-                 "use the 'o' and 'p' keys to apply reflection Transform \n");
+                 "use the 'o' and 'p' keys to apply reflection Transform \n"
+                 "use the 't' ,'g' , 'h' ,'f' ,'v' and 'n' \n"
+                 "keys to apply a translation Transform ");
 
   my_gui.endAllChildren();
   my_gui.endFrame();

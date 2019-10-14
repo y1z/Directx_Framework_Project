@@ -55,5 +55,11 @@ namespace helper
     handelCameraKeyInput(const uint8 pressedKey, cCameraManager &currentCamera, 
                       cWindow &window,cDeviceContext &deviceContext,
                          cConstBuffer *neverChange, cConstBuffer *resizeChange);
+
+  /*! take care of all transform related with the actor 
+  rotation ,shearing, reflection etc..  */
+  void 
+    handelActorTransforms(cActor &actor,const uint8 chosenAxis,
+                             const uint8 pressedKey, float TransformAmount);
 }
 

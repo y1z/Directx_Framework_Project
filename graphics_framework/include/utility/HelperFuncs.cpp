@@ -272,6 +272,147 @@ namespace helper
   #endif // DIRECTX
 
   }
+
   /*****************/
 
+  void handelActorTransforms(cActor & actor, const uint8 chosenAxis, const uint8 pressedKey, float TransformAmount)
+  {
+    if (pressedKey == (WPARAM)'R')
+    {
+      actor.m_transform.resetToIdentity();
+    }
+
+    else if (pressedKey == VK_RIGHT)
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          actor.m_transform.rotateInXAxis(TransformAmount);
+          break;
+
+        case 1:
+          actor.m_transform.rotateInYAxis(TransformAmount);
+          break;
+
+        case 2:
+          actor.m_transform.rotateInZAxis(TransformAmount);
+          break;
+      }
+    }
+
+    else if (pressedKey == VK_LEFT)
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          actor.m_transform.rotateInXAxis(-TransformAmount);
+          break;
+        case 1:
+          actor.m_transform.rotateInYAxis(-TransformAmount);
+          break;
+        case 2:
+          actor.m_transform.rotateInZAxis(-TransformAmount);
+          break;
+      }
+    }
+
+    if (pressedKey == (WPARAM)'U')
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          actor.m_transform.shearTransformInXAxis(TransformAmount);
+          break;
+        case 1:
+          actor.m_transform.shearTransformInYAxis(TransformAmount);
+          break;
+        case 2:
+          actor.m_transform.shearTransformInZAxis(TransformAmount);
+          break;
+      }
+    }
+
+    else if (pressedKey == (WPARAM)'I')
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          actor.m_transform.shearTransformInXAxis(-TransformAmount);
+          break;
+        case 1:
+          actor.m_transform.shearTransformInYAxis(-TransformAmount);
+          break;
+        case 2:
+          actor.m_transform.shearTransformInZAxis(-TransformAmount);
+          break;
+      }
+    }
+
+    else if (pressedKey == (WPARAM)'O')
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          actor.m_transform.reflectTransfromInXAxis(TransformAmount);
+          break;
+        case 1:
+          actor.m_transform.reflectTransfromInYAxis(TransformAmount);
+          break;
+        case 2:
+          actor.m_transform.reflectTransfromInZAxis(TransformAmount);
+          break;
+      }
+    }
+
+    if (pressedKey == (WPARAM)'P')
+    {
+      switch (chosenAxis)
+      {
+        case 0:
+          actor.m_transform.reflectTransfromInXAxis(-TransformAmount);
+          break;
+        case 1:
+          actor.m_transform.reflectTransfromInYAxis(-TransformAmount);
+          break;
+        case 2:
+          actor.m_transform.reflectTransfromInZAxis(-TransformAmount);
+          break;
+      }
+    }
+
+    //move forwards 
+    if (pressedKey == (WPARAM)'T')
+    {
+      actor.m_transform.moveTransform(0.0f, 0.0f, TransformAmount, 0.0f);
+    }
+    //move backwards 
+    else if (pressedKey == (WPARAM)'G')
+    {
+      actor.m_transform.moveTransform(0.0f, 0.0f, -TransformAmount, 0.0f);
+    }
+    //move left 
+    else if (pressedKey == (WPARAM)'F')
+    {
+      actor.m_transform.moveTransform(-TransformAmount, 0.0f, 0.0f, 0.0f);
+    }
+    // move right 
+    else if (pressedKey == (WPARAM)'H')
+    {
+      actor.m_transform.moveTransform(TransformAmount, 0.0f, 0.0f, 0.0f);
+    }
+
+    else if (pressedKey == (WPARAM)'V')
+    {
+      actor.m_transform.moveTransform(0.f, TransformAmount, 0.0f, 0.f);
+    }
+
+    else if (pressedKey == (WPARAM)'N')
+    {
+      actor.m_transform.moveTransform(0.f, -TransformAmount, 0.f, 0.f);
+    }
+  }
+
 }
+/*****************/
+
+

@@ -52,7 +52,8 @@ cTransform::shearTransformInXAxis(float shearingAmount)
   m_transformMatrix.matrix *= shearMatrix;
 }
 
-void cTransform::shearTransformInYAxis(float shearingAmount)
+void 
+cTransform::shearTransformInYAxis(float shearingAmount)
 {
   glm::mat4 shearMatrix(1.0f);
   glm::vec4 ShearingVec(0.0f, 1.0f, shearingAmount, 0.0f);
@@ -60,7 +61,8 @@ void cTransform::shearTransformInYAxis(float shearingAmount)
   m_transformMatrix.matrix *= shearMatrix;
 }
 
-void cTransform::shearTransformInZAxis(float shearingAmount)
+void 
+cTransform::shearTransformInZAxis(float shearingAmount)
 {
   glm::mat4 shearMatrix(1.0f);
   glm::vec4 ShearingVec(0.0f, shearingAmount, 1.0f, 0.0f);
@@ -68,19 +70,22 @@ void cTransform::shearTransformInZAxis(float shearingAmount)
   m_transformMatrix.matrix *= shearMatrix;
 }
 
-void cTransform::reflectTransfromInXAxis(float Amount)
+void 
+cTransform::reflectTransfromInXAxis(float Amount)
 {
   glm::vec4 reflectionColum(-Amount, 0.0f, 0.0f, 0.0f);
   m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 0, reflectionColum);
 }
 
-void cTransform::reflectTransfromInYAxis(float Amount)
+void 
+cTransform::reflectTransfromInYAxis(float Amount)
 {
   glm::vec4 reflectionColum(0.0f, -Amount, 0.0f, 0.0f);
   m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 1, reflectionColum);
 }
 
-void cTransform::reflectTransfromInZAxis(float Amount)
+void 
+cTransform::reflectTransfromInZAxis(float Amount)
 {
   glm::vec4 reflectionColum(0.0f, 0.0f, -Amount, 0.0f);
   m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 2, reflectionColum);
@@ -102,20 +107,19 @@ cTransform::isReady() const
 void
 cTransform::Init(cDevice & device, cDeviceContext & deviceContext)
 {
-  //foo 
+  m_transformMatrix.matrix = glm::identity<glm::mat4>();
 }
 
-void cTransform::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*>& constBuffers)
+void 
+cTransform::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*>& constBuffers)
 {}
 
-void cTransform::update(cDeviceContext & deviceContext, const sMatrix4x4 &Transform)
-{
+void 
+cTransform::update(cDeviceContext & deviceContext, const sMatrix4x4 &Transform)
+{}
 
-}
-
-
-
-void cTransform::Destroy()
+void 
+cTransform::Destroy()
 {}
 
 
