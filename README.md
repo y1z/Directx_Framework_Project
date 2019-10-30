@@ -16,6 +16,8 @@ This repository will house a graphics framework that can chose between 2 api's o
 - GLM : https://github.com/g-truc/glm
     - NOT include in the project 
     - path is __`$(DEVLIBS)glm`__ 
+- GLEW : http://glew.sourceforge.net/ 
+	- included in the project 
 ## Environment variable
  - DEVLIBS : `C:\c++libs\`
     - aka it in the same place where i keep my libs 
