@@ -17,17 +17,24 @@
 #include "../include/cShaderResourceView.h"
 #include "../include/cMesh.h"
 #include "../include/enum_headers/enumTopology.h"
+
+#include "../include/cApiComponents.h"
+#include "utility/HelperFuncs.h"
+#include "utility/CustomStructs.h"
+
+#include "glm/gtc/type_ptr.hpp" // for glm::value_ptr
 // std includes 
 #include <cassert>
 // limits for setting objects 
 static constexpr const uint8_t c_MaxRenderTargets = 8;
 static constexpr const uint8_t c_MaxViewPorts = 8;
+//TODO : make open-gl have the ability to use multiple vertex buffers  
 static constexpr const uint8_t c_MaxVertexBuffers = 24;
 
 cDeviceContext::cDeviceContext()
 #if DIRECTX
   :mptr_deviceContext(nullptr)
-
+#elif OPEN_GL
 #endif // DIRECTX
 {}
 
@@ -114,6 +121,9 @@ cDeviceContext::RSSetViewports(cViewport viewports[], uint8_t numViewports)
     assert(("Error too many view-ports"&& numViewports <= c_MaxViewPorts));
   }
 #elif OPEN_GL 
+  //TODO : make this have the ability to address multiple view-ports
+  glViewport(0, 0, viewports[0].getWidth(), viewports[0].getHeight());
+
 #endif // DIRECTX
 
 }
@@ -136,7 +146,7 @@ cDeviceContext::IASetVertexBuffers(cVertexBuffer vertexBuffer[], uint32_t numBuf
   {
     ID3D11Buffer *BufferTempPtrArr[c_MaxVertexBuffers];
     uint32_t strides[c_MaxVertexBuffers];
-    uint32_t offSets[c_MaxVertexBuffers]{0}; // use later 
+    uint32_t offSets[c_MaxVertexBuffers]{ 0 }; // use later 
     for (uint32_t i = 0; i < numBuffers; ++i)
     {
       BufferTempPtrArr[i] = vertexBuffer[i].getBuffer();
@@ -152,53 +162,134 @@ cDeviceContext::IASetVertexBuffers(cVertexBuffer vertexBuffer[], uint32_t numBuf
   }
 
 #elif OPEN_GL
+  m_drawingData.currentVertexBuffer = vertexBuffer[0].getID();
 #endif // DIRECTX
 }
 
-void cDeviceContext::IASetIndexBuffer(cIndexBuffer & indexBuffer, int Format, int offSet)
+void
+cDeviceContext::IASetIndexBuffer(cIndexBuffer & indexBuffer, int Format, int offSet)
 {
 #if DIRECTX
-  mptr_deviceContext->IASetIndexBuffer(indexBuffer.getBuffer(), static_cast<DXGI_FORMAT>(Format), offSet);
+  mptr_deviceContext->IASetIndexBuffer(indexBuffer.getBuffer(), static_cast< DXGI_FORMAT >(Format), offSet);
 #elif OPEN_GL
+  m_drawingData.currentIndexBuffer = indexBuffer.getID();
+  m_drawingData.currentFormat = Format;
 #endif // DIRECTX
 }
 
-void cDeviceContext::IASetPrimitiveTopology(int Topology)
+void
+cDeviceContext::IASetPrimitiveTopology(int Topology)
 {
 #if DIRECTX
-  mptr_deviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(Topology));
+  mptr_deviceContext->IASetPrimitiveTopology(static_cast< D3D11_PRIMITIVE_TOPOLOGY >(Topology));
 #elif OPEN_GL
+  m_drawingData.currentTopology = Topology;
 #endif // DIRECTX
 }
 
-void cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
+void
+cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
 {
 #if DIRECTX
   mptr_deviceContext->UpdateSubresource(Buffer->getBuffer(), 0, nullptr, originOfData, 0, 0);
 #elif OPEN_GL
+  cConstBuffer * constBuffer = dynamic_cast< cConstBuffer * >(Buffer);
+  if (constBuffer != nullptr)
+  {
+    if (constBuffer->getIndex() == 0)
+    {
+      auto *ViewMatrixTemp = reinterpret_cast< const ViewMatrix* >(originOfData);
+
+      glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ViewMatrixTemp->matrix)); 
+
+    }
+    else if (constBuffer->getIndex() == 1)
+    {
+      auto *ProjMatrixTemp = reinterpret_cast< const ProjectionMatrix* >(originOfData);
+      glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE , glm::value_ptr(ProjMatrixTemp->matrix));
+    }
+    else if (constBuffer->getIndex() == 2)
+    {
+      // TODO : update  when new members are added 
+      static constexpr const char *uniformBlockVarName[] = { {"u_world"},{"u_color"} };
+      // TODO : update when using a different struct
+      const GlChangeEveryFrame *worldMatrix = reinterpret_cast< const GlChangeEveryFrame* >(originOfData);
+
+      // how big is the data i what to pass over 
+      int32 uniformBlockSize = 0;
+      glGetActiveUniformBlockiv(*cApiComponents::getShaderProgram(), constBuffer->getID(),
+                                GL_UNIFORM_BLOCK_DATA_SIZE, &uniformBlockSize);
+
+      uByte *DataBuffer = static_cast< uByte* > (alloca(uniformBlockSize));
+
+      //TODO: update with the struct bing used 
+      uint32 indices[2];
+      glGetUniformIndices(*cApiComponents::getShaderProgram(), 2,
+                          uniformBlockVarName, indices);
+
+      //TODO: update with the struct bing used 
+      int32  offsets[2];
+      glGetActiveUniformsiv(*cApiComponents::getShaderProgram(), 2, indices,
+                            GL_UNIFORM_OFFSET, offsets);
+
+      std::memcpy(DataBuffer + offsets[0], &worldMatrix->world,
+                  sizeof(glm::mat4));
+
+      std::memcpy(DataBuffer + offsets[1], &worldMatrix->color,
+                  sizeof(sColorf));
+
+      glBindBuffer(GL_UNIFORM_BUFFER, constBuffer->getGlUniformBlockID());
+      glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize,
+                   DataBuffer, GL_DYNAMIC_DRAW);
+
+      glBindBufferBase(GL_UNIFORM_BUFFER, constBuffer->getID(), constBuffer->getGlUniformBlockID());
+
+      glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+  }
+
+  //TODO: add check for the other buffer when you start using them in this function. 
+  assert(constBuffer != nullptr);
 #endif // DIRECTX
 }
 
-void cDeviceContext::ClearRenderTargetView(cRenderTargetView & renderTargetView, float color[4])
+void
+cDeviceContext::ClearRenderTargetView(cRenderTargetView & renderTargetView, sColorf* color)
 {
+    // han purple https://rgbcolorcode.com/color/6619FF
+  static constexpr float defaultClearColor[4] = { 0.40f,0.10f,1.0f,1.0f };
+  static constexpr sColorf directXColor{ 0.30f,0.30f,1.0f,1.0f };
+//rgb(0.30,0.30,1.00)
 #if DIRECTX
   if (color == nullptr)
   {
-    // han purple https://rgbcolorcode.com/color/6619FF
-    float ClearColor[4] = {0.40f,0.10f,1.0f,1.0f};
-    mptr_deviceContext->ClearRenderTargetView(renderTargetView.getRenderTragetView(), ClearColor);
+    mptr_deviceContext->ClearRenderTargetView(renderTargetView.getRenderTragetView(), directXColor.allColor);
   }
   else
   {
-    mptr_deviceContext->ClearRenderTargetView(renderTargetView.getRenderTragetView(), color);
-  }
+    mptr_deviceContext->ClearRenderTargetView(renderTargetView.getRenderTragetView(), color->allColor);
+}
 #elif OPEN_GL
-#endif // DIRECTX
+  static constexpr sColorf OpenGlColor{ 1.0f,0.34f,0.20f,1.0f };
+    //rgb(1.00, 0.73, 0.20) https://rgbcolorcode.com/color/FFBB33
+
+  if (color != nullptr)
+  {
+    glClearColor(color->red, color->green, color->blue, color->alpha);
+  }
+  else
+  {
+    glClearColor(OpenGlColor.red, OpenGlColor.green, OpenGlColor.blue, OpenGlColor.alpha);
+  }
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif // DIRECTX 
 }
 
-void cDeviceContext::ClearDepthStencilView(cDepthStencilView & depthStencilView, bool ClearStencil,
-                                           bool ClearDepth, uint8_t StencilClearValues,
-                                           float DepthClearValue)
+void
+cDeviceContext::ClearDepthStencilView(cDepthStencilView & depthStencilView, bool ClearStencil,
+                                      bool ClearDepth, uint8_t StencilClearValues,
+                                      float DepthClearValue)
 {
 #if DIRECTX
   int clearFlags = 0x00;
@@ -325,11 +416,133 @@ void cDeviceContext::PSSetSamplers(cSampler samplers[], uint32_t numSamplers, ui
 #endif // DIRECTX
 }
 
-void cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset, unsigned int Program)
+void
+cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
 {
 #if DIRECTX
   mptr_deviceContext->DrawIndexed(indexCount, 0, 0);
+ // mptr_deviceContext->Draw(indexCount,0);
 #elif OPEN_GL
+  GlRemoveAllErrors();
+
+  glUseProgram(*cApiComponents::getShaderProgram());
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
+  unsigned int OffSetOfFirst = offsetof(sVertexPosTex, pos);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void* >(OffSetOfFirst));
+
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
+  unsigned int OffSetOfSecond = offsetof(sVertexPosTex, tex);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void * >(OffSetOfSecond));
+
+  if (GlCheckForError())
+  {
+    std::cout << " Error ";
+  }
+  //glEnableVertexAttribArray(2);
+  //glBindBuffer(GL_ARRAY_BUFFER, this->m_VertexBuffer.GetBufferID());
+  //unsigned int OffSetOfThird = offsetof(VertexPosNormTex, TexCoord);
+  //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPosNormTex), reinterpret_cast< const void * >(OffSetOfThird));
+
+  // UN-BIND FROM THE VERTEX BUFFER 
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // draw the indices 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_drawingData.currentIndexBuffer);
+
+  glDrawElements(m_drawingData.currentTopology, indexCount, m_drawingData.currentFormat /*equivalent to GL_UNSIGNED_SHORT*/, reinterpret_cast< const void* >(0));
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  if (GlCheckForError())
+  {
+    std::cout << " Error ";
+  }
+
 #endif // DIRECTX
+}
+
+void cDeviceContext::DrawIndexed(cIndexBuffer & indexBuffer)
+{
+
+#if DIRECTX
+  mptr_deviceContext->DrawIndexed(indexBuffer.getElementCount(), 0, 0);
+#elif OPEN_GL
+  GlRemoveAllErrors();
+
+  //glUseProgram(*cApiComponents::getShaderProgram());
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
+  unsigned int OffSetOfFirst = offsetof(sVertexPosTex, pos);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void* >(OffSetOfFirst));
+
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
+  unsigned int OffSetOfSecond = offsetof(sVertexPosTex, tex);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void * >(OffSetOfSecond));
+
+  if (GlCheckForError())
+  {
+    std::cout << " Error ";
+  }
+  //glEnableVertexAttribArray(2);
+  //glBindBuffer(GL_ARRAY_BUFFER, this->m_VertexBuffer.GetBufferID());
+  //unsigned int OffSetOfThird = offsetof(VertexPosNormTex, TexCoord);
+  //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPosNormTex), reinterpret_cast< const void * >(OffSetOfThird));
+
+  // draw the indices 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.getID());
+
+  glDrawElements(GL_TRIANGLES, indexBuffer.getElementCount(), GL_UNSIGNED_SHORT, reinterpret_cast< const void* >(0));
+
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  if (GlCheckForError())
+  {
+    std::cout << " Error ";
+  }
+
+#endif // DIRECTX
+}
+
+bool cDeviceContext::SetShaders(cVertexShader & vertexShader, cPixelShader & pixelShader)
+{
+#if DIRECTX
+  this->VSSetShader(vertexShader);
+  this->PSSetShader(pixelShader);
+
+  return true;
+#elif OPEN_GL
+  unsigned int * ShaderProgram = cApiComponents::getShaderProgram();
+  glLinkProgram(*(ShaderProgram));
+  glValidateProgram(*(ShaderProgram));
+
+  int Status;
+  glGetProgramiv(*(ShaderProgram), GL_VALIDATE_STATUS, &Status);
+  if (Status == GL_FALSE)
+  {
+    assert(true == false && "Error with Shader Program ");
+  }
+
+  int Link;
+  glGetProgramiv(*ShaderProgram, GL_LINK_STATUS, &Link);
+  if (Link == GL_FALSE)
+  {
+    assert(true == false && "Error with linking ");
+  }
+
+  if (GlCheckForError())
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+
+#endif // DIRECTX
+  return false;
 }
 

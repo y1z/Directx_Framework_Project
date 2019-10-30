@@ -214,6 +214,24 @@
     <ClInclude Include="include\actor\cAABB.h">
       <Filter>include\actor</Filter>
     </ClInclude>
+    <ClInclude Include="include\actor\cSphere.h">
+      <Filter>include\actor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\enHelperTemplates.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_glfw.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_opengl3.h">
+      <Filter>depencies\imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\enum_headers\enumBufferUsage.h">
+      <Filter>include\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\enErrorHandling.h">
+      <Filter>include\utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cBuffer.cpp">
@@ -332,6 +350,15 @@
     </ClCompile>
     <ClCompile Include="include\actor\src\cAABB.cpp">
       <Filter>include\actor\src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\actor\src\cSphere.cpp">
+      <Filter>include\actor\src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_opengl3.cpp">
+      <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_glfw.cpp">
+      <Filter>depencies\imgui\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

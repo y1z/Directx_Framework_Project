@@ -18,11 +18,11 @@ public:
 	~imGuiManager();
 
 private:// typedefs 
-  using ptr_FileOpenFunc = std::string(*)(cWindow);
+  using ptr_FileOpenFunc = std::string(*)(cWindow &);
 public:
 	/*! init the imgui library*/
 	bool 
-    Init(cDevice &Device, cDeviceContext &DeviceContext, HWND Handle);
+    Init(cDevice &Device, cDeviceContext &DeviceContext,cWindow &window);
 
   /*! set a function pointer to a function that 
   opens file explorer 
@@ -83,5 +83,7 @@ private:// variables
   uint32 m_childCount;
   //! a pointer to a function that opens a file 
   ptr_FileOpenFunc mptr_FileFunc = nullptr;
+
+  bool is_initialized{false};
 };
 

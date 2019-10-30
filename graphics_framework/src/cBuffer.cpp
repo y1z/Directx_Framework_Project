@@ -3,10 +3,13 @@
 #include <memory>
 cBuffer::cBuffer()
 #if DIRECTX
-  :mptr_buffer(nullptr) ,
+  :mptr_buffer(nullptr) 
+#elif   OPEN_GL
+  :m_bufferID(0) 
 #endif // DIRECTX
-  m_stride(0)
 {
+  m_stride = 0;
+  m_elementCount = 0;
   std::memset(&m_Desc, 0, sizeof(m_Desc));
 }
 
@@ -17,7 +20,8 @@ cBuffer::~cBuffer()
   {
     mptr_buffer->Release();
   }
-
+#elif OPEN_GL
+  if (m_bufferID != 0) { glDeleteBuffers(1, &m_bufferID); }
 #endif // DIRECTX
 }
 
@@ -35,10 +39,26 @@ cBuffer::getBufferRef()
 }
 #endif // DIRECTX
 
-std::size_t cBuffer::getElementCount() const
+std::size_t 
+cBuffer::getElementCount() const
 {
   return m_elementCount;
 }
+#if OPEN_GL
+
+uint32_t
+cBuffer::getID() const
+{
+  return m_bufferID;
+}
+
+uint32_t *
+cBuffer::getIDPtr()
+{
+  return &m_bufferID;
+}
+
+#endif // OPEN_GL
 
 sBufferDesc
 cBuffer::getDescriptor() const
@@ -52,8 +72,14 @@ cBuffer::getBufferType() const
   return m_Type;
 }
 
-std::size_t 
+std::size_t
 cBuffer::getStride() const
 {
   return m_stride;
+}
+
+uint32_t
+cBuffer::getBufferSize() const
+{
+  return m_Desc.sizeOfBuffer;
 }

@@ -3,7 +3,6 @@
 #include <utility/CustomStructs.h>
 #include <vector>
 
-
 class cDevice;
 class cDeviceContext;
 class cConstBuffer;
@@ -17,7 +16,7 @@ public:
 public:
   /*! this will move the current transform matrix in a direction */
   void
-    moveTransform(float x, float y, float z, float w = 1.0f);
+    moveTransform(float x, float y, float z, float w = 1.0f,float deltaTime = 0.1666f);
 
   /*! will rotate the transform in the X axis */
   void
@@ -67,15 +66,14 @@ public:
   */
   void
     reflectTransfromInZAxis(float Amount);
+
 public: // get and set functions 
 
   /*!returns the matrix used to keep track of transform */
   sMatrix4x4 
     getMatrix()const;
 
-
 public: /*inherited virtual functions */
-
 
   /*! this function will be used to know if the component is ready to be used */
   bool
@@ -97,6 +95,7 @@ public: /*inherited virtual functions */
   void
     Destroy()override;
 private:
+
   //!this is the variable that contains all transform related operation
   sMatrix4x4 m_transformMatrix;
 };

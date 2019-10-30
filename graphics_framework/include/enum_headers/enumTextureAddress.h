@@ -10,6 +10,12 @@ enum class TextureAddress : int
   Border = D3D11_TEXTURE_ADDRESS_BORDER,
   Mirror_once = D3D11_TEXTURE_ADDRESS_MIRROR_ONCE
 #elif OPEN_GL
+  Wrap ,
+  Mirror,
+  Clamp,
+  Border,
+  Mirror_once
+#else
   Wrap,
   Mirror,
   Clamp,

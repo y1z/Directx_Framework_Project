@@ -64,7 +64,7 @@
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
-#include <glew-2.1.0/include/GL/glew.h>
+#include <GL/glew.h> 
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
 #else
@@ -96,8 +96,8 @@
 #undef  IMGUI_IMPL_OPENGL_LOADER_GL3W
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
 #include <GL/gl3w.h>   // Needs to be initialized with gl3wInit() in user's code
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <glew-2.1.0/include/GL/glew.h>   // Needs to be initialized with glewInit() in user's code
+ #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+#include <GL/glew.h>   // Needs to be initialized with glewInit() in user's code
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
 #include <glad/glad.h>  // Needs to be initialized with gladLoadGL() in user's code
 #else

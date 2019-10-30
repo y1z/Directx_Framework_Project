@@ -4,7 +4,7 @@
 #include "../include/utility/CustomStructs.h"
 
 cMesh::cMesh()
- :m_topology(Topology::TriList)
+  :m_topology(Topology::TriList)
 {
   mptr_indexBuffer = new cIndexBuffer();
   mptr_vertexBuffer = new cVertexBuffer();
@@ -23,7 +23,7 @@ cMesh::cMesh()
 cMesh::cMesh(cMesh && mesh)
   :mptr_indexBuffer(mesh.mptr_indexBuffer),
   mptr_vertexBuffer(mesh.mptr_vertexBuffer),
-  m_topology(mesh.m_topology) 
+  m_topology(mesh.m_topology)
 {
   mesh.mptr_indexBuffer = nullptr;
   mesh.mptr_vertexBuffer = nullptr;
@@ -64,15 +64,15 @@ cMesh & cMesh::operator=(cMesh && mesh)
 void cMesh::initIndexBuffer(std::unique_ptr<std::vector<uint16>> & indeces)
 {
   mptr_indiceData = std::move(indeces);
-  mptr_indexBuffer->setDescription(sizeof(uint16),mptr_indiceData->size(),0);
-  mptr_indexBuffer->setData( &mptr_indiceData->front());
+  mptr_indexBuffer->init(sizeof(uint16), mptr_indiceData->size(), 0);
+  mptr_indexBuffer->setData(mptr_indiceData->data());
 }
 
 void cMesh::initVertexBuffer(std::unique_ptr<std::vector<sVertexPosTex>> & vertexes)
 {
   mptr_vertexData = std::move(vertexes);
-  mptr_vertexBuffer->setDescription(sizeof(sVertexPosTex), mptr_vertexData->size(), 0);
-  mptr_vertexBuffer->setData(&mptr_vertexData->front());
+  mptr_vertexBuffer->init(sizeof(sVertexPosTex), mptr_vertexData->size(), 0);
+  mptr_vertexBuffer->setData(mptr_vertexData->data());
 }
 
 bool cMesh::createVertexBuffer(cDevice & device)
@@ -94,11 +94,7 @@ void cMesh::setTexture(const std::shared_ptr<cTexture2D> &newTexture)
 
 void cMesh::setTransform(const sMatrix4x4 & newTransform)
 {
-#if DIRECTX
-//  m_transform = newTransform;
-#elif OPEN_GL
-#endif // DIRECTX
-
+  m_transform = newTransform.matrix;
 }
 
 void cMesh::setTopology(Topology topology)
@@ -106,7 +102,7 @@ void cMesh::setTopology(Topology topology)
   m_topology = topology;
 }
 
-Topology 
+Topology
 cMesh::getTopology() const
 {
   return  m_topology;
@@ -125,13 +121,13 @@ cMesh::getIndexBuffer()
   return  *this->mptr_indexBuffer;
 }
 
-const std::vector<sVertexPosTex>* 
+const std::vector<sVertexPosTex>*
 cMesh::getVertexData() const
 {
   return mptr_vertexData.get();
 }
 
-const std::vector<uint16>* 
+const std::vector<uint16>*
 cMesh::getIndiceData() const
 {
   return mptr_indiceData.get();

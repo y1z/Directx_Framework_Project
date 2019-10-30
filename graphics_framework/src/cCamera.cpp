@@ -6,23 +6,25 @@
 
 cCamera::cCamera()
   :cCameraBase(),
-  m_fov(3.14159f / 4.0f)
+  m_fov(3.14159f / 4.0f),
+  m_speed(1200.0f)
 {
 #if DIRECTX
   m_trasfrom.matrix = glm::identity<glm::mat4x4>();
+  m_apiSpeedMultiplyer = 1.0f;
   this->updateCoords();
 #elif OPEN_GL
+  m_apiSpeedMultiplyer = 0.1f;
 #endif // DIRECTX
 }
 
 void
 cCamera::moveRight(float unit, cWindow &window, float deltaTime)
 {
-  m_eye.vector4 += glm::vec4((m_right.vector3 * unit), 0.0f);
-  m_at.vector4 += glm::vec4((m_right.vector3 * unit), 0.0f);
-  //dx::XMVECTOR UnitVector = {unit,unit,unit,unit};
-  //m_eye.vector4 = dx::XMVectorAdd(m_eye.vector4, dx::XMVectorMultiply(m_right.vector4, UnitVector));
-  //m_at.vector4 = dx::XMVectorAdd(m_at.vector4, dx::XMVectorMultiply(m_right.vector4, UnitVector));
+  glm::vec3 tempRight = m_right.vector3 * (m_speed * m_apiSpeedMultiplyer) * unit;
+
+  m_eye.vector4 += glm::vec4((tempRight * deltaTime), 0.0f);
+  m_at.vector4 += glm::vec4((tempRight * deltaTime), 0.0f);
 
   //this->updateCoords();
   this->updateCamera(window);
@@ -31,8 +33,10 @@ cCamera::moveRight(float unit, cWindow &window, float deltaTime)
 void
 cCamera::moveUp(float unit, cWindow &window, float deltaTime)
 {
-  m_eye.vector4 += m_up.vector4 * unit;
-  m_at.vector4 += m_up.vector4 *unit;
+  glm::vec4 tempUP = m_up.vector4 * (m_speed * m_apiSpeedMultiplyer) * unit;
+
+  m_eye.vector4 += tempUP * deltaTime;
+  m_at.vector4 += tempUP * deltaTime;
 
   // this->updateCoords();
   this->updateCamera(window);
@@ -41,8 +45,11 @@ cCamera::moveUp(float unit, cWindow &window, float deltaTime)
 void
 cCamera::moveFront(float unit, cWindow &window, float deltaTime)
 {
-  m_eye.vector4 += glm::vec4((m_front.vector3 * unit), 0.0f);
-  m_at.vector4 += glm::vec4((m_front.vector3 * unit), 0.0f);
+  glm::vec3 tempFront = m_front.vector3 * (m_speed * m_apiSpeedMultiplyer) * unit;
+
+  m_eye.vector4 += glm::vec4((tempFront *  deltaTime), 0.0f);
+  m_at.vector4 += glm::vec4((tempFront * deltaTime), 0.0f);
+
   //this->updateCoords();
   this->updateCamera(window);
 }
@@ -58,11 +65,11 @@ void cCamera::rotateCamera(sVector3 & OffSet, cWindow &window)
 void
 cCamera::calculateAndSetView()
 {
-  m_view.matrix = glm::lookAtLH(static_cast<glm::vec3>(m_eye.vector4),
-                                static_cast<glm::vec3>(m_at.vector4),
-                                static_cast<glm::vec3>(m_up.vector4));
+  m_view.matrix = glm::lookAtLH(static_cast< glm::vec3 >(m_eye.vector4),
+                                static_cast< glm::vec3 >(m_at.vector4),
+                                static_cast< glm::vec3 >(m_up.vector4));
 
-  m_view.matrix = glm::transpose(m_view.matrix);
+  helper::arrangeForApi(m_view);
 }
 
 void
@@ -76,7 +83,8 @@ cCamera::calculateAndSetPerpective(cWindow &window,
   m_projection.matrix = glm::perspectiveFovLH<float>(m_fov, window.getWidth(),
                                                      window.getHeight(), m_near, m_far);
 
-  m_projection.matrix = glm::transpose(m_projection.matrix);
+  //m_projection.matrix = glm::transpose(m_projection.matrix);
+  helper::arrangeForApi(m_projection);
   isOrtho = false;
   updateCoords();
 }
@@ -87,17 +95,26 @@ cCamera::calculateAndSetOrthographic(cWindow & window, float Far, float Near)
   m_far = Far;
   m_near = Near;
   //m_projection.matrix = //glm::orthoLH(window.getWidth(),window.getHeight(),)
-#if DIRECTX
-  RECT WindowCoords;
-  GetClientRect(window.getHandle(), &WindowCoords);
 
-  m_projection.matrix = glm::orthoLH<float>(WindowCoords.left, WindowCoords.right,
-                                            WindowCoords.bottom, WindowCoords.top,
-                                            m_near, m_far);
+  sWindowSize currentWindowSize = helper::getWindowSize(window);
 
-  m_projection.matrix = glm::transpose(m_projection.matrix);
-#elif OPEN_GL
-#endif // DIRECTX
+  //m_projection.matrix = glm::orthoLH<float>(WindowCoords.left, WindowCoords.right,
+  //                                          WindowCoords.bottom, WindowCoords.top,
+  //                                          m_near, m_far);
+
+  //m_projection.matrix = glm::ortho<float>(WindowCoords.left, -WindowCoords.left,
+  //                                        WindowCoords.bottom, -WindowCoords.bottom,
+  //                                        m_near, m_far);
+
+  //m_projection.matrix = glm::orthoLH<float>(WindowCoords.left, WindowCoords.right,
+  //                                          WindowCoords.bottom, WindowCoords.top,
+  //                                          -1.0f, 1.0f);
+
+  m_projection.matrix = glm::orthoLH<float>(0.0f, currentWindowSize.width,
+                                            0, currentWindowSize.height,
+                                            -1.0f, 1.0f);
+  helper::arrangeForApi(m_projection);
+  //m_projection.matrix = glm::transpose(m_projection.matrix);
 
   this->isOrtho = true;
 }
@@ -105,7 +122,7 @@ cCamera::calculateAndSetOrthographic(cWindow & window, float Far, float Near)
 void
 cCamera::moveTransform(sVector4 & Vector)
 {
-  m_trasfrom.matrix = glm::translate(m_trasfrom.matrix, static_cast<glm::vec3>(Vector.vector4));
+  m_trasfrom.matrix = glm::translate(m_trasfrom.matrix, static_cast< glm::vec3 >(Vector.vector4));
 }
 
 void
@@ -118,33 +135,26 @@ void
 cCamera::updateCamera(cWindow & window)
 {
 
-  //m_view.matrix = glm::lookAtLH(static_cast<glm::vec3>(m_eye.vector4),
-  //                              static_cast<glm::vec3>(m_at.vector4),
-  //                              static_cast<glm::vec3>(m_up.vector4));
-
-  //m_view.matrix = glm::transpose(m_view.matrix);
 
   if (this->isOrtho == false)
   {
     m_projection.matrix = glm::perspectiveFovLH<float>(m_fov, window.getWidth(),
                                                        window.getHeight(), m_near, m_far);
 
-    m_projection.matrix = glm::transpose(m_projection.matrix);
+    //m_projection.matrix = glm::transpose(m_projection.matrix);
+    helper::arrangeForApi(m_projection);
     //    m_projection.matrix = dx::XMMatrixTranspose(m_projection.matrix);
   }
   else
   {
-  #if DIRECTX
-    RECT WindowCoords;
-    GetClientRect(window.getHandle(), &WindowCoords);
+    sWindowSize currentWindowSize = helper::getWindowSize(window);
 
-    m_projection.matrix = glm::orthoLH<float>(WindowCoords.left, WindowCoords.right,
-                                              WindowCoords.bottom, WindowCoords.top,
-                                              m_near, m_far);
+    m_projection.matrix = glm::orthoLH<float>(0.0f, currentWindowSize.width,
+                                              0, currentWindowSize.height,
+                                              -1.0f, 1.0f);
 
-    m_projection.matrix = glm::transpose(m_projection.matrix);
-  #elif OPEN_GL
-  #endif // DIRECTX
+    helper::arrangeForApi(m_projection);
+    //m_projection.matrix = glm::transpose(m_projection.matrix);
     this->isOrtho = true;
   }
   updateCoords();
@@ -153,24 +163,18 @@ cCamera::updateCamera(cWindow & window)
 void
 cCamera::updateCoords()
 {
-#if DIRECTX
-  //m_front.vector3 = dx::XMVector4Normalize(dx::XMVectorSubtract(m_at.vector3, m_eye.vector3));
-  //m_right.vector3 = dx::XMVector4Normalize(dx::XMVector3Cross(m_up.vector3, m_front.vector3));
-  //m_up.vector3 = dx::XMVector4Normalize(dx::XMVector3Cross(m_front.vector3, m_right.vector3));
+  m_view.matrix = glm::lookAtLH(static_cast< glm::vec3 >(m_eye.vector4),
+                                static_cast< glm::vec3 >(m_at.vector4),
+                                static_cast< glm::vec3 >(m_up.vector4));
 
-  m_view.matrix = glm::lookAtLH(static_cast<glm::vec3>(m_eye.vector4),
-                                static_cast<glm::vec3>(m_at.vector4),
-                                static_cast<glm::vec3>(m_up.vector4));
+  helper::arrangeForApi(m_view);
+  //m_view.matrix = glm::transpose(m_view.matrix);
 
-  m_view.matrix = glm::transpose(m_view.matrix);
-
-  m_front.vector3 = glm::normalize(static_cast<glm::vec3>(m_at.vector4 - m_eye.vector4));
-  m_right.vector3 = glm::normalize(glm::cross(static_cast<glm::vec3>(m_up.vector4),
-                                              static_cast<glm::vec3>(m_front.vector3)));
+  m_front.vector3 = glm::normalize(static_cast< glm::vec3 >(m_at.vector4 - m_eye.vector4));
+  m_right.vector3 = glm::normalize(glm::cross(static_cast< glm::vec3 >(m_up.vector4),
+                                   static_cast< glm::vec3 >(m_front.vector3)));
 
   m_up.vector4 = glm::vec4(glm::normalize(glm::cross(m_front.vector3, m_right.vector3)), 0.0f);
-#elif OPEN_GL
-#endif // DIRECTX
 }
 
 sMatrix4x4
@@ -191,12 +195,14 @@ cCamera::getTransfrom() const
   return this->m_trasfrom;
 }
 
-float cCamera::getFovRad() const
+float
+cCamera::getFovRad() const
 {
   return m_fov;
 }
 
-float cCamera::getFovDeg() const
+float
+cCamera::getFovDeg() const
 {
   return this->m_fov * (180.0f / 3.14159f);
 }
@@ -213,9 +219,21 @@ cCamera::getFar() const
   return this->m_far;
 }
 
-bool cCamera::getIsOrtho() const
+float cCamera::getSpeed() const
+{
+  return m_speed;
+}
+
+bool
+cCamera::getIsOrtho() const
 {
   return isOrtho;
+}
+
+void
+cCamera::setSpeed(float newSpeed)
+{
+  m_speed = newSpeed;
 }
 
 

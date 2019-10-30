@@ -98,9 +98,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_DLL;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\glew\include;$(SolutionDir)dependencies\glfw\include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -110,17 +110,17 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;opengl32.lib;glew32d.lib;assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glew\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_DLL;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\glew\include;$(SolutionDir)dependencies\glfw\include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -130,8 +130,8 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mtd.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;opengl32.lib;glew32d.lib;assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glew\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -140,9 +140,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_DLL;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\glew\include;$(SolutionDir)dependencies\glfw\include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -154,8 +154,8 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;opengl32.lib;glew32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glew\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -164,9 +164,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_DLL;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp;$(SolutionDir)dependencies\imgui;$(SolutionDir)include;$(SolutionDir)dependencies\glew\include;$(SolutionDir)dependencies\glfw\include;$(SolutionDir)dependencies\DirectXTK\include;$(DEVLIBS)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -178,14 +178,16 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;assimp-vc141-mt.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTK.lib;d3d11.lib;dxguid.lib;glfw3dll.lib;opengl32.lib;glew32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\DirectXTK\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\assimp\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glfw\lib\$(PlatformTarget)\$(Configuration);$(SolutionDir)dependencies\glew\lib\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dependencies\imgui\imgui\imconfig.h" />
     <ClInclude Include="dependencies\imgui\imgui\imgui.h" />
     <ClInclude Include="dependencies\imgui\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="dependencies\imgui\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="dependencies\imgui\imgui\imgui_impl_win32.h" />
     <ClInclude Include="dependencies\imgui\imgui\imgui_internal.h" />
     <ClInclude Include="dependencies\imgui\imgui\imstb_rectpack.h" />
@@ -194,6 +196,7 @@
     <ClInclude Include="include\actor\baseComponent.h" />
     <ClInclude Include="include\actor\cAABB.h" />
     <ClInclude Include="include\actor\cActor.h" />
+    <ClInclude Include="include\actor\cSphere.h" />
     <ClInclude Include="include\actor\cTransform.h" />
     <ClInclude Include="include\cApiComponents.h" />
     <ClInclude Include="include\cBuffer.h" />
@@ -230,9 +233,12 @@
     <ClInclude Include="include\enum_headers\enumActorTypes.h" />
     <ClInclude Include="include\enum_headers\enumTextureAddress.h" />
     <ClInclude Include="include\enum_headers\enumTopology.h" />
+    <ClInclude Include="include\enum_headers\enumBufferUsage.h" />
     <ClInclude Include="include\imGuiManager.h" />
     <ClInclude Include="include\utility\CustomStructs.h" />
     <ClInclude Include="include\utility\enDefs.h" />
+    <ClInclude Include="include\utility\enErrorHandling.h" />
+    <ClInclude Include="include\utility\enHelperTemplates.h" />
     <ClInclude Include="include\utility\GraficsMacros.h" />
     <ClInclude Include="include\utility\Grafics_libs.h" />
     <ClInclude Include="include\utility\HelperFuncs.h" />
@@ -245,11 +251,14 @@
     <ClCompile Include="dependencies\imgui\imgui\imgui_demo.cpp" />
     <ClCompile Include="dependencies\imgui\imgui\imgui_draw.cpp" />
     <ClCompile Include="dependencies\imgui\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="dependencies\imgui\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="dependencies\imgui\imgui\imgui_widgets.cpp" />
     <ClCompile Include="include\actor\src\baseComponent.cpp" />
     <ClCompile Include="include\actor\src\cAABB.cpp" />
     <ClCompile Include="include\actor\src\cActor.cpp" />
+    <ClCompile Include="include\actor\src\cSphere.cpp" />
     <ClCompile Include="include\actor\src\cTransform.cpp" />
     <ClCompile Include="include\cCameraManager.cpp" />
     <ClCompile Include="include\utility\HelperFuncs.cpp" />

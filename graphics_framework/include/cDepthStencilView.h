@@ -42,6 +42,8 @@ public:
 private:
 #if DIRECTX
   ID3D11DepthStencilView*mptr_depthStencilView;
+#elif OPEN_GL 
+  uint32 m_depthStencilID = 0;
 #endif // DIRECTX
   sDepthStencilDescriptor m_Descriptor;
 public:

@@ -1,9 +1,9 @@
 #pragma once
 #include "utility/Grafics_libs.h"
 #include <filesystem>
+
 /*! this class is a container for variables that are used as globals inside 
 a API */
-
 class cApiComponents
 {
 public:
@@ -17,21 +17,33 @@ public:
   //! get the information for  
   D3D_DRIVER_TYPE 
     getHardwareVersion()const ;
-
-  void 
-    setSupportedVersion(int SupportedVersion);
-
-  void 
-    setHardwareVersion(int HardwareVersion);  
-  //!this is for components of the API's that are everywhere i don't think DirectX has something like this 
-  // so i just going a dummy function 
-  unsigned int  getGlobalComponent();
-  void setGlobalComponent(unsigned int Component);
 #elif OPEN_GL
-  
-  unsigned int &getGlobalComponent();
 #endif // DIRECTX
 
+  /*! set the version of the api used
+  \param [in] majorVersion keeps track of the bigger version changes of the api
+  \param [in] minorVersion */
+  void
+    setSupportedVersion(int majorVersion, int minorVersion = 0);
+
+  /*! set the hardware being used 
+  by the api */
+  void 
+    setHardwareVersion(int HardwareVersion);  
+
+#if OPEN_GL
+
+  /*! returns a reference to the shader program 
+  for open_gl */
+  static unsigned int 
+    *getShaderProgram();
+
+  /*! returns a reference to the 
+  vertex array object */
+  static unsigned int 
+    *getvertexArrayObject();
+
+#endif // OPEN_GL
 private:
   std::filesystem::path m_stratingPath;
 #if DIRECTX
@@ -39,7 +51,12 @@ private:
   D3D_DRIVER_TYPE m_driveType;
   //! used to know which version of the api is needed 
   D3D_FEATURE_LEVEL m_version;
+
 #elif OPEN_GL
-  unsigned int m_program{0};
+  static unsigned int GlShaderProgram ;
+  static unsigned int vertexArrayObject;
+  int m_majorVersion;
+  int m_minorVersion;
 #endif
 };
+

@@ -10,10 +10,13 @@ cRenderTargetView::cRenderTargetView()
 
 cRenderTargetView::~cRenderTargetView()
 {
+#if DIRECTX
   if (mptr_renderTragetView)
   {
     mptr_renderTragetView->Release();
   }
+#elif OPEN_GL
+#endif // DIRECTX
 }
 
 #if DIRECTX

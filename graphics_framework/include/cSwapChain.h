@@ -10,6 +10,7 @@
 class cRenderTargetView;
 class cTexture2D;
 class cDevice;
+class cWindow;
 
 /*! controls the settings for the swap-chain*/
 struct sSwapDesc
@@ -18,13 +19,19 @@ struct sSwapDesc
   uint32_t buffHeight = 1;
   int buffUsage = 0;
   int buffFormat = 0;
+#if DIRECTX
   HWND outputWindow; //! used only in directX 
-  //! controls the refresh rate  buffNumaretor / buffDenominator
+#elif OPEN_GL
+  GLFWwindow * outputWindow;//!< used only in open_gl 
+#else
+  void* outputWindow = nullptr;
+#endif // DIRECTX
+//! controls the refresh rate  buffNumaretor / buffDenominator
   uint16_t buffRefershNumaretor = 60;
   uint16_t buffRefershDenominator = 1;
-  uint8_t buffCount{0};
-  uint8_t sampCount{0};
-  uint8_t sampQuality{0};
+  uint8_t buffCount{ 0 };
+  uint8_t sampCount{ 0 };
+  uint8_t sampQuality{ 0 };
   bool isWindowd = true;
 };
 
@@ -64,28 +71,41 @@ public:// functions
   void
     setSwapChain(uint32_t width, uint32_t height,
                  int format, int usage,
-                 HWND handle, uint8_t bufferCount = 1,
+                 cWindow &handle, uint8_t bufferCount = 1,
                  uint16_t RefreshNumerator = 60, uint16_t RefreshDenominator = 1,
                  uint8_t SampCount = 1, uint8_t SampQuality = 0,
                  bool isWindowed = true);
-  /*!*/
+  /*! just passes the argument to the render-target*/
   void
     setRenderTarget(uint32 width, uint32 height, Formats format);
+  
+#if OPEN_GL
+          /*! set the window for the glfwSwapBuffers function */
+  void
+    setGlWindow(GLFWwindow *newWindow);
+
+#endif // OPEN_GL
+
   /*!returns the swap chain render target*/
   cRenderTarget&
     getRenderTarget();
+
   /*!returns the swap chain depth-stencil-view*/
   cDepthStencilView&
     getDepthStencilView();
+
   /*!returns the swap chain depth-stencil*/
   cTexture2D&
     getDepthStencil();
+
   /*!*/
   cRenderTargetView&
     getRenderTargerView();
+
   /*!*/
   void
     setDepthStencilView(Formats format, int Dimension = 3, int Mip = 0);
+
   /*! the swap-chain gets a buffer for swapping
   \param backBuffer [out] the resulting back buffer
   \param bufferIndex [in] determines which index the buffer belongs to */
@@ -104,6 +124,12 @@ public:// functions
 private:
 #if DIRECTX
   IDXGISwapChain *mptr_swapChain;
+#elif OPEN_GL
+  /*! this is so the swap-chain can use
+  the glSwapBuffer functions */
+  GLFWwindow *mptr_window = nullptr;
+  uint32 *mptr_backBuffer{nullptr};
+  uint32 *mptr_depthStencilView{ nullptr };
 #endif // DIRECTX
   sSwapDesc m_desc;
   cDepthStencilView m_depthStencilView;

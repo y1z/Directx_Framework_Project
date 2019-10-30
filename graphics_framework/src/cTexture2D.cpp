@@ -1,9 +1,12 @@
 
 #include "../include/cTexture2D.h"
 #include <memory>
+
 cTexture2D::cTexture2D()
 #if DIRECTX
   :mptr_texture(nullptr)
+#elif OPEN_GL
+  :m_textureID(0)
 #endif // DIRECTX
 {
   std::memset(&m_desc, 0, sizeof(m_desc));
@@ -19,8 +22,8 @@ cTexture2D::~cTexture2D()
   
 #endif // DIRECTX
 }
-#if DIRECTX
 
+#if DIRECTX
 ID3D11Texture2D
 * cTexture2D::getTexture()
 {
@@ -50,15 +53,21 @@ ID3D11ShaderResourceView
 void 
 cTexture2D::setDescriptor(float width, float height, int format, int usage, int bindFlags, int CpuAccess, int arraySize)
 {
-#if DIRECTX
   m_desc.texWidth = width;
   m_desc.texHeight = height;
   m_desc.texFormat = format; 
   m_desc.Usage = usage;
   m_desc.BindFlags = bindFlags; 
-  m_desc.CpuAccess;
+  m_desc.CpuAccess = CpuAccess;
   m_desc.arraySize = arraySize;
-#endif // DIRECTX
+#if OPEN_GL
+  glGenTextures(1, &m_textureID);
+  glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+#endif // OPEN_GL
+
 }
 
 sTextureDescriptor 
@@ -66,8 +75,31 @@ cTexture2D::getDescriptor()
 {
   return  m_desc;
 }
+#if OPEN_GL
 
-void cTexture2D::Release()
+uint32 
+cTexture2D::getID() const
+{
+  return m_textureID;
+}
+
+uint32 * 
+cTexture2D::getIDPtr()
+{
+  return &m_textureID;
+}
+
+void 
+cTexture2D::setID(uint32 newID)
+{
+  m_textureID = newID;
+}
+
+
+
+#endif // OPEN_GL
+void
+cTexture2D::Release()
 {
 #if DIRECTX
   mptr_texture->Release();

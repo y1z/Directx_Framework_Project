@@ -2,14 +2,13 @@
 #include "../include/cRenderTarget.h"
 #include <memory>
 
-#if DIRECTX
-
 cRenderTarget::cRenderTarget()
-{
-}
+{}
 
 cRenderTarget::~cRenderTarget()
 {}
+
+#if DIRECTX
 
 ID3D11Texture2D *
 cRenderTarget::getRenderTarget()
@@ -55,6 +54,5 @@ cRenderTarget::Release()
 #if DIRECTX
   this->m_target.Release();
 #endif // DIRECTX
-
 }
 

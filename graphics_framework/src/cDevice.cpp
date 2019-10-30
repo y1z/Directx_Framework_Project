@@ -11,11 +11,18 @@
 #include "../include/cConstBuffer.h"
 #include "../include/cSampler.h"
 #include "../include/cRenderTarget.h"
+#include "cApiComponents.h" // for shaderProgram 
+
+#include "utility/HelperFuncs.h"
 //std includes 
 #include <vector>
 
 cDevice::cDevice()
+#if DIRECTX
   :mptr_device(nullptr)
+#elif   OPEN_GL
+  :mptr_device(0)
+#endif // DIRECTX
 {}
 
 cDevice::~cDevice()
@@ -38,7 +45,28 @@ bool cDevice::CreateRenderTargetView(cTexture2D & texture, cRenderTargetView & r
   {
     return true;
   }
+#elif OPEN_GL
+  //TODO :  set up the frame buffer  http://docs.gl/gl4/glGenFramebuffers
+  GlRemoveAllErrors();
+  glGenFramebuffers(1, texture.getIDPtr());
+  glBindFramebuffer(GL_FRAMEBUFFER, texture.getID());
 
+
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  //if (status != GL_FRAMEBUFFER_COMPLETE)
+  //{
+  //	 std::string ErrorCode = std::to_string(status);
+  //	 assert(true == false && "Frame buffer Errror :");
+  //}
+
+  if (!GlCheckForError())
+  {
+    // un bind the buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return true;
+  }
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  return true;
 #endif // 0
   return false;
 }
@@ -54,10 +82,32 @@ bool cDevice::CreateRenderTargetView(cRenderTarget & renderTarget, cRenderTarget
   {
     return true;
   }
+  return false;
+#elif OPEN_GL
+  GlRemoveAllErrors();
 
-#endif // 0
+  glGenFramebuffers(1, renderTarget.getTexture().getIDPtr());
+  glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.getTexture().getID());
+
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  //if (status != GL_FRAMEBUFFER_COMPLETE)
+  //{
+  //	 std::string ErrorCode = std::to_string(status);
+  //	 assert(true == false && "Frame buffer Errror :");
+  //}
+
+  if (!GlCheckForError())
+  {
+    // un bind the buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return true;
+  }
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+#endif // DIRECTX
   return false;
 }
+
 
 bool cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Texture)
 {
@@ -69,16 +119,32 @@ bool cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Tex
   descDepth.Height = Description.texHeight;
   descDepth.MipLevels = 1;
   descDepth.ArraySize = 1;
-  descDepth.Format = static_cast<DXGI_FORMAT> (Description.texFormat);//DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT_D24_UNORM_S8_UINT
+  descDepth.Format = static_cast< DXGI_FORMAT > (Description.texFormat);//DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT_D24_UNORM_S8_UINT
   descDepth.SampleDesc.Count = 1;
   descDepth.SampleDesc.Quality = 0;
-  descDepth.Usage = static_cast<D3D11_USAGE> (Description.Usage);
+  descDepth.Usage = static_cast< D3D11_USAGE > (Description.Usage);
   descDepth.BindFlags = Description.BindFlags;
   descDepth.CPUAccessFlags = Description.CpuAccess;
   descDepth.MiscFlags = 0;
 
   hr = mptr_device->CreateTexture2D(&descDepth, NULL, Texture.getTextureRef());
   if (SUCCEEDED(hr))
+  {
+    return true;
+  }
+#elif OPEN_GL
+  GlRemoveAllErrors();
+
+  glBindTexture(GL_TEXTURE_2D, Texture.getID());
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Description.texWidth, Description.texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  if (!GlCheckForError())
   {
     return true;
   }
@@ -93,21 +159,43 @@ bool cDevice::CreateDepthStencilView(cDepthStencilView & DepthView)
   HRESULT hr;
   D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
   SecureZeroMemory(&descDSV, sizeof(descDSV));
-  descDSV.Format = static_cast<DXGI_FORMAT>(DepthView.getDescriptor().Format);
-  descDSV.ViewDimension = static_cast<D3D11_DSV_DIMENSION>(DepthView.getDescriptor().Dimension);
+  descDSV.Format = static_cast< DXGI_FORMAT >(DepthView.getDescriptor().Format);
+  descDSV.ViewDimension = static_cast< D3D11_DSV_DIMENSION >(DepthView.getDescriptor().Dimension);
   descDSV.Texture2D.MipSlice = DepthView.getDescriptor().Mip;
 
-  hr = mptr_device->CreateDepthStencilView(DepthView.getTexture(),&descDSV, DepthView.getDepthStencilViewRef());
+  hr = mptr_device->CreateDepthStencilView(DepthView.getTexture(), &descDSV, DepthView.getDepthStencilViewRef());
 
   if (SUCCEEDED(hr))
   {
     return true;
   }
+#elif OPEN_GL
+  /* TODO :*/
+  //GlRemoveAllErrors();
+  glEnable(GL_DEPTH_TEST);
+  //glGenRenderbuffers(1, DepthView.getDepthStencil().getIDPtr());
+  //glBindRenderbuffer(GL_RENDERBUFFER,DepthView.getDepthStencil().getID());
+
+  //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+  //                      DepthStencilView.GetTexture2D()->GetWidth(), DepthStencilView.GetTexture2D()->GetHeight());
+
+  //glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+  //if (!GlCheckForError())
+  //{
+  //  return true;
+  //}
+  //else
+  //{
+  //  return false;
+  //}
+  return true;
 #endif // DIRECTX
   return false;
 }
 
-bool cDevice::CreateVertexShader(cVertexShader & vertexShader)
+bool
+cDevice::CreateVertexShader(cVertexShader & vertexShader)
 {
 #if DIRECTX
   HRESULT hr;
@@ -120,8 +208,28 @@ bool cDevice::CreateVertexShader(cVertexShader & vertexShader)
   {
     return true;
   }
-  return false;
+#elif OPEN_GL
+  GlRemoveAllErrors();
+  glAttachShader(*cApiComponents::getShaderProgram(), vertexShader.getID());
+  glLinkProgram(*cApiComponents::getShaderProgram());
+  glValidateProgram(*cApiComponents::getShaderProgram());
+
+  int Status;
+  glGetProgramiv(*cApiComponents::getShaderProgram(), GL_VALIDATE_STATUS, &Status);
+  if (Status == GL_FALSE)
+  {
+    En_LOG_ERROR_WITH_CODE(enErrorCode::ShaderLinkError);
+  }
+
+  if (GlCheckForError())
+  {
+    return false;
+  }
+
+  return true;
 #endif // DIRECTX
+
+  return false;
 }
 
 bool cDevice::CreatePixelShader(cPixelShader & pixelShader)
@@ -137,7 +245,27 @@ bool cDevice::CreatePixelShader(cPixelShader & pixelShader)
   {
     return true;
   }
+#elif  OPEN_GL
+  GlRemoveAllErrors();
+  glAttachShader(*cApiComponents::getShaderProgram(), pixelShader.getID());
+  glLinkProgram(*cApiComponents::getShaderProgram());
+  glValidateProgram(*cApiComponents::getShaderProgram());
+
+  int Status;
+  glGetProgramiv(*cApiComponents::getShaderProgram(), GL_VALIDATE_STATUS, &Status);
+  if (Status == GL_FALSE)
+  {
+    En_LOG_ERROR_WITH_CODE(enErrorCode::ShaderLinkError);
+  }
+
+  if (GlCheckForError())
+  {
+    return false;
+  }
+
+  return true;
 #endif // DIRECTX
+
   return false;
 }
 
@@ -152,12 +280,12 @@ bool cDevice::CreateInputLayout(cInputLayout &inputLayout
   for (int i = 0; i < NumElements; ++i)
   {
     D3D11_INPUT_ELEMENT_DESC Desc;
-    Desc.Format = static_cast<DXGI_FORMAT>(intermediateDesc[i].Format);
-    Desc.AlignedByteOffset = (UINT) intermediateDesc[i].Alignment;
+    Desc.Format = static_cast< DXGI_FORMAT >(intermediateDesc[i].Format);
+    Desc.AlignedByteOffset = ( UINT )intermediateDesc[i].Alignment;
     Desc.SemanticIndex = intermediateDesc[i].Index;
     Desc.SemanticName = intermediateDesc[i].Name.c_str();
     Desc.InputSlot = intermediateDesc[i].Slot;
-    Desc.InputSlotClass = static_cast<D3D11_INPUT_CLASSIFICATION> (intermediateDesc[i].SlotClass);
+    Desc.InputSlotClass = static_cast< D3D11_INPUT_CLASSIFICATION > (intermediateDesc[i].SlotClass);
     Desc.InstanceDataStepRate = intermediateDesc[i].InstanceData;
     ElementDesc.emplace_back(Desc);
   }
@@ -170,6 +298,9 @@ bool cDevice::CreateInputLayout(cInputLayout &inputLayout
   {
     return true;
   }
+#elif OPEN_GL
+  //TODO:  create input layout  
+  return true;
 #endif // DIRECTX
   return false;
 }
@@ -181,17 +312,17 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
   std::vector<D3D11_INPUT_ELEMENT_DESC> directxInputLayout;
   // my input layout struct 
   std::vector<sInputDescriptor> intermidateLayout = inputLayout.getInputDescriptor();
-  /*convert my intermediate input layout format to 
+  /*convert my intermediate input layout format to
   directX input layout format */
   for (const sInputDescriptor &intermidate : intermidateLayout)
   {
     D3D11_INPUT_ELEMENT_DESC directxDesc;
-    directxDesc.Format = static_cast<DXGI_FORMAT>(intermidate.Format);
-    directxDesc.AlignedByteOffset = static_cast<UINT>(intermidate.Alignment);
+    directxDesc.Format = static_cast< DXGI_FORMAT >(intermidate.Format);
+    directxDesc.AlignedByteOffset = static_cast< UINT >(intermidate.Alignment);
     directxDesc.SemanticIndex = intermidate.Index;
     directxDesc.SemanticName = intermidate.Name.c_str();
     directxDesc.InputSlot = intermidate.Slot;
-    directxDesc.InputSlotClass = static_cast<D3D11_INPUT_CLASSIFICATION> (intermidate.SlotClass);
+    directxDesc.InputSlotClass = static_cast< D3D11_INPUT_CLASSIFICATION > (intermidate.SlotClass);
     directxDesc.InstanceDataStepRate = intermidate.InstanceData;
     directxInputLayout.emplace_back(directxDesc);
   }
@@ -206,6 +337,8 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
     return true;
   }
 #elif OPEN_GL
+  // TODO : create input layout 
+  return true;
 #endif // DIRECTX
   return false;
 }
@@ -231,7 +364,38 @@ bool cDevice::CreateVertexBuffer(cVertexBuffer & VertexBuffer)
     return true;
   }
   return false;
+#elif OPEN_GL
+  GlRemoveAllErrors();
+
+  glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer.getID());
+
+  glBufferData(GL_ARRAY_BUFFER, // buffer type 
+               VertexBuffer.getBufferSize(),
+               VertexBuffer.getData(), GL_DYNAMIC_DRAW);
+
+
+  int32 size;
+  glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+  if (size != VertexBuffer.getBufferSize())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+  else
+  { return true; }
+
 #endif // DIRECTX
+  return false;
 }
 
 bool cDevice::CreateIndexBuffer(cIndexBuffer & indexBuffer)
@@ -255,6 +419,35 @@ bool cDevice::CreateIndexBuffer(cIndexBuffer & indexBuffer)
     return true;
   }
   return false;
+#elif OPEN_GL 
+  GlRemoveAllErrors();
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.getID());
+
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, // buffer type 
+               indexBuffer.getBufferSize(),
+               indexBuffer.getData(), GL_STATIC_DRAW);
+
+
+  int32 size;
+  glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+  if (size != indexBuffer.getBufferSize())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+  else
+  { return true; }
 #endif // DIRECTX
   return true;
 }
@@ -279,6 +472,45 @@ bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
     return true;
   }
   return false;
+#elif OPEN_GL
+  GlRemoveAllErrors();
+
+  int ActiveUniformCount;
+  uint32_t * shaderProgram = cApiComponents::getShaderProgram();
+
+  glUseProgram(*shaderProgram);
+
+  glGetProgramiv(*shaderProgram, GL_ACTIVE_UNIFORMS, &ActiveUniformCount);
+
+  // the view matrix 
+  if (constBuffer.getIndex() == 0)
+  {
+    auto location = glGetUniformLocation(*shaderProgram, "uView");
+    *constBuffer.getIDPtr() = location;
+  }
+  // the projection matrix 
+  else if (constBuffer.getIndex() == 1)
+  {
+    auto location = glGetUniformLocation(*shaderProgram, "uProjection");
+    *constBuffer.getIDPtr() = location;
+  }
+  // the world matrix 
+  else if (constBuffer.getIndex() == 2)
+  {
+    //glUniformBlockBinding()
+    *constBuffer.getIDPtr() = glGetUniformBlockIndex(*shaderProgram, "u_worldAndColor");
+    glGenBuffers(1, constBuffer.getGlUniformBlockIDPtr());
+    glBindBuffer(GL_UNIFORM_BUFFER, constBuffer.getGlUniformBlockID());
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+  }
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+  return true;
+
 #endif // DIRECTX
   return true;
 }
@@ -296,6 +528,19 @@ bool cDevice::CreateSamplerState(cSampler & sampler)
     return true;
   }
   return false;
+#elif OPEN_GL
+  //TODO : add sampler function 
+  GlRemoveAllErrors();
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+  else
+  {
+    return true;
+  }
 #endif // DIRECTX
   return false;
 }

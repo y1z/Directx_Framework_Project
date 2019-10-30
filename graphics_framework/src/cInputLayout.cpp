@@ -12,10 +12,13 @@ cInputLayout::cInputLayout()
 
 cInputLayout::~cInputLayout()
 {
+#if DIRECTX
   if (mptr_inputLayout)
   {
     mptr_inputLayout->Release();
   }
+#elif OPEN_GL
+#endif // DIRECTX
 }
 
 #if DIRECTX
@@ -161,6 +164,7 @@ bool cInputLayout::ReadShaderData(cVertexShader & ShaderData, bool isPerVertex)
   // no longer needed 
   ReflectorShader->Release();
   return true;
+#elif OPEN_GL
 
 #endif // DIRECTX
   return true;

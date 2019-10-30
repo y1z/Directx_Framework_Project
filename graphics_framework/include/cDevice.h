@@ -75,6 +75,7 @@ private:
   ID3D11Device *mptr_device = nullptr;
 
 #elif OPEN_GL  // DIRECTX 
+ unsigned int mptr_device;
 #endif 
 };
 

@@ -4,7 +4,8 @@
 cDepthStencilView::cDepthStencilView()
 #if DIRECTX
   :mptr_depthStencilView(nullptr)
-
+#elif OPEN_GL
+  :m_depthStencilID(0)
 #endif // DIRECTRX
 {}
 
@@ -31,32 +32,32 @@ ID3D11DepthStencilView ** cDepthStencilView::getDepthStencilViewRef()
   return &mptr_depthStencilView;
 }
 
-ID3D11Texture2D * 
+ID3D11Texture2D *
 cDepthStencilView::getTexture()
 {
   return m_depthStencil.getTexture();
 }
 
-ID3D11Texture2D ** 
+ID3D11Texture2D **
 cDepthStencilView::getTextureRef()
 {
   return m_depthStencil.getTextureRef();
 }
 
- #endif // DIRECTX 
+#endif // DIRECTX 
 
-sDepthStencilDescriptor 
+sDepthStencilDescriptor
 cDepthStencilView::getDescriptor() const
 {
   return this->m_Descriptor;
 }
 
-void 
+void
 cDepthStencilView::init(int Format, int Dimension, int mip)
 {
   m_Descriptor.Format = Format;
-  m_Descriptor.Dimension= Dimension;
-  m_Descriptor.Mip= mip;
+  m_Descriptor.Dimension = Dimension;
+  m_Descriptor.Mip = mip;
 }
 
 cTexture2D &
@@ -65,10 +66,13 @@ cDepthStencilView::getDepthStencil()
   return m_depthStencil;
 }
 
-void 
+void
 cDepthStencilView::ReleaseAll()
 {
   m_depthStencil.Release();
+#if DIRECTX
   mptr_depthStencilView->Release();
   mptr_depthStencilView = nullptr;
+#elif OPEN_GL
+#endif // DIRECTX
 }

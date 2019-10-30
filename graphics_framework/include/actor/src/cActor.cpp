@@ -40,6 +40,16 @@ cActor::DrawComponent(std::size_t Index, cDeviceContext &deviceContext, std::vec
   }
 }
 
+void 
+cActor::DrawAllComponents(cDeviceContext & deviceContext, std::vector<cConstBuffer*>& buffers)
+{
+  for (auto & component : m_components)
+  {
+    component->Draw(deviceContext, buffers);
+  }
+
+}
+
 void
 cActor::InitComponent(std::size_t Index, cDeviceContext & deviceContext, cDevice & device)
 {

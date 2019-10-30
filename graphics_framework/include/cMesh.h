@@ -85,8 +85,6 @@ private:
   //! controls which topology it used be each mesh.
   Topology m_topology;
   glm::mat4 m_transform;
-#if DIRECTX
-#endif // DIRECTX
 };
 
 

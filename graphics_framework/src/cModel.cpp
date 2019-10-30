@@ -12,6 +12,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "utility/CustomStructs.h"
+#include "utility/HelperFuncs.h"
 
 #include <cassert>
 #include <iostream>
@@ -48,30 +49,22 @@ cModel::cModel(std::string_view strView)
 bool
 cModel::LoadModelFromFile(cDevice &device)
 {
-  /************** REMOVED BECUASE OF LINKER ERRORS ***************/
-  //Assimp::Importer importer;
-  //
-  //const aiScene* TheScene = importer.ReadFile(filePath,
-  //                                            aiProcess_Triangulate |
-  //                                            aiProcessPreset_TargetRealtime_MaxQuality |
-  //                                            aiProcess_ConvertToLeftHanded);
+  Assimp::Importer importer;
 
-  const aiScene* Scene = aiImportFile(m_modelPath.c_str(),
-                                      aiProcessPreset_TargetRealtime_MaxQuality |
-                                      aiProcess_ConvertToLeftHanded);
+  const aiScene* Scene = importer.ReadFile(m_modelPath.c_str(),
+                                           aiProcessPreset_TargetRealtime_MaxQuality |
+                                           aiProcess_ConvertToLeftHanded);
 
 
   std::vector<std::string> texturePaths;
 
   if (Scene == nullptr)
   {
-    aiReleaseImport(Scene);
     return false;
   }
   else
   {
     this->TraversTree(Scene, Scene->mRootNode, device, texturePaths);
-    aiReleaseImport(Scene);
     return true;
   }
 
@@ -84,22 +77,39 @@ cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &
   //m_meshes[2].setTopology(Topology::LineList);
   const glm::mat4 Identidad(1.0f);
 
+#if DIRECTX
+  glm::mat4 Transform(Identidad * this->m_transform.matrix);
+#elif OPEN_GL
+
+//  glm::mat4 Transform(Identidad * this->m_transform.matrix);
+  glm::mat4 Transform(Identidad * glm::transpose(this->m_transform.matrix));
+#else
+  glm::mat4 Transform(Identidad);
+#endif // DIRECTX
+
+    //mesh.setTransform(Transform);
   for (cMesh &mesh : m_meshes)
   {
-    glm::mat4 Transform(Identidad * this->m_transform.matrix);
-    mesh.setTransform(Transform);
-    deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), Formats::R16);
+    deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), Formats::uR16);
     deviceContext.IASetVertexBuffers(&mesh.getVertexBuffer(), 1);
-    deviceContext.IASetPrimitiveTopology(static_cast<int>(mesh.getTopology()));
+    deviceContext.IASetPrimitiveTopology(static_cast< int >(mesh.getTopology()));
+  #if DIRECTX
     if (mesh.getResource() != nullptr)
-    { deviceContext.PSSetShaderResources(mesh); }
+    {
+      deviceContext.PSSetShaderResources(mesh);
+    }
+  #endif // DIRECTX
 
-    deviceContext.DrawIndexed(mesh.getIndexBuffer().getElementCount(), 0);
-
-    Cb.world = glm::transpose(Transform);
-    Cb.color = color;
-    deviceContext.UpdateSubresource(buffers[0], &Cb);
+    deviceContext.DrawIndexed(mesh.getIndexBuffer().getElementCount(),0);
   }
+
+  sMatrix4x4 temp;
+  temp.matrix = Transform;
+  helper::arrangeForApi(temp);
+  Cb.world = temp.matrix;
+  Cb.color = color;
+  deviceContext.UpdateSubresource(buffers[0], &Cb);
+
 }
 
 void
@@ -115,13 +125,21 @@ cModel::setMaterialPath(const std::string_view MaterialPath)
   m_materialPaths.push_back(std::string(MaterialPath));
 }
 
+void cModel::AddMesh(cMesh && newMesh)
+{
+  m_meshes.push_back (std::forward<cMesh>(newMesh));
+  setReady(true);
+}
+
+
+
 std::size_t
 cModel::getMeshCount() const
 {
   return m_meshes.size();
 }
 
-std::size_t 
+std::size_t
 cModel::getVertexCount() const
 {
   std::size_t Result(0);
@@ -161,7 +179,7 @@ cModel::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*> &buffers)
   DrawMeshes(devContext, buffers);
 }
 
-void cModel::update(cDeviceContext & deviceContext, const sMatrix4x4 &Transform )
+void cModel::update(cDeviceContext & deviceContext, const sMatrix4x4 &Transform)
 {
   m_transform = Transform;
 }
@@ -197,7 +215,7 @@ void
 cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device,
                     const aiScene*scene, std::vector<std::string> &texturePaths)
 {
-  std::unique_ptr< std::vector<uint16>> ptr_indices = std::make_unique<std::vector<uint16>>();
+  std::unique_ptr<std::vector<uint16>> ptr_indices = std::make_unique<std::vector<uint16>>();
   std::unique_ptr<std::vector<sVertexPosTex>> ptr_vertices = std::make_unique<std::vector<sVertexPosTex>>();
 
   ptr_indices->reserve(assimpMesh->mNumFaces * 3);
@@ -226,8 +244,8 @@ cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device,
     vertex.pos.w = 1.0f;
     if (assimpMesh->HasTextureCoords(0))
     {
-      vertex.tex.x = static_cast<float>(assimpMesh->mTextureCoords[0][i].x);
-      vertex.tex.y = static_cast<float>(assimpMesh->mTextureCoords[0][i].y);
+      vertex.tex.x = static_cast< float >(assimpMesh->mTextureCoords[0][i].x);
+      vertex.tex.y = static_cast< float >(assimpMesh->mTextureCoords[0][i].y);
     }
     ptr_vertices->emplace_back(vertex);
   }
@@ -254,7 +272,7 @@ cModel::CheckTexturePaths(const aiScene * scene, const aiMesh *assimpMesh, std::
   std::filesystem::path Path = m_modelPath;
   Path = Path.parent_path();
   fs::directory_iterator dirIter(Path);
-  static std::vector<std::string >  ExtensionFormast = {{".jpg"},{".png"}};
+  static std::vector<std::string >  ExtensionFormast = { {".jpg"},{".png"} };
 
   //TODO : make this dynamic 
   //for (const fs::path p : dirIter)

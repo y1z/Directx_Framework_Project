@@ -42,12 +42,17 @@ public:
   void
     setMaterialPath(const std::string_view MaterialPath);
 
+  void
+    AddMesh(cMesh && newMesh);
+
   /*! returns the total number of mesh the model has */
   std::size_t 
     getMeshCount() const;
+
   /*! returns the number of vertex the model is composed of. */
   std::size_t 
     getVertexCount()const;
+
   /*! returns a pointer to a that the model contains */
   [[nodiscard]]const cMesh*
     getMesh(std::size_t index) const ;
@@ -72,6 +77,7 @@ public:// baseComponent functions
   void
     setTransform(glm::mat4 &matrix);
 
+  /**/
   glm::mat4
     getTransform()const;
 private:

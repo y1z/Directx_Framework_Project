@@ -4,8 +4,8 @@
 
 cCameraBase::cCameraBase()
 {// default values taken from the tutorial 
-  m_eye.vector4 = glm::vec4(0.0f, 3.0f, -6.0f, 0.0f);
-  m_at.vector4 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+  m_eye.vector4 = glm::vec4(0.0f, 3.0f, -6.0f, 1.0f);
+  m_at.vector4 = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
   m_up.vector4 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 }
 

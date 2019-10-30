@@ -24,5 +24,16 @@ enum class Filter
   Anisotropic_Comperasion, 
   Anisotropic_Minimum, 
   Anisotropic_Maximum
+#else
+MinMagMip_Point ,
+MinMagMip_Point_Linear ,
+MinMagMip_Linear_Mip_Point ,
+MinMagMip_MagMip_Linear ,
+MinMagMip_Linear ,
+  /**************************************/
+Anisotropic, 
+Anisotropic_Comperasion, 
+Anisotropic_Minimum ,
+Anisotropic_Maximum ,
 #endif // DIRECTX
 };

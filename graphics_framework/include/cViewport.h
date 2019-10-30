@@ -1,11 +1,11 @@
 #pragma once
 #include "../include/utility/Grafics_libs.h"
-#include <cinttypes>
+#include "utility/enDefs.h"
 //! intermediate for using it in multiple API's  
 struct sViewportDesc
 {
-  float width{1.0f};
-  float height{1.0f};
+  uint32 width{1u};
+  uint32 height{1u};
   float minDepth{0.0f};
   float maxDepth{0.0f};
   float TopLeftX{0.0f};
@@ -21,7 +21,7 @@ public:
   ~cViewport();
 public:
   void/*! sets all the values of the viewport*/
-    setViewport(float width, float height,
+    setViewport(uint32 width, uint32 height,
                 float minDepth, float maxDepth,
                 float TopLeftX = 0.0f, float TopLeftY = 0.0f);
 
@@ -29,8 +29,15 @@ public:
   //! returns the descriptor for the view-port
   D3D11_VIEWPORT
     getViewport();
-
+#elif OPEN_GL 
+  sViewportDesc
+  getViewport() const ;
 #endif // DIRECTX
+  int32
+  getWidth()const;
+
+  int32
+  getHeight()const;
 private:
   sViewportDesc m_viewportDesc;
 #if DIRECTX

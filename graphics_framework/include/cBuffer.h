@@ -7,12 +7,13 @@
 //! this will represent the data my buffer has 
 struct sBufferDesc
 {
-  uint32_t sizeOfBuffer{0};
-  int usage{0};
-  uint32_t bindFlags{0};
-  uint32_t cpuAccess{0};
-  uint32_t miscFlags{0};
+  uint32_t sizeOfBuffer{ 0 };
+  int usage{ 0 };
+  uint32_t bindFlags{ 0 };
+  uint32_t cpuAccess{ 0 };
+  uint32_t miscFlags{ 0 };
   uint32_t structured;
+  void *ptr_data;
 };
 
 /*! this is the base class for all buffer types */
@@ -24,25 +25,25 @@ public:
   virtual ~cBuffer();
 #if DIRECTX
   //! for functions that require a single pointer 
-  ID3D11Buffer 
+  ID3D11Buffer
     *getBuffer();
 
   //! for functions that require a 2 pointers 
-  ID3D11Buffer 
+  ID3D11Buffer
     **getBufferRef();
 #endif // DIRECTX
 
 public: // functions 
   //! for setting the values in the buffer 
   virtual void
-    setDescription(uint32_t singleElementSize,
-                   uint32_t totalElements,
-                   uint32_t  cpuAccess,
-                   uint32_t miscFlags = 0,
-                   uint32_t structured = 0) = 0;
+    init(uint32_t singleElementSize,
+         uint32_t totalElements,
+         uint32_t  cpuAccess,
+         uint32_t miscFlags = 0,
+         uint32_t structured = 0) = 0;
 
 //! returns the number of elements in the buffer 
-  std::size_t 
+  std::size_t
     getElementCount() const;
 
 #if DIRECTX
@@ -50,20 +51,36 @@ public: // functions
   virtual D3D11_BUFFER_DESC
     getDirectXDesc() = 0;
 
+#elif OPEN_GL
+  uint32_t
+    getID() const;
+
+  uint32_t *
+    getIDPtr();
 #endif // DIRECTX
+
   //!return the buffer descriptor 
   sBufferDesc
     getDescriptor() const;
+
   //!return the type the buffer is (vertex ,index , const)
   BufferType
     getBufferType() const;
+
   //! return the stride of the buffer 
   std::size_t
     getStride() const;
+
+  uint32_t
+    getBufferSize() const;
+
 protected:
+
 #if DIRECTX
   //! directX 11 buffer implementation
   ID3D11Buffer *mptr_buffer;
+#elif OPEN_GL
+  uint32_t m_bufferID = 0;
 #endif 
   //! keeps track of how many element's a buffer contains
   std::size_t m_elementCount;

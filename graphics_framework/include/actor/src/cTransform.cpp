@@ -13,9 +13,10 @@ cTransform::cTransform()
 }
 
 void
-cTransform::moveTransform(float x, float y, float z, float w)
+cTransform::moveTransform(float x, float y, float z, float w, float deltaTime)
 {
   glm::vec3 moveVector(x, y, z);
+  moveVector *= deltaTime;
   m_transformMatrix.matrix = glm::translate(m_transformMatrix.matrix, moveVector);
 }
 
@@ -52,7 +53,7 @@ cTransform::shearTransformInXAxis(float shearingAmount)
   m_transformMatrix.matrix *= shearMatrix;
 }
 
-void 
+void
 cTransform::shearTransformInYAxis(float shearingAmount)
 {
   glm::mat4 shearMatrix(1.0f);
@@ -61,7 +62,7 @@ cTransform::shearTransformInYAxis(float shearingAmount)
   m_transformMatrix.matrix *= shearMatrix;
 }
 
-void 
+void
 cTransform::shearTransformInZAxis(float shearingAmount)
 {
   glm::mat4 shearMatrix(1.0f);
@@ -70,21 +71,21 @@ cTransform::shearTransformInZAxis(float shearingAmount)
   m_transformMatrix.matrix *= shearMatrix;
 }
 
-void 
+void
 cTransform::reflectTransfromInXAxis(float Amount)
 {
   glm::vec4 reflectionColum(-Amount, 0.0f, 0.0f, 0.0f);
   m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 0, reflectionColum);
 }
 
-void 
+void
 cTransform::reflectTransfromInYAxis(float Amount)
 {
   glm::vec4 reflectionColum(0.0f, -Amount, 0.0f, 0.0f);
   m_transformMatrix.matrix = glm::column(m_transformMatrix.matrix, 1, reflectionColum);
 }
 
-void 
+void
 cTransform::reflectTransfromInZAxis(float Amount)
 {
   glm::vec4 reflectionColum(0.0f, 0.0f, -Amount, 0.0f);
@@ -110,15 +111,15 @@ cTransform::Init(cDevice & device, cDeviceContext & deviceContext)
   m_transformMatrix.matrix = glm::identity<glm::mat4>();
 }
 
-void 
+void
 cTransform::Draw(cDeviceContext & devContext, std::vector<cConstBuffer*>& constBuffers)
 {}
 
-void 
+void
 cTransform::update(cDeviceContext & deviceContext, const sMatrix4x4 &Transform)
 {}
 
-void 
+void
 cTransform::Destroy()
 {}
 

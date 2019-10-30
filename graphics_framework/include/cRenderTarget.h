@@ -41,9 +41,7 @@ public:
   void
     Release();
 private:
-#if DIRECTX
   cTexture2D m_target;
-#endif // DIRECTX
   sRenderTarget m_desc;
 };
 

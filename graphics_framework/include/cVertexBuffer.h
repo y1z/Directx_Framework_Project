@@ -11,7 +11,7 @@ public:
 public:
 
   void //! set the buffer 
-    setDescription(uint32_t singleElementSize,
+    init(uint32_t singleElementSize,
                    uint32_t TotalElements,
                    uint32_t  cpuAccess,
                    uint32_t miscFlags = 0,
@@ -19,6 +19,9 @@ public:
   //! set a pointer to the vertex data  
   void
     setData(void* ptr);
+
+  const void *
+    getData() const;
 
 #if DIRECTX
   //! for interfacing with directX 
@@ -31,8 +34,9 @@ public:
 #endif // DIRECTX
 private:
 #if DIRECTX
-  D3D11_SUBRESOURCE_DATA m_data;
+  D3D11_SUBRESOURCE_DATA m_desc;
 #elif OPEN_GL
+
 #endif // DIRECTX
 };
 

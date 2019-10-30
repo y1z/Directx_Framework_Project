@@ -14,7 +14,7 @@ cViewport::~cViewport()
 {}
 
 void
-cViewport::setViewport(float width, float height,
+cViewport::setViewport(uint32 width, uint32 height,
                        float minDepth, float maxDepth,
                        float TopLeftX, float TopLeftY)
 {
@@ -38,6 +38,25 @@ cViewport::getViewport()
   m_viewport.TopLeftX = m_viewportDesc.TopLeftX;
   m_viewport.TopLeftY = m_viewportDesc.TopLeftY;
   return  m_viewport;
+}
+
+#elif OPEN_GL
+sViewportDesc 
+cViewport::getViewport() const
+{
+  return m_viewportDesc;
+}
+
+int32 
+cViewport::getWidth() const
+{
+  return m_viewportDesc.width;
+}
+
+int32 
+cViewport::getHeight() const
+{
+  return  m_viewportDesc.height;
 }
 
 #endif // 0

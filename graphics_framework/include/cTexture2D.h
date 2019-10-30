@@ -1,6 +1,7 @@
 #pragma once
 #include "../include/utility/Grafics_libs.h"
 #include "../include/cShaderResourceView.h"
+#include "utility/enDefs.h"
 class cMesh;
 /*! \brief takes care of the representation of textures */
 struct sTextureDescriptor
@@ -36,13 +37,30 @@ public:
                   int bindFlags, int CpuAccess = 0,
                   int arraySize = 1);
 
+/**/
   sTextureDescriptor
     getDescriptor();
+#if OPEN_GL
 
-  void Release();
+  uint32
+    getID() const;
+
+  uint32*
+    getIDPtr();
+
+  void
+    setID(uint32 newID);
+
+#endif // OPEN_GL
+
+  void
+    Release();
+
 private:
 #if DIRECTX
   ID3D11Texture2D * mptr_texture;
+#elif  OPEN_GL
+  uint32 m_textureID;
 #endif // DIRECTX
 public://make private
   sTextureDescriptor m_desc;

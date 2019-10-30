@@ -3,6 +3,8 @@
 #include "utility/Grafics_libs.h"
 #include "utility/enDefs.h"
 #include "../Resource.h"
+class cDeviceContext;
+class cViewport;
 
 class cWindow
 {
@@ -17,28 +19,37 @@ public:
   \param windowName [in] give the window a name
   \param className [in] this is just an identifier for the window */
   bool
-    init(LRESULT(__stdcall*ptr_proc)(HWND, UINT, WPARAM, LPARAM),
-         const HINSTANCE &instance,
+    init(LRESULT(CALLBACK*ptr_proc)(HWND, UINT, WPARAM, LPARAM),
+         const HMODULE *Instance,
          const char *windowName = nullptr,
          const char *className = nullptr);
-#if DIRECTX
+#ifndef OPEN_GL
   /*! returns  the window handle */
   HWND
     getHandle()const;
-  /*! returns the current HINSTANCE of the window */
-  HINSTANCE
-    getInstance() const;
 #elif OPEN_GL
+
+  /*! returns the window handle */
+  GLFWwindow
+    *getHandle();
+#else
+  void*
+    getHandle();
 #endif // DIRECTX
 
-  uint32 
+   /*! returns the current HMODULE of the window */
+  HMODULE
+    getInstance() const;
+
+  uint32
     getWidth() const;
 
-  uint32 
+  uint32
     getHeight() const;
 
   void
     update();
+
 private:
 #if UNICODE 
   std::wstring m_name;
@@ -50,8 +61,15 @@ private:
   /*! a pointer for the wndProc function */
   WNDCLASSEX m_descriptor;
   LRESULT(CALLBACK *mptr_proc) (HWND, UINT, WPARAM, LPARAM);
+#ifndef OPEN_GL 
   HWND m_handle;
+#elif OPEN_GL
+  GLFWwindow* m_handle;
+#else 
+  void* m_handle;
+#endif // DIRECTX
   HINSTANCE m_instance;
+
   uint32 m_width;
   uint32 m_height;
 };

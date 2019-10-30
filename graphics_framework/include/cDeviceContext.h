@@ -1,5 +1,6 @@
 #pragma once 
 #include "..//include/utility/Grafics_libs.h"
+#include "../include/utility/enDefs.h"
 // std includes 
 #include <cstdint>
 // Forward decelerations 
@@ -17,12 +18,34 @@ class cViewport;
 class cBuffer;
 class cShaderResourceView;
 class cMesh;
+/***************************/
 struct sSamplerDesc;
 struct sTextureDescriptor;
 struct sDepthStencilDescriptor;
 struct sInputDescriptor;
+struct sColorf;
+
+        /*!Contains all the necessary  information for drawing to
+the buffer */
+struct sDrawData
+{
+#if DIRECTX
+#elif OPEN_GL
+  /*! used for knowing which of the index-buffers are set */
+  uint32 currentIndexBuffer = 0u;
+  /*! used for knowing which of the vertex-buffers are set */
+  uint32 currentVertexBuffer = 0u;
+  /*! used for knowing which type of topology is set */
+  uint32 currentTopology = 0u;
+  /*! used for knowing how to interpret the indices of the index buffer */
+  uint32 currentFormat = 0u;
+#endif // DIRECTX
+};
 
 
+
+/*!takes care of preparing/setting all variables
+that are necessary for drawing to the screen*/
 class cDeviceContext
 {
 public:
@@ -46,13 +69,14 @@ public:// functions
     ClearState();
 
   /*! set render-targets and can set multiple render-targets
-      \param renderTragetsViews [out] the render-targets to be set 
+      \param renderTragetsViews [out] the render-targets to be set
       \param  depthStencilView [out] the set depth-stencil view(note there can only be 1)
       \param numRenderTargets [in] to tell how many render target there are */
   void
     OMSetRenderTargets(cRenderTargetView renderTragetsViews[],
                        cDepthStencilView &depthStencilView,
                        uint32_t numRenderTragets = 1);
+
   /*!set the view port/s */
   void
     RSSetViewports(cViewport viewports[],
@@ -79,7 +103,7 @@ public:// functions
     UpdateSubresource(cBuffer *Buffer, const void *originOfData);
 
   void
-    ClearRenderTargetView(cRenderTargetView &renderTargetView, float color[4] = nullptr);
+    ClearRenderTargetView(cRenderTargetView &renderTargetView, sColorf* color = nullptr);
 
   void //! clear the depthStencil with the choice of only clearing the depth/stencil portion or both
     ClearDepthStencilView(cDepthStencilView &depthStencilView, bool ClearStencil = false,
@@ -99,7 +123,7 @@ public:// functions
     PSSetShaderResources(cShaderResourceView  ShaderResources[], uint32_t numResources = 1, uint32_t Slots = 0);
 
   void/*! set's the resources for the pixel shader (can only set one) */
-    PSSetShaderResources(cMesh &ShaderResources, uint32_t Slot = 0 );
+    PSSetShaderResources(cMesh &ShaderResources, uint32_t Slot = 0);
 
   void/*! setting the const-buffers for the pixel shader (can only set one at a time)
       \param Slots the individual slots where the constant buffer goes to.*/
@@ -110,12 +134,21 @@ public:// functions
 
   void/*! this is the function that draws to the window
       \param IndexCount [in] how many indexes to drawi
-      \param indexOffset [in] if for some reason you what an off set ???
-      \param Program [in] this parameter is for Open_gl*/
-    DrawIndexed(uint32_t indexCount, uint32_t indexOffset,unsigned int Program = 0);
+      \param indexOffset [in] if for some reason you what an off set ???*/
+    DrawIndexed(uint32_t indexCount, uint32_t indexOffset);
+
+  void
+    DrawIndexed(cIndexBuffer &indexBuffer);
+
+  /**/
+  bool
+    SetShaders(cVertexShader &vertexShader, cPixelShader &pixelShader);
 private:
 #if DIRECTX
   ID3D11DeviceContext* mptr_deviceContext = nullptr;
+#elif OPEN_GL
+   /*!where all information relevant to drawing to the screen is keep-ed */
+  sDrawData m_drawingData;
 
 #endif // DIRECTX
 };

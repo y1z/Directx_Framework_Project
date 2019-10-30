@@ -12,7 +12,7 @@ using namespace std::string_literals;
 #include "imgui/imgui_impl_dx11.h"
 #elif OPEN_GL
 #include "imgui/imgui_impl_opengl3.h"
-#include "imgui/imgui_impl_glfw.h";
+#include "imgui/imgui_impl_glfw.h" 
 #endif // USING_DIRECTX
 //#include "CWindow.h"
 /*****************************/
@@ -21,7 +21,7 @@ using namespace std::string_literals;
 
 namespace ig = ImGui;
 
-static constexpr uint32_t c_fpsSamplesCount = 60;
+static constexpr uint32_t c_fpsSamplesCount = 360;
 //! this variable is for ImGui_ImplOpenGL3_Init
 static constexpr const char *GlslVersion = "#version 430 core";
 //----------------------------------------
@@ -44,41 +44,54 @@ static constexpr const char *GlslVersion = "#version 430 core";
 
 imGuiManager::imGuiManager()
   :m_childCount(0),
-  mptr_FileFunc(nullptr)
+  mptr_FileFunc(nullptr),
+  is_initialized(false)
 {}
 
 /*!  Highly  Important to free the memory*/
 imGuiManager::~imGuiManager()
 {
+  if (is_initialized)
+  {
 
-#ifdef DIRECTX
-  ImGui_ImplDX11_Shutdown();
-  ImGui_ImplWin32_Shutdown();
-#elif USING_OPEN_GL
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-#endif // USING_DIRECTX
+  #ifdef DIRECTX
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+  #elif OPEN_GL
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+  #endif // USING_DIRECTX
 
-  ImGui::DestroyContext();
+    ImGui::DestroyContext();
+  }
 }
 
 bool
-imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, HWND Handle)
+imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, cWindow &window)
 {
   bool isSuccesful = false;
-  isSuccesful = IMGUI_CHECKVERSION();
+  is_initialized = IMGUI_CHECKVERSION();
+  if (is_initialized)
+  {
+    ImGui::CreateContext();
+    //this can be used to enable or disable opciones
+    ImGuiIO& GuiIo = ImGui::GetIO();
+    // check for possible error 
+  #ifdef DIRECTX
+    isSuccesful = ImGui_ImplWin32_Init(window.getHandle());
+    isSuccesful = ImGui_ImplDX11_Init(Device.getDevice(), DeviceContext.getDeviceContext());
+  #elif OPEN_GL
+    // TODO: REMOVE COMMIT WHEN READY 
+    isSuccesful = ImGui_ImplGlfw_InitForOpenGL(window.getHandle(),true);
+    isSuccesful = ImGui_ImplOpenGL3_Init(GlslVersion);
+  #endif // USING_DIRECTX
+  }
 
-  ImGui::CreateContext();
-  //this can be used to enable or disable opciones
-  ImGuiIO& GuiIo = ImGui::GetIO();
-  // check for possible error 
-#ifdef DIRECTX
-  isSuccesful = ImGui_ImplWin32_Init(Handle);
-  isSuccesful = ImGui_ImplDX11_Init(Device.getDevice(), DeviceContext.getDeviceContext());
-#endif // USING_DIRECTX
-  ImGui::StyleColorsDark();
-
-  return isSuccesful;
+  if (is_initialized)
+  {
+    ImGui::StyleColorsDark();
+  }
+  return is_initialized;
 }
 
 void
@@ -117,14 +130,14 @@ imGuiManager::calculateAverageFPS(float deltaTime)
   currenFpsIndex++;
 
   float averageFps = 0.0f;
-  for (uint8_t i = 0; i < c_fpsSamplesCount; ++i)
+  for (size_t i = 0; i < c_fpsSamplesCount; ++i)
   {
     averageFps += fpsTimes[i];
   }
   return averageFps = averageFps / c_fpsSamplesCount;
 }
 
-void 
+void
 imGuiManager::MenuForOpenFile(cWindow & window, std::string & PathOfFile, bool & used)
 {
   if (ImGui::Button("Load model from file "))
@@ -148,35 +161,38 @@ imGuiManager::beginFrame(const char * windowName)
   ImGui_ImplDX11_NewFrame();
   ImGui_ImplWin32_NewFrame();
 #elif OPEN_GL 
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
 #endif// DIRECTX
   ImGui::NewFrame();
   ImGui::Begin(windowName);
 }
 
-void 
-imGuiManager::addItemCountToChild(const char* childId, std::string_view itemName, uint32 itemCount) {
+void
+imGuiManager::addItemCountToChild(const char* childId, std::string_view itemName, uint32 itemCount)
+{
 
   static std::string messageStr = "Item Name : ";
- // get the data in the string view 
+  // get the data in the string view 
   messageStr += itemName.data();
   ig::Text(messageStr.c_str());
 
   messageStr = "Item Count =  %d";
 
-  ig::TextColored(ImVec4(0.98, 0.88, 0.20, 1.0f), messageStr.c_str() , itemCount);
+  ig::TextColored(ImVec4(0.98f, 0.88f, 0.20f, 1.0f), messageStr.c_str(), itemCount);
   // reset the static string 
   messageStr = "Item Name : ";
 
 }
 
-void 
-imGuiManager::addText(std::string_view message,sColorf TextColor)
+void
+imGuiManager::addText(std::string_view message, sColorf TextColor)
 {
-  ig::TextColored(ImVec4(TextColor.red, TextColor.green, TextColor.blue, TextColor.alpha),message.data());
+  ig::TextColored(ImVec4(TextColor.red, TextColor.green, TextColor.blue, TextColor.alpha), message.data());
 
 }
 
-void imGuiManager::addSliderFloat(std::string_view NameOfValue,float & Value, float lowerRange, float upperRange)
+void imGuiManager::addSliderFloat(std::string_view NameOfValue, float & Value, float lowerRange, float upperRange)
 {
   ig::SliderFloat(NameOfValue.data(), &Value, lowerRange, upperRange);
 }
@@ -188,7 +204,7 @@ imGuiManager::beginChild(const char * childID)
   ig::BeginChild(childID);
 }
 
-void 
+void
 imGuiManager::endAllChildren()
 {
   for (uint32 i = 0; i < m_childCount; ++i)

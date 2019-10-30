@@ -2,11 +2,14 @@
 #include "../include/cSwapChain.h"
 #include "..//include/cTexture2D.h"
 #include "../include/cDevice.h"
+#include "../include/cWindow.h"
+#include "utility/HelperFuncs.h"
 
 #include <cassert>
 cSwapChain::cSwapChain()
 #if DIRECTX
   :mptr_swapChain(nullptr)
+#elif OPEN_GL
 #endif // DIRECTX
 {}
 
@@ -17,9 +20,9 @@ cSwapChain::~cSwapChain()
   {
     mptr_swapChain->Release();
   }
-
-}
+#elif OPEN_GL
 #endif // DIRECTX
+}
 
 #if DIRECTX
 
@@ -43,7 +46,7 @@ cSwapChain::getSwapChainDesc()
   result.BufferCount = m_desc.buffCount;
   result.BufferDesc.Width = m_desc.buffWidth;
   result.BufferDesc.Height = m_desc.buffHeight;
-  result.BufferDesc.Format = static_cast<DXGI_FORMAT>(m_desc.buffFormat);
+  result.BufferDesc.Format = static_cast< DXGI_FORMAT >(m_desc.buffFormat);
   result.BufferDesc.RefreshRate.Numerator = m_desc.buffRefershNumaretor;
   result.BufferDesc.RefreshRate.Denominator = m_desc.buffRefershDenominator;
   result.BufferUsage = m_desc.buffUsage;
@@ -53,16 +56,15 @@ cSwapChain::getSwapChainDesc()
   result.Windowed = m_desc.isWindowd;
   return  result;
 }
-
+#elif OPEN_GL
 #endif // DIRECTX
 
 void
 cSwapChain::setSwapChain(uint32_t width, uint32_t height,
                          int format, int usage,
-                         HWND handle, uint8_t bufferCount,
-                         uint16_t RefershNumerator, uint16_t RefershDenominator,
-                         uint8_t SampCount, uint8_t SampQuality,
-                         bool isWindowed)
+                         cWindow & window, uint8_t bufferCount,
+                         uint16_t RefreshNumerator, uint16_t RefreshDenominator,
+                         uint8_t SampCount, uint8_t SampQuality, bool isWindowed)
 {
   m_desc.buffWidth = width;
   m_desc.buffHeight = height;
@@ -71,10 +73,10 @@ cSwapChain::setSwapChain(uint32_t width, uint32_t height,
   m_desc.buffUsage = usage;
   m_desc.sampCount = SampCount;
   m_desc.sampQuality = SampQuality;
-  m_desc.buffRefershNumaretor = RefershNumerator;
-  m_desc.buffRefershDenominator = RefershDenominator;
+  m_desc.buffRefershNumaretor = RefreshNumerator;
+  m_desc.buffRefershDenominator = RefreshDenominator;
   m_desc.isWindowd = isWindowed;
-  m_desc.outputWindow = handle;
+  m_desc.outputWindow = window.getHandle();
 
   //m_StencilView.set
 }
@@ -84,6 +86,15 @@ cSwapChain::setRenderTarget(uint32 width, uint32 height, Formats format)
 {
   this->m_renderTarget.setDescription(width, height, format);
 }
+
+#if OPEN_GL
+void
+cSwapChain::setGlWindow(GLFWwindow * newWindow)
+{
+  mptr_window = newWindow;
+}
+
+#endif // OPEN_GL
 
 cRenderTarget &
 cSwapChain::getRenderTarget()
@@ -122,7 +133,7 @@ cSwapChain::GetBuffer(cTexture2D & backBuffer, uint32_t bufferIndex)
   HRESULT hr;
   hr = mptr_swapChain->GetBuffer(bufferIndex,
                                  __uuidof(ID3D11Texture2D),
-                                 reinterpret_cast<LPVOID*>(backBuffer.getTextureRef()));
+                                 reinterpret_cast< LPVOID* >(backBuffer.getTextureRef()));
   if (SUCCEEDED(hr))
   {
     return true;
@@ -130,6 +141,16 @@ cSwapChain::GetBuffer(cTexture2D & backBuffer, uint32_t bufferIndex)
   else
   {
     return false;
+  }
+#elif OPEN_GL
+  GlRemoveAllErrors();
+
+  mptr_backBuffer = backBuffer.getIDPtr();
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR
+
+      return false;
   }
 #endif // DIRECTX 
   return true;
@@ -141,7 +162,8 @@ bool cSwapChain::InitBuffer()
   return isSucceful;
 }
 
-bool cSwapChain::Present(uint32_t SycroOption, uint32_t PresentationOption, unsigned int Program)
+bool
+cSwapChain::Present(uint32_t SycroOption, uint32_t PresentationOption, unsigned int Program)
 {
 #if DIRECTX
   HRESULT hr;
@@ -150,7 +172,15 @@ bool cSwapChain::Present(uint32_t SycroOption, uint32_t PresentationOption, unsi
   {
     return true;
   }
+#elif OPEN_GL
+  glfwPollEvents();
+  if (mptr_window != nullptr)
+  {
 
+    glfwSwapBuffers(mptr_window);
+    return true;
+  }
+  else { return false; }
 #endif // DIRECTX
   return false;
 }
@@ -169,7 +199,7 @@ cSwapChain::Resize(cDevice &device,
 
   this->m_desc.buffWidth = width;
   this->m_desc.buffHeight = height;
-  this->m_depthStencilView.getDepthStencil().setDescriptor(width, height,Formats::depthStencil_format /*45*/, 0, 0x40L);
+  this->m_depthStencilView.getDepthStencil().setDescriptor(width, height, Formats::depthStencil_format /*45*/, 0, 0x40L);
 
   mptr_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
 
@@ -195,20 +225,8 @@ cSwapChain::Resize(cDevice &device,
   isSuccesful = device.CreateDepthStencilView(m_depthStencilView);
   assert(("error Creating the depth-stencil view" && isSuccesful == true));
 
-  //DXGI_SWAP_CHAIN_DESC sd;
-  //SecureZeroMemory(&sd, sizeof(sd));
-  //sd.BufferCount = 1;
-  //sd.BufferDesc.Width = width;
-  //sd.BufferDesc.Height = height;
-  //sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  //sd.BufferDesc.RefreshRate.Numerator = 60;
-  //sd.BufferDesc.RefreshRate.Denominator = 1;
-  //sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  //sd.OutputWindow = handle;
-  //sd.SampleDesc.Count = 1;
-  //sd.SampleDesc.Quality = 0;
-  //sd.Windowed = TRUE;
   return isSuccesful;
+#elif OPEN_GL
 #endif // DIRECTX
   return false;
 }
