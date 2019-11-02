@@ -19,7 +19,8 @@ cTexture2D::~cTexture2D()
 #if DIRECTX
   if (mptr_texture != nullptr) 
   { mptr_texture->Release(); }
-  
+#elif OPEN_GL
+
 #endif // DIRECTX
 }
 
@@ -51,7 +52,10 @@ ID3D11ShaderResourceView
 #endif // DIRECTX
 
 void 
-cTexture2D::setDescriptor(float width, float height, int format, int usage, int bindFlags, int CpuAccess, int arraySize)
+cTexture2D::init(uint32 width, uint32 height, 
+                  int format, int usage,
+                  int bindFlags, int CpuAccess, 
+                  int arraySize)
 {
   m_desc.texWidth = width;
   m_desc.texHeight = height;
@@ -61,10 +65,6 @@ cTexture2D::setDescriptor(float width, float height, int format, int usage, int 
   m_desc.CpuAccess = CpuAccess;
   m_desc.arraySize = arraySize;
 #if OPEN_GL
-  glGenTextures(1, &m_textureID);
-  glBindTexture(GL_TEXTURE_2D, m_textureID);
-
-  glBindTexture(GL_TEXTURE_2D, 0);
 
 #endif // OPEN_GL
 
@@ -98,12 +98,15 @@ cTexture2D::setID(uint32 newID)
 
 
 #endif // OPEN_GL
+
 void
 cTexture2D::Release()
 {
 #if DIRECTX
   mptr_texture->Release();
   mptr_texture = nullptr;
+#elif OPEN_GL
+  if (m_textureID != 0) { glDeleteTextures(1, &m_textureID); } 
 #endif // DIRECTX
 }
 

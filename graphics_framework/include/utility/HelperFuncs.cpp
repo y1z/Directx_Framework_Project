@@ -307,7 +307,7 @@ namespace helper
     }
     else
     {
-      En_LOG_ERROR_WITH_CODE(enErrorCode::InvalidPath);
+      EN_LOG_ERROR_WITH_CODE(enErrorCode::InvalidPath);
     }
     return Result;
   }
@@ -328,7 +328,7 @@ namespace helper
     }
     else
     {
-      En_LOG_ERROR_WITH_CODE(enErrorCode::InvalidPath);
+      EN_LOG_ERROR_WITH_CODE(enErrorCode::InvalidPath);
     }
     return Result;
   }
@@ -423,6 +423,7 @@ namespace helper
     if (pressedKey == (WPARAM)'R')
     {
       actor.m_transform.resetToIdentity();
+      //actor.m_transform.rotateInXAxis(180);
     }
 
     else if (pressedKey == VK_RIGHT)
@@ -596,6 +597,7 @@ namespace helper
     return Result;
   }
 
+  /*****************/
   void
     arrangeForApi(sMatrix4x4 & Original)
   {
@@ -710,8 +712,34 @@ namespace helper
 
     return result;
   }
+  /*****************/
 
+  bool
+    loadNewActorModelFromFile(cActor & actor, cWindow &windowToOpen, cDevice &device)
+  {
+    cModel*ptr_Model = findModelComponent(actor);
+    if (ptr_Model == nullptr)
+    {
+      EN_LOG_ERROR;
+      return false;
+    }
+    ptr_Model->Destroy();
+
+    ptr_Model->setModelPath(openFile(windowToOpen));
+
+    if (!ptr_Model->LoadModelFromFile(device))
+    {
+      EN_LOG_ERROR;
+      return false;
+
+    }
+
+
+
+    return true;
+  }
 /*****************/
+
 }
 
 

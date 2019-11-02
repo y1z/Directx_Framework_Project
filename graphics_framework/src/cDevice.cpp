@@ -171,25 +171,25 @@ bool cDevice::CreateDepthStencilView(cDepthStencilView & DepthView)
   }
 #elif OPEN_GL
   /* TODO :*/
-  //GlRemoveAllErrors();
+  GlRemoveAllErrors();
   glEnable(GL_DEPTH_TEST);
-  //glGenRenderbuffers(1, DepthView.getDepthStencil().getIDPtr());
-  //glBindRenderbuffer(GL_RENDERBUFFER,DepthView.getDepthStencil().getID());
+  glGenRenderbuffers(1, DepthView.getDepthStencil().getIDPtr());
+  glBindRenderbuffer(GL_RENDERBUFFER,DepthView.getDepthStencil().getID());
 
-  //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
-  //                      DepthStencilView.GetTexture2D()->GetWidth(), DepthStencilView.GetTexture2D()->GetHeight());
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, DepthView.getDepthStencil().getDescriptor().texWidth,
+                        DepthView.getDepthStencil().getDescriptor().texHeight);
 
-  //glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-  //if (!GlCheckForError())
-  //{
-  //  return true;
-  //}
-  //else
-  //{
-  //  return false;
-  //}
-  return true;
+  if (!GlCheckForError())
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+
 #endif // DIRECTX
   return false;
 }
@@ -218,7 +218,7 @@ cDevice::CreateVertexShader(cVertexShader & vertexShader)
   glGetProgramiv(*cApiComponents::getShaderProgram(), GL_VALIDATE_STATUS, &Status);
   if (Status == GL_FALSE)
   {
-    En_LOG_ERROR_WITH_CODE(enErrorCode::ShaderLinkError);
+    EN_LOG_ERROR_WITH_CODE(enErrorCode::ShaderLinkError);
   }
 
   if (GlCheckForError())
@@ -255,7 +255,7 @@ bool cDevice::CreatePixelShader(cPixelShader & pixelShader)
   glGetProgramiv(*cApiComponents::getShaderProgram(), GL_VALIDATE_STATUS, &Status);
   if (Status == GL_FALSE)
   {
-    En_LOG_ERROR_WITH_CODE(enErrorCode::ShaderLinkError);
+    EN_LOG_ERROR_WITH_CODE(enErrorCode::ShaderLinkError);
   }
 
   if (GlCheckForError())

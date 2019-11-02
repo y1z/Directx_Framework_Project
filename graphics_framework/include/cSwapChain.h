@@ -100,7 +100,7 @@ public:// functions
 
   /*!*/
   cRenderTargetView&
-    getRenderTargerView();
+    getRenderTargetView();
 
   /*!*/
   void

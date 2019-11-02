@@ -27,28 +27,29 @@ cRenderTarget::getDiscriptor()
 {
   D3D11_RENDER_TARGET_VIEW_DESC result;
   std::memset(&result, 0, sizeof(result));
-  result.Format = static_cast<DXGI_FORMAT>(this->m_desc.format);//DXGI_USAGE_RENDER_TARGET_OUTPUT
-  result.ViewDimension = static_cast<D3D11_RTV_DIMENSION >(m_desc.dimension);
+  result.Format = static_cast< DXGI_FORMAT >(this->m_desc.format);//DXGI_USAGE_RENDER_TARGET_OUTPUT
+  result.ViewDimension = static_cast< D3D11_RTV_DIMENSION >(m_desc.dimension);
   return  result;
 }
 #endif // DIRECTX
 
 void
-cRenderTarget::setDescription(uint32_t width, uint32_t height,int Format, int Type)
+cRenderTarget::setDescription(uint32_t width, uint32_t height,
+                              int Format, int Type)
 {
   m_desc.format = Format;
-  m_desc.dimension = Type; 
-  
-  m_target.setDescriptor(width, height, Format, 0, 0x40); 
+  m_desc.dimension = Type;
+
+  m_target.init(width, height, Format, 0, 0x40);
 }
 
-cTexture2D & 
+cTexture2D &
 cRenderTarget::getTexture()
 {
   return m_target;
 }
 
-void 
+void
 cRenderTarget::Release()
 {
 #if DIRECTX

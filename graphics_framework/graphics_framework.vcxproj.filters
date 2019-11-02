@@ -232,6 +232,9 @@
     <ClInclude Include="include\utility\enErrorHandling.h">
       <Filter>include\utility</Filter>
     </ClInclude>
+    <ClInclude Include="include\cShaderTarget.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cBuffer.cpp">
@@ -359,6 +362,9 @@
     </ClCompile>
     <ClCompile Include="dependencies\imgui\imgui\imgui_impl_glfw.cpp">
       <Filter>depencies\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cShaderTarget.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

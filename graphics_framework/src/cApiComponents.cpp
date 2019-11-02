@@ -55,13 +55,13 @@ cApiComponents::setHardwareVersion(int HardwareVersion)
 }
 
 #if OPEN_GL
-unsigned int*
+uint32*
 cApiComponents::getShaderProgram()
 {
   return &cApiComponents::GlShaderProgram;
 }
 
-unsigned int*
+uint32 *
 cApiComponents::getvertexArrayObject()
 {
   return &cApiComponents::vertexArrayObject; 

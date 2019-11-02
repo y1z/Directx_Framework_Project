@@ -28,8 +28,7 @@ uniform u_worldAndColor
 
 /** OUT VARIABLES */ 
 out vec2 outTexcoords;
-out vec4 outColor;
-/** IN VARIABLES */
+//out vec4 outColor;
 
 /** MAIN */
 void main(){
@@ -38,8 +37,7 @@ void main(){
 /* needs to be multiplied in this order
 vector4 * matrix4x4 
  */
- mat4 Tmvp = transpose(mvp); 
   gl_Position = la_position * mvp;//* Tmvp;// mvp;// mvp;
   outTexcoords = la_texcoords;
-  outColor = vec4(0.0f,0.0f,0.8f,1.0f);
+ // outColor = vec4(0.0f,0.0f,0.8f,1.0f);
 }

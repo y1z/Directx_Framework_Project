@@ -46,7 +46,8 @@ enum class enErrorCode :Byte4
   NotReady = 0b000'0000'0000'0000'0000'0000'0000'0010, //!<  means that the function/class/object needed more set up before it's ready to be used  
   InvalidPath = 0b000'0000'0000'0000'0000'0000'0000'0100,//!< means that a provided path 
   ShaderComplieError = 0b000'0000'0000'0000'0000'0000'0000'1000,//!< means that a provided path 
-  ShaderLinkError = 0b000'0000'0000'0000'0000'0000'0001'0000//!< means that a provided path 
+  ShaderLinkError = 0b000'0000'0000'0000'0000'0000'0001'0000, //!< means that a provided path 
+  ActorComponentError = 0b000'0000'0000'0000'0000'0000'0010'0000//!< means that a provided path 
 };
 
 /*++++++++++++++++++++++++++++++++++++*/
@@ -99,6 +100,11 @@ namespace enError
     case enErrorCode::ShaderLinkError:
     messageFormat(FunctionName, "failed to link shader");
     break;
+    case enErrorCode::ActorComponentError:
+    messageFormat(FunctionName, "Component is one of the following \n"
+                  " ==> 1) does not exist in the current actor "
+                  " ==> 2) the component needed more set-up in order to do it's job ");
+    break;
     default:
     messageFormat(FunctionName, "No error massage set");
     break;
@@ -121,9 +127,9 @@ happen */
 #define EN_LOG_ERROR enError::ENTROPY_log_error(__func__,__LINE__,__FILE__);
 
 
-#define En_LOG_ERROR_WITH_CODE(ErrorCode) enError::ENTROPY_log_error_code(__func__,__LINE__,__FILE__,ErrorCode);
+#define EN_LOG_ERROR_WITH_CODE(ErrorCode) enError::ENTROPY_log_error_code(__func__,__LINE__,__FILE__,ErrorCode);
 #else
 // does nothing 
 #define EN_LOG_ERROR
-#define En_LOG_ERROR_WITH_CODE (ErrorCode)  ErrorCode ;
+#define EN_LOG_ERROR_WITH_CODE (ErrorCode)  ErrorCode ;
 #endif // !NDEBUG

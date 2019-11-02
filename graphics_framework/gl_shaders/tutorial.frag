@@ -3,16 +3,19 @@
 \author Yhaliff Said Barraza
  */
 
+ /** UNIFORMS */
+uniform sampler2D uTextureSampler;
+
 /** IN VARIABLES */
 in vec2 outTexcoords;
-in vec4 outColor;
+//in vec4 outColor;
 
 /** OUT VARIABLES */ 
 out vec4 resultColor;
-out vec2 resultTexcoords;
+//out vec2 resultTexcoords;
 
 /** MAIN*/
-void main(){
- resultTexcoords = sin(outTexcoords.xy);
- resultColor = outColor + vec4( resultTexcoords.xy,0.0f,0.0f) ;
+void main()
+{
+ resultColor = texture(uTextureSampler,outTexcoords); 
 }

@@ -115,7 +115,7 @@ cSwapChain::getDepthStencil()
 }
 
 cRenderTargetView
-& cSwapChain::getRenderTargerView()
+& cSwapChain::getRenderTargetView()
 {
   return this->m_renderTargetView;
 }
@@ -199,7 +199,7 @@ cSwapChain::Resize(cDevice &device,
 
   this->m_desc.buffWidth = width;
   this->m_desc.buffHeight = height;
-  this->m_depthStencilView.getDepthStencil().setDescriptor(width, height, Formats::depthStencil_format /*45*/, 0, 0x40L);
+  this->m_depthStencilView.getDepthStencil().init(width, height, Formats::depthStencil_format /*45*/, 0, 0x40L);
 
   mptr_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
 
@@ -219,7 +219,7 @@ cSwapChain::Resize(cDevice &device,
   //depthDesc.Dimension = 3;// equivalent to D3D11_DSV_DIMENSION_TEXTURE2D 
   //depthDesc.Mip = 0;
 
-  m_depthStencilView.init(45, 3);
+  m_depthStencilView.init(45,  3);
   //DepthStencilView.init(45, 3);
 
   isSuccesful = device.CreateDepthStencilView(m_depthStencilView);
@@ -227,6 +227,10 @@ cSwapChain::Resize(cDevice &device,
 
   return isSuccesful;
 #elif OPEN_GL
+
+
+
+  return true;
 #endif // DIRECTX
   return false;
 }

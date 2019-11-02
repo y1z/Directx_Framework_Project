@@ -1,5 +1,6 @@
 #include "..\include\imGuiManager.h"
 #include "cDevice.h"
+#include "cShaderResourceView.h"
 
 #include "cDeviceContext.h"
 #include "cWindow.h"
@@ -82,7 +83,7 @@ imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, cWindow &wi
     isSuccesful = ImGui_ImplDX11_Init(Device.getDevice(), DeviceContext.getDeviceContext());
   #elif OPEN_GL
     // TODO: REMOVE COMMIT WHEN READY 
-    isSuccesful = ImGui_ImplGlfw_InitForOpenGL(window.getHandle(),true);
+    isSuccesful = ImGui_ImplGlfw_InitForOpenGL(window.getHandle(), true);
     isSuccesful = ImGui_ImplOpenGL3_Init(GlslVersion);
   #endif // USING_DIRECTX
   }
@@ -120,7 +121,7 @@ imGuiManager::calculateAverageFPS(float deltaTime)
   // gets the fps 
   float fps = 1 / deltaTime;
   // contains the results for later to average them out 
-  static float fpsTimes[c_fpsSamplesCount] = {0};
+  static float fpsTimes[c_fpsSamplesCount] = { 0 };
   static uint32_t  currenFpsIndex = 0;
 
   if (currenFpsIndex > c_fpsSamplesCount - 1)
@@ -186,10 +187,38 @@ imGuiManager::addItemCountToChild(const char* childId, std::string_view itemName
 }
 
 void
+imGuiManager::addButton(std::string_view buttonUse, bool & buttonCondtion)
+{
+  if (ig::Button(buttonUse.data()))
+  {
+    if (buttonCondtion == false)
+    {
+      buttonCondtion = true;
+    }
+    else
+    {
+      buttonCondtion = false;
+    }
+
+  }
+
+}
+
+void
 imGuiManager::addText(std::string_view message, sColorf TextColor)
 {
   ig::TextColored(ImVec4(TextColor.red, TextColor.green, TextColor.blue, TextColor.alpha), message.data());
 
+}
+
+
+void imGuiManager::addImage(cShaderResourceView & Resource, uint32 SizeInX, uint32 SizeInY)
+{
+#if DIRECTX
+  ig::Image(( void* )Resource.getShaderResource(), ImVec2(SizeInX, SizeInY));
+#elif OPEN_GL
+  ig::Image(( void* )Resource.getResourceID(), ImVec2(SizeInX, SizeInY));
+#endif // DIRECTX
 }
 
 void imGuiManager::addSliderFloat(std::string_view NameOfValue, float & Value, float lowerRange, float upperRange)

@@ -35,6 +35,7 @@
 #include "cCamera.h"
 #include "cCameraManager.h"
 #include "actor/cActor.h"
+#include "cShaderTarget.h"
 
 /*****************************************************/
 #include "enum_headers/enFormatEnums.h" 
@@ -50,7 +51,16 @@
 #include <wrl.h>
 #include "WICTextureLoader.h"
 #include "DDSTextureLoader.h"
-#endif // DIRECTX
+#else 
+
+//#ifndef STBI_INCLUDE_STB_IMAGE_H  &&  !STB_IMAGE_IMPLEMENTATION
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "utility/stb_image.h"
+
+//#endif // STB_IMAGE_IMPLEMENTATION
+
+#endif // STBI_INCLUDE_STB_IMAGE_H  
 /*****************************************************/
 #if DIRECTX
 #include "../include/directx_structs.h"
@@ -74,8 +84,8 @@ cInputLayout my_vertexInputLayout;
 
 cVertexBuffer my_vertexBuffer;
 cIndexBuffer my_indexBuffer;
-cConstBuffer my_constNeverChanges;
-cConstBuffer my_constChangeOnResize;
+cConstBuffer my_constViewMatrix;
+cConstBuffer my_constProjectionMatrix;
 cConstBuffer my_constChangesEveryFrame;
 cSampler my_sampler;
 cViewport my_viewport;
@@ -91,6 +101,7 @@ std::unique_ptr <cActor>my_YArrow = std::make_unique<cActor>();
 std::unique_ptr <cActor>my_ZArrow = std::make_unique<cActor>();
 std::unique_ptr<cCameraManager>my_cameraManager = std::make_unique<cCameraManager>();
 std::unique_ptr <cActor> my_tornado = std::make_unique<cActor>();
+std::unique_ptr<cShaderTarget>  my_shaderTarget = std::make_unique<cShaderTarget>();
 /**********************************************************/
 cApiComponents my_apiComponent;
 /*****************************************************/
@@ -105,6 +116,7 @@ sMatrix4x4 g_View;
 sMatrix4x4 g_Projection;
 sWindowSize g_windowSizeTracker;
 bool g_isInit(false);
+bool g_isRunnig(true);
 //! this is the path local to the solution of the program
 const std::filesystem::path g_initPath = std::filesystem::current_path();
 sColorf g_vMeshColor;
@@ -112,8 +124,7 @@ sColorf g_vMeshColor;
 float g_TransformAmount = 1.0f;
 static float g_trackedTime = 0.0f;
 static bool g_ControlMouse(false);
-uint32 g_tempVertBuffer;
-uint32 g_tempIndexBuffer;
+static bool g_loadNewModel(false);
 /********************************************************/
 //--------------------------------------------------------------------------------------
 // Forward declarations
@@ -126,7 +137,7 @@ void DestroyAllComponentsFromActor(cActor &actor);
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-std::string ModelSelectMenu(cWindow &window);
+//std::string ModelSelectMenu(cWindow &window);
 
 void
 Update();
@@ -141,9 +152,18 @@ GLkeycallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 void
 GLMoveMouse(GLFWwindow *window, double xPos, double yPos);
 
+void
+GlCloseWindow(GLFWwindow *window);
 
 void
 SetCallBackFunctions(cWindow &window);
+
+void
+GlResizeBuffer(GLFWwindow* window, int width, int height);
+
+
+void
+GlWindowResize(GLFWwindow* window, int width, int height);
 #endif // OPEN_GL
 
 /**
@@ -218,8 +238,6 @@ wWinMain(HINSTANCE hInstance,
   /* the actor now owns the model */
   my_actor->AddComponents(new cModel());
 
-  my_actor->m_transform.rotateInXAxis(180.0f);
-
   //static sVertexPosTex Pos0;
   //Pos0.pos = glm::vec4(-1.0, -1.0, 0.0, 1.0);
   //static sVertexPosTex Pos1;
@@ -247,14 +265,22 @@ wWinMain(HINSTANCE hInstance,
 
   if (FAILED(InitDevice()))
   {
-    return 0;
+    return -1;
   }
+
+  sWindowSize sizeOfWindow = helper::getWindowSize(my_window);
+
+  if (my_shaderTarget->init(sizeOfWindow, my_device))
+  {
+    std::cout << "worked someHow";
+  }
+
 
 //  my_tornado->AddComponents(helper::createHelicoid(0.1f, 5.0f, 0.0f, 7.1f, 20, my_device));
 
   // Main message loop
   MSG msg = { 0 };
-  while (WM_QUIT != msg.message)
+  while (WM_QUIT != msg.message && g_isRunnig)
   {
     if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
     {
@@ -322,7 +348,7 @@ InitDevice()
   assert(("Error with swap-chain getting a buffer " &&  isSuccesful == true));
 
   // Create a render target view
-  isSuccesful = my_device.CreateRenderTargetView(my_swapChain.getRenderTarget().getTexture(), my_swapChain.getRenderTargerView());
+  isSuccesful = my_device.CreateRenderTargetView(my_swapChain.getRenderTarget().getTexture(), my_swapChain.getRenderTargetView());
   assert((isSuccesful == true && "Error with render-target creation"));
   // Create depth stencil texture
 
@@ -342,7 +368,7 @@ InitDevice()
   isSuccesful = my_device.CreateDepthStencilView(my_swapChain.getDepthStencilView());
   assert(isSuccesful == true && "Error with depth-stencil creation");
 
-  my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargerView(),
+  my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargetView(),
                                       my_swapChain.getDepthStencilView());
 
   // Setup the viewport
@@ -433,7 +459,8 @@ InitDevice()
   cModel* ptr_toModel = helper::findModelComponent(*my_actor);
   assert(ptr_toModel != nullptr && "Error component 'model' does NOT exist in current actor");
 
-  ptr_toModel->setModelPath(ModelSelectMenu(my_window));
+  ptr_toModel->setModelPath(helper::openFile(my_window));
+
   isSuccesful = ptr_toModel->LoadModelFromFile(my_device);
 
   assert(("Error with loading model file" && isSuccesful == true));
@@ -441,27 +468,27 @@ InitDevice()
 
   my_deviceContext.SetShaders(my_vertexShader, my_pixelShader);
   // Set primitive topology
-  my_constNeverChanges.init(sizeof(ViewMatrix),
-                            1,
-                            0);
+  my_constViewMatrix.init(sizeof(ViewMatrix),
+                          1,
+                          0);
 
-  my_constNeverChanges.setIndex(0);
+  my_constViewMatrix.setIndex(0);
 
 
-  isSuccesful = my_device.CreateConstBuffer(my_constNeverChanges);
+  isSuccesful = my_device.CreateConstBuffer(my_constViewMatrix);
   assert(isSuccesful == true && "Error Creating constant buffer");
 
   //hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
   //if (FAILED(hr))
   //  return hr;
 
-  my_constChangeOnResize.init(sizeof(ProjectionMatrix),
-                              1,
-                              0);
+  my_constProjectionMatrix.init(sizeof(ProjectionMatrix),
+                                1,
+                                0);
 
-  my_constChangeOnResize.setIndex(1);
+  my_constProjectionMatrix.setIndex(1);
 
-  isSuccesful = my_device.CreateConstBuffer(my_constChangeOnResize);
+  isSuccesful = my_device.CreateConstBuffer(my_constProjectionMatrix);
   assert(isSuccesful == true && "Error Creating constant buffer");
 
   my_constChangesEveryFrame.init(sizeof(GlChangeEveryFrame),
@@ -491,6 +518,12 @@ InitDevice()
                                     my_shaderResourceView.getShaderResourceRef());
 
   assert((!FAILED(hr) && "Error loading file"));
+#else
+
+  std::filesystem::path resourcePath(g_initPath);
+  resourcePath += "//base_albedo.jpg";// "//base_albedo.jpg";
+  my_shaderResourceView.createShaderResourceFromFile(resourcePath.generic_string(), my_device, my_deviceContext);
+
 #endif // DIRECTX
 
   my_sampler.setDescirption(static_cast< int >(Filter::Anisotropic),
@@ -506,45 +539,38 @@ InitDevice()
   // Initialize the world matrices
   g_World.matrix = glm::identity<glm::mat4>();
 
-  cCamera orthoCamera;
-  orthoCamera.calculateAndSetView();
-  orthoCamera.calculateAndSetOrthographic(my_window, 100.0f, 0.1f);
+  cCamera CameraSecurity;
+  CameraSecurity.setEye(0.0f, 30.0f,  20.0f);
+  CameraSecurity.setAt(0.0f, 0.0f, 0.0f);
+  CameraSecurity.calculateAndSetView();
+  CameraSecurity.calculateAndSetPerpective(my_window, 100.0f, 1000.1f, 0.01f);
 
   cCamera perspectiveCamera;
   perspectiveCamera.calculateAndSetView();
   perspectiveCamera.calculateAndSetPerpective(my_window, 70.0f, 100.0f, 0.1f);
 
   my_cameraManager->pushBackCamera(perspectiveCamera);
-  my_cameraManager->pushBackCamera(orthoCamera);
-  //g_Projection.matrix = dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4,
-  //                                                   width / (FLOAT) height,
-  //                                                   0.01f,
-  //                                                   100.0f);
+  my_cameraManager->pushBackCamera(CameraSecurity);
 
-  //g_View.matrix = dx::XMMatrixLookAtLH(Eye, At, Up);
   ViewMatrix cbNeverChanges;
   cbNeverChanges.matrix = my_cameraManager->getViewMatrix().matrix;
 
-  my_deviceContext.UpdateSubresource(&my_constNeverChanges,
+  my_deviceContext.UpdateSubresource(&my_constViewMatrix,
                                      &cbNeverChanges);
 
   // Initialize the projection matrix
   ProjectionMatrix cbChangesOnResize;
-  cbChangesOnResize.matrix = my_cameraManager->getProjectionMatrix().matrix;//dx::XMMatrixTranspose(g_Projection.matrix);
+  cbChangesOnResize.matrix = my_cameraManager->getProjectionMatrix().matrix;
 
-  my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
+  my_deviceContext.UpdateSubresource(&my_constProjectionMatrix,
                                      &cbChangesOnResize);
 
   std::filesystem::path arrowModelPath(g_initPath);
 
   arrowModelPath += "\\resources\\media\\3d models\\fbx\\Arrow.fbx";
 
-//  cModel *ptr_XArrow = helper::findComponent<cModel>(*my_XArrow);
   cModel *ptr_YArrow = helper::findComponent<cModel>(*my_YArrow);
   cModel *ptr_ZArrow = helper::findComponent<cModel>(*my_ZArrow);
-
-  /**/
- // ptr_XArrow->setModelPath(arrowModelPath.generic_string());
 
   if (ptr_YArrow != nullptr)
   {
@@ -568,12 +594,6 @@ DestroyAllComponentsFromActor(cActor & actor)
   actor.DestroyAllComponents();
 }
 
-
-std::string
-ModelSelectMenu(cWindow & window)
-{
-  return my_gui.OpenFileFunc(window);
-}
 
 //--------------------------------------------------------------------------------------
 // Render a frame
@@ -605,148 +625,122 @@ void Render()
     t = (dwTimeCur - dwTimeStart) / 1000.0f;
   }
 
-  // Rotate cube around the origin
+  static cShaderResourceView* shaderResources[2] =
+  {
+    &my_shaderResourceView,
+    &my_shaderTarget->getShaderResourceView(),
+  };
+
+/******** SET TARGET **********/
+  my_deviceContext.OMSetRenderTargets(&my_shaderTarget->getRenderTargetView(), my_swapChain.getDepthStencilView());
+
+/******** Clear depth**********/
+  sColorf color_Mangnolia;
+  color_Mangnolia.red = 0.98f;
+  color_Mangnolia.green = 0.90f;
+  color_Mangnolia.blue = 1.0f;
+  color_Mangnolia.alpha = 1.0f;
+
+  my_deviceContext.ClearRenderTargetView(my_shaderTarget->getRenderTargetView(), &color_Mangnolia);
+  my_deviceContext.ClearDepthStencilView(my_swapChain.getDepthStencilView());
+
+
+/******** Change camera **********/
+  my_cameraManager->switchCamera(1);
+  ViewMatrix neverChange = my_cameraManager->getViewMatrix();
+  my_deviceContext.UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
+                                     &neverChange.matrix);
+
+  ProjectionMatrix Proj;
+  Proj.matrix = my_cameraManager->getProjectionMatrix().matrix;;
+  my_deviceContext.UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constProjectionMatrix),
+                                     &Proj);
+
+   /************************************************************************************************************************/
+
+  /*setting values for the vertex shader*/
+  my_deviceContext.VSSetConstantBuffers(my_constViewMatrix, my_constViewMatrix.getIndex());
+  my_deviceContext.VSSetConstantBuffers(my_constProjectionMatrix, my_constProjectionMatrix.getIndex());
+  my_deviceContext.VSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
+
+  /*setting values for the pixel shader */
+  my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
+  my_deviceContext.PSSetShaderResources(*shaderResources, 2);
+  my_deviceContext.PSSetSamplers(&my_sampler);
+
+
+   // Rotate cube around the origin
   g_World.matrix = glm::rotate(g_World.matrix, t, glm::vec3(0, 1.0f, 0));
 
   // Modify the color
   g_vMeshColor.red = (sinf(t * 1.0f) + 1.0f) * 0.5f;
   g_vMeshColor.green = (cosf(t * 3.0f) + 1.0f) * 0.5f;
   g_vMeshColor.blue = (sinf(t * 5.0f) + 1.0f) * 0.5f;
-  //
-  // Clear the back buffer
-  //
+
   float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red, green, blue, alpha
 
-  /* open_gl and directX have different so i
-  can more easily distinguish them*/
-  my_deviceContext.ClearRenderTargetView(my_swapChain.getRenderTargerView());
-//g_pImmediateContext->ClearRenderTargetView(my_renderTragetView.getRenderTragetView()
+  //g_pImmediateContext->ClearRenderTargetView(my_renderTragetView.getRenderTragetView()
+/**************************************************************************************************************/
 
-  my_deviceContext.ClearDepthStencilView(my_swapChain.getDepthStencilView());
-  //g_pImmediateContext->ClearDepthStencilView(my_depthStencilView.getDepthStencilView()
-  //                                           , D3D11_CLEAR_DEPTH, 1.0f
-  //                                           , 0);
-  glm::vec4 glMoveVector = { 2,1,1,1 };
-  glm::vec4 glScaleVector = { 1,1,std::fabs(std::cosf(t)),1 };
-  glm::vec3 glRotVector = { 1,0,0 };
-
-#ifndef MODEL_LOAD
-  GlChangeEveryFrame Cb;
-  Cb.world = glm::rotate(Cb.world, t, glRotVector);
-  Cb.color.red = 0.5f;
-  Cb.color.green = 0.5f;
-  Cb.color.blue = 0.6f;
-  Cb.color.alpha = 1.0f;
-
-  cb.vMeshColor = g_vMeshColor;
-  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &Cb);
-
-#endif // !MODEL_LOAD
-  //
-  // Render the cube
-  //
-
-
-  /*setting values for the vertex shader*/
-  my_deviceContext.VSSetConstantBuffers(my_constNeverChanges, my_constNeverChanges.getIndex());
-  my_deviceContext.VSSetConstantBuffers(my_constChangeOnResize, my_constChangeOnResize.getIndex());
-  my_deviceContext.VSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
-
-  /*setting values for the pixel shader */
-  my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
-  my_deviceContext.PSSetShaderResources(&my_shaderResourceView);
-  my_deviceContext.PSSetSamplers(&my_sampler);
-
-
-
-#ifndef MODEL_LOAD
-  my_deviceContext.DrawIndexed(36, 0);
-  cb.mWorld = dx::XMMatrixMultiply(tempMatrixMove, tempMatrixScale);//XMMatrixTranspose(XMMatrixTranslationFromVector(moveVector));
-
-  cb.vMeshColor = g_vMeshColor;
-  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
-
-  my_deviceContext.DrawIndexed(36, 0);
-
-  dx::XMVECTOR Move2 = { -3,1,1,0 };
-  // CBChangesEveryFrame cb;
-  tempMatrixMove = dx::XMMatrixTranspose(dx::XMMatrixTranslationFromVector(Move2));
-
-  cb.mWorld = dx::XMMatrixMultiply(tempMatrixMove, tempMatrixRotate);
-  cb.vMeshColor = g_vMeshColor;
-  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame, &cb);
-
-  my_deviceContext.DrawIndexed(36, 0);
-#else
+  //my_deviceContext.ClearDepthStencilView(my_swapChain.getDepthStencilView());
 
   static std::vector<cConstBuffer *> bufferArray =
   {
     &my_constChangesEveryFrame,
-    &my_constChangeOnResize,
-    &my_constNeverChanges
+    &my_constProjectionMatrix,
+    &my_constViewMatrix
   };
 
-  sColorf color;
-  color.red = std::sinf(t);
-  color.green = std::cosf(-t);
-  color.blue = 1.0f;
-  color.alpha = 1.0f;
-
-  //my_XArrow->m_transform.rotateInZAxis(.01f);
-  //my_ZArrow->m_transform.rotateInXAxis(-.01f);
+/************************************************************************************************************/
+  // DRAW ONE 
+/************************************************************************************************************/
+  my_actor->DrawAllComponents(my_deviceContext, bufferArray);
 
 
-  //my_YArrow->m_transform.rotateInZAxis(90.0f);
-  //my_YArrow->update(my_deviceContext);
-  //my_YArrow->DrawAllComponents(my_deviceContext, bufferArray);
-
-  //my_YArrow->m_transform.resetToIdentity();
-  //my_YArrow->m_transform.rotateInXAxis(90.0f);
-  //my_YArrow->update(my_deviceContext);
-  //my_YArrow->DrawAllComponents(my_deviceContext, bufferArray);
-  //my_YArrow->m_transform.resetToIdentity();
-
-  //my_YArrow->update(my_deviceContext);
-  //my_YArrow->DrawAllComponents(my_deviceContext, bufferArray);
-
-  //my_actor->m_transform.rotateInXAxis(.9f);
-
-  my_actor->m_transform.rotateInYAxis(-5.0f);
+  //my_actor->m_transform.rotateInYAxis(-0.3f);
   my_actor->update(my_deviceContext);
 
-  //glUseProgram(*cApiComponents::getShaderProgram());
-  //glEnableVertexAttribArray(0);
-  //glBindBuffer(GL_ARRAY_BUFFER, g_tempVertBuffer);// m_drawingData.currentVertexBuffer);
-  //unsigned int OffSetOfFirst = offsetof(sVertexPosTex, pos);
-  //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void* >(OffSetOfFirst));
+  my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargetView(), my_swapChain.getDepthStencilView());
 
-  //glEnableVertexAttribArray(1);
-  //glBindBuffer(GL_ARRAY_BUFFER, g_tempVertBuffer);
-  //unsigned int OffSetOfSecond = offsetof(sVertexPosTex, tex);
-  //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void * >(OffSetOfSecond));
+  my_deviceContext.ClearRenderTargetView(my_swapChain.getRenderTargetView());
 
-  //glBindBuffer(GL_ARRAY_BUFFER, 0);
+  my_deviceContext.ClearDepthStencilView(my_swapChain.getDepthStencilView());
 
-  //// draw the indices 
-  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_tempIndexBuffer);
+  /*setting values for the vertex shader*/
+  my_deviceContext.VSSetConstantBuffers(my_constViewMatrix, my_constViewMatrix.getIndex());
+  my_deviceContext.VSSetConstantBuffers(my_constProjectionMatrix, my_constProjectionMatrix.getIndex());
+  my_deviceContext.VSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
 
-  //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT /*equivalent to GL_UNSIGNED_SHORT*/, reinterpret_cast< const void* >(0));
+  /*setting values for the pixel shader */
+  my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
+  //my_deviceContext.PSSetShaderResources(&my_shaderTarget->getShaderResourceView());
+  my_deviceContext.PSSetShaderResources(*shaderResources, 2);
+  my_deviceContext.PSSetSamplers(&my_sampler);
 
-  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  ///my_deviceContext.ClearRenderTargetView(my_shaderTarget->getRenderTargetView());
 
+
+  my_cameraManager->switchCamera(0);
+  neverChange = my_cameraManager->getViewMatrix();
+  my_deviceContext.UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
+                                     &neverChange.matrix);
+
+  Proj.matrix = my_cameraManager->getProjectionMatrix().matrix;;
+  my_deviceContext.UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constProjectionMatrix),
+                                     &Proj);
+
+/************************************************************************************************************/
+  //DARW TWO
+/************************************************************************************************************/
   my_actor->DrawAllComponents(my_deviceContext, bufferArray);
-  //my_tornado->update(my_deviceContext);
-  //ptr_toTornado->DrawMeshes(my_deviceContext,bufferArray);
-
-  //ptr_toModel->DrawMeshes(my_deviceContext, bufferArray, color);
-
-#endif // !MODEL_LOAD
 
   my_timer.EndTiming();
   float deltaTime = my_timer.GetResultSeconds();
   g_trackedTime = deltaTime;
 
   my_gui.beginFrame("Data");
+  my_gui.addImage(my_shaderTarget->getShaderResourceView());
+  my_gui.addButton("load new model", g_loadNewModel);
   my_gui.beginChildWithFpsCount(deltaTime);
   my_gui.addItemCountToChild("Mesh count ", "Mesh", ptr_toModel->getMeshCount());
   my_gui.addItemCountToChild("vertices count ", "vertices", ptr_toModel->getVertexCount());
@@ -761,9 +755,11 @@ void Render()
 
   my_gui.endAllChildren();
   my_gui.endFrame();
-  // Present our back buffer to our front buffer
 
+
+  // Present our back buffer to our front buffer
   my_swapChain.Present(0, 0);
+
   Update();
 }
 
@@ -780,7 +776,7 @@ void Update()
     // get current position of mouse 
     my_swapChain.Resize(my_device, my_window.getWidth(), my_window.getHeight());
 
-    my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargerView(), my_swapChain.getDepthStencilView());
+    my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargetView(), my_swapChain.getDepthStencilView());
 
     my_cameraManager->getCurrentCamera()->calculateAndSetPerpective(my_window, my_cameraManager->getCurrentCamera()->getFovDeg(),
                                                                     my_cameraManager->getCurrentCamera()->getFar(),
@@ -790,7 +786,7 @@ void Update()
     //CBChangeOnResize newProjection;
     newProjection.matrix = my_cameraManager->getProjectionMatrix().matrix;
 
-    my_deviceContext.UpdateSubresource(&my_constChangeOnResize,
+    my_deviceContext.UpdateSubresource(&my_constProjectionMatrix,
                                        &newProjection);
 
     my_viewport.setViewport(my_window.getWidth(), my_window.getHeight(), 0.0f, 1.0f/*std::numeric_limits<float>::max()*/);
@@ -798,6 +794,17 @@ void Update()
     my_deviceContext.RSSetViewports(&my_viewport);
   }
 
+  if (g_loadNewModel == true)
+  {
+    //successful
+    bool isSuccessful = helper::loadNewActorModelFromFile(*my_actor, my_window, my_device);
+    if (!isSuccessful)
+    {
+      EN_LOG_ERROR_WITH_CODE(enErrorCode::ActorComponentError);
+    }
+
+    g_loadNewModel = false;
+  }
 }
 
 
@@ -839,7 +846,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // going forwards 
     helper::handelCameraKeyInput(wParam, *my_cameraManager,
                                  my_window, my_deviceContext,
-                                 &my_constNeverChanges, &my_constChangeOnResize
+                                 &my_constViewMatrix, &my_constProjectionMatrix
                                  , g_trackedTime);
 
     helper::handelActorTransforms(*my_actor, chosenAxis, wParam, g_TransformAmount);
@@ -880,7 +887,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       my_cameraManager->rotateCamera(rotation, my_window);
       ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-      my_deviceContext.UpdateSubresource(&my_constNeverChanges,
+      my_deviceContext.UpdateSubresource(&my_constViewMatrix,
                                          &ChangeWithViewMatrix);
     }
   }
@@ -912,8 +919,11 @@ SetCallBackFunctions(cWindow &window)
 {
   glfwSetInputMode(window.getHandle(), GLFW_STICKY_KEYS, GLFW_TRUE);
   glfwSetCursorPosCallback(window.getHandle(), GLMoveMouse);
-  ////glfwSetMouseButtonCallback(app.m_window.m_pointer, MouseButtons);
+  glfwSetWindowSizeCallback(window.getHandle(), GlWindowResize);
+  // void (* GLFWwindowclosefun)(GLFWwindow*);
+  glfwSetWindowCloseCallback(window.getHandle(), GlCloseWindow);
   glfwSetKeyCallback(window.getHandle(), GLkeycallback);
+  glfwSetFramebufferSizeCallback(window.getHandle(), GlResizeBuffer);
 }
 
 void
@@ -925,7 +935,7 @@ GLkeycallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 
   helper::handelCameraKeyInput(key, *my_cameraManager,
                                my_window, my_deviceContext,
-                               &my_constNeverChanges, &my_constChangeOnResize
+                               &my_constViewMatrix, &my_constProjectionMatrix
                                , g_trackedTime);
 
   helper::handelActorTransforms(*my_actor, chosenAxis, key, g_TransformAmount);
@@ -974,10 +984,30 @@ GLMoveMouse(GLFWwindow * window, double xPos, double yPos)
 
     ViewMatrix ChangeWithViewMatrix;
     ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-    my_deviceContext.UpdateSubresource(&my_constNeverChanges,
+    my_deviceContext.UpdateSubresource(&my_constViewMatrix,
                                        &ChangeWithViewMatrix);
 
   }
 }
+
+void
+GlCloseWindow(GLFWwindow * window)
+{
+  g_isRunnig = false;
+
+  glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+}
+
+void
+GlResizeBuffer(GLFWwindow* window, int width, int height)
+{
+  glViewport(0, 0, width, height);
+}
+
+void
+GlWindowResize(GLFWwindow* window, int width, int height)
+{}
+
 #endif
 

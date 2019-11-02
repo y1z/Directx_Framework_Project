@@ -100,15 +100,23 @@ namespace helper
 
 
   /**
-  *@param [in] lowerMultiplier will control the lowest value to multiple the result's from the 
-  * sin and cos functions 
-  *@param [in] upperMultiplier will control the largest value to multiple the result's from the 
-  * sin and cos functions 
+  *@param [in] lowerMultiplier will control the lowest value to multiple the result's from the
+  * sin and cos functions
+  *@param [in] upperMultiplier will control the largest value to multiple the result's from the
+  * sin and cos functions
   */
   [[nodiscard]] cModel *
-    createHelicoid( float lowerMultiplier, float upperMultiplier,
-                     float lowerAngle, float upperAngle, 
+    createHelicoid(float lowerMultiplier, float upperMultiplier,
+                   float lowerAngle, float upperAngle,
                    uint32_t division, cDevice &device);
+
+  /**
+  *@brief remove the actor current model then give the user the option to load a new model
+  *@param actor [in][out]  the actor with a new model
+  */
+  [[nodiscard]] bool
+    loadNewActorModelFromFile(cActor &actor, cWindow &windowToOpen,cDevice &device);
+
 
 }
 

@@ -190,6 +190,7 @@ cModel::Destroy()
   m_meshes.clear();
   m_modelPath.clear();
   m_materialPaths.clear();
+  this->m_meshes.clear();
   setReady(false);
 }
 
@@ -246,6 +247,11 @@ cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device,
     {
       vertex.tex.x = static_cast< float >(assimpMesh->mTextureCoords[0][i].x);
       vertex.tex.y = static_cast< float >(assimpMesh->mTextureCoords[0][i].y);
+    }
+    else
+    {
+      vertex.tex.x = 0.0f;
+      vertex.tex.y = 0.0f;
     }
     ptr_vertices->emplace_back(vertex);
   }

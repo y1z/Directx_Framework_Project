@@ -26,7 +26,13 @@ static bool GlCheckForError()
     Message += ConvertToHex.str();
     Message += "> \n";
 
-    std::cout <<  Message.c_str() ;
+    std::cout << Message.c_str();
+    if (Error == GL_INVALID_ENUM)
+    {
+      std::cout << "invalid Enum \n";
+    }
+
+
   }
   return IsErrorResult;
 }

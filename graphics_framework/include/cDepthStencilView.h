@@ -2,6 +2,7 @@
 
 #include"utility/Grafics_libs.h"
 #include "../include/cTexture2D.h"
+#include "utility/enDefs.h"
 
 struct sDepthStencilDescriptor
 {
@@ -16,8 +17,6 @@ public:
   cDepthStencilView();
   ~cDepthStencilView();
 public:
-
-  
 #if DIRECTX
   ID3D11DepthStencilView* getDepthStencilView();
   ID3D11DepthStencilView** getDepthStencilViewRef();
@@ -27,7 +26,14 @@ public:
 
   ID3D11Texture2D ** 
     getTextureRef();
+
+#elif OPEN_GL
+
+  uint32
+    getDepthStencilID() const;
+
 #endif // DIRECTX
+
   sDepthStencilDescriptor 
     getDescriptor() const;
 
@@ -41,10 +47,12 @@ public:
     ReleaseAll();
 private:
 #if DIRECTX
-  ID3D11DepthStencilView*mptr_depthStencilView;
+  ID3D11DepthStencilView *mptr_depthStencilView;
 #elif OPEN_GL 
+
   uint32 m_depthStencilID = 0;
 #endif // DIRECTX
+
   sDepthStencilDescriptor m_Descriptor;
 public:
   cTexture2D m_depthStencil;

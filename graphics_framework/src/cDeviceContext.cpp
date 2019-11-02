@@ -103,6 +103,7 @@ cDeviceContext::OMSetRenderTargets(cRenderTargetView renderTargetsViews[],
 
 }
 
+
 void
 cDeviceContext::RSSetViewports(cViewport viewports[], uint8_t numViewports)
 {
@@ -200,13 +201,13 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
     {
       auto *ViewMatrixTemp = reinterpret_cast< const ViewMatrix* >(originOfData);
 
-      glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ViewMatrixTemp->matrix)); 
+      glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ViewMatrixTemp->matrix));
 
     }
     else if (constBuffer->getIndex() == 1)
     {
       auto *ProjMatrixTemp = reinterpret_cast< const ProjectionMatrix* >(originOfData);
-      glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE , glm::value_ptr(ProjMatrixTemp->matrix));
+      glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ProjMatrixTemp->matrix));
     }
     else if (constBuffer->getIndex() == 2)
     {
@@ -268,7 +269,7 @@ cDeviceContext::ClearRenderTargetView(cRenderTargetView & renderTargetView, sCol
   else
   {
     mptr_deviceContext->ClearRenderTargetView(renderTargetView.getRenderTragetView(), color->allColor);
-}
+  }
 #elif OPEN_GL
   static constexpr sColorf OpenGlColor{ 1.0f,0.34f,0.20f,1.0f };
     //rgb(1.00, 0.73, 0.20) https://rgbcolorcode.com/color/FFBB33
@@ -328,7 +329,7 @@ void cDeviceContext::VSSetConstantBuffers(cConstBuffer & Buffer, uint8_t Slot)
 #elif OPEN_GL
 #endif // DIRECTX
 
-}
+  }
 
 void cDeviceContext::PSSetShader(cPixelShader & pixelShader)
 {
@@ -363,6 +364,25 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
     assert(("Error asking for too many slots", Slots <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1));
   }
 #elif OPEN_GL
+  GlRemoveAllErrors();
+  // should be the index for shader program 
+  glUseProgram(*cApiComponents::getShaderProgram());
+
+  auto Location = glGetUniformLocation(*cApiComponents::getShaderProgram(), "uTextureSampler");
+
+  int32_t Count;
+  glGetIntegerv(GL_ACTIVE_TEXTURE, &Count);
+
+  glActiveTexture(shaderResources[0].getTextureID());//+ shaderResources->getResourceID());// + shaderResources->getResourceID());
+
+  glBindTexture(GL_TEXTURE_2D, shaderResources[0].getResourceID());
+  // NEEDS TO BE ONE OR EVERYTHING GOES TO SHIT 
+  glUniform1i(Location, 0);
+
+  if (GlCheckForError())
+  {
+    assert(true == false, "Error with Texture Sample");
+  }
 
 #endif // DIRECTX
 }

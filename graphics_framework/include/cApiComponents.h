@@ -1,6 +1,7 @@
 #pragma once
 #include "utility/Grafics_libs.h"
 #include <filesystem>
+#include "utility/enDefs.h"
 
 /*! this class is a container for variables that are used as globals inside 
 a API */
@@ -35,12 +36,12 @@ public:
 
   /*! returns a reference to the shader program 
   for open_gl */
-  static unsigned int 
+  static uint32
     *getShaderProgram();
 
   /*! returns a reference to the 
   vertex array object */
-  static unsigned int 
+  static uint32 
     *getvertexArrayObject();
 
 #endif // OPEN_GL
@@ -53,8 +54,8 @@ private:
   D3D_FEATURE_LEVEL m_version;
 
 #elif OPEN_GL
-  static unsigned int GlShaderProgram ;
-  static unsigned int vertexArrayObject;
+  static uint32 GlShaderProgram ;
+  static uint32 vertexArrayObject;
   int m_majorVersion;
   int m_minorVersion;
 #endif

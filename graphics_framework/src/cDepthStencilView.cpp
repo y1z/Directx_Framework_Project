@@ -43,7 +43,13 @@ cDepthStencilView::getTextureRef()
 {
   return m_depthStencil.getTextureRef();
 }
+#elif OPEN_GL
 
+uint32 
+cDepthStencilView::getDepthStencilID() const
+{
+  return m_depthStencilID;
+}
 #endif // DIRECTX 
 
 sDepthStencilDescriptor
@@ -58,6 +64,11 @@ cDepthStencilView::init(int Format, int Dimension, int mip)
   m_Descriptor.Format = Format;
   m_Descriptor.Dimension = Dimension;
   m_Descriptor.Mip = mip;
+#if OPEN_GL
+  glGenRenderbuffers(1, &m_depthStencilID);
+
+#endif // OPEN_GL
+
 }
 
 cTexture2D &
