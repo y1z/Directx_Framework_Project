@@ -1,6 +1,6 @@
 #pragma once
 
-#include"utility/Grafics_libs.h"
+#include"utility/enGraphics.h"
 #include "../include/cTexture2D.h"
 #include "utility/enDefs.h"
 

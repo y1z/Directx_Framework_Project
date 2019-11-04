@@ -1,5 +1,5 @@
 #pragma once 
-#include "../include/utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 #include "utility/enDefs.h"
 #include "enum_headers/enFormatEnums.h"
 #include <string_view>
@@ -9,7 +9,7 @@ class cDeviceContext;
 
 struct sShaderResourceDesc
 {
-  Formats format = Formats::fR32G32B32A32;
+  enFormats format = enFormats::fR32G32B32A32;
   int viewDim;
 };
 
@@ -70,7 +70,7 @@ public:
     getChannelCount()const;
 
   void
-    setDescriptor(Formats format, int viewDim);
+    setDescriptor(enFormats format, int viewDim);
 private:
  sShaderResourceDesc m_desc;
   uint8 * mptr_resourceData = nullptr;

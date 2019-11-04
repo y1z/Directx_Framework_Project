@@ -49,9 +49,9 @@ public:// functions
     setTransform(const sMatrix4x4 & newTransform);
   //! sets the topology for the individual mesh 
   void
-    setTopology(Topology topology);
+    setTopology(enTopology topology);
   //! returns the type of topology the mesh contians 
-  Topology
+  enTopology
     getTopology() const;
 
 public: // functions 
@@ -83,7 +83,7 @@ private:
   /*! this contains the values that represent the indices */
   std::unique_ptr<std::vector<uint16>> mptr_indiceData;
   //! controls which topology it used be each mesh.
-  Topology m_topology;
+  enTopology m_topology;
   glm::mat4 m_transform;
 };
 

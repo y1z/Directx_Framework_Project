@@ -1,6 +1,6 @@
 #pragma once
-#include "utility/Grafics_libs.h"
-enum class Filter
+#include "utility/enGraphics.h"
+enum class enFilter
 {
 #if DIRECTX
   MinMagMip_Point = D3D11_FILTER_MIN_MAG_MIP_POINT,

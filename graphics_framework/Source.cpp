@@ -4,10 +4,8 @@
 // This application demonstrates texturing
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 //--------------------------------------------------------------------------------------
-#include "utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 /******************************************************/
 #include "../include/cDevice.h"// FINISHED
 #include "../include/cDeviceContext.h" //FINISHED 
@@ -340,9 +338,9 @@ InitDevice()
 
   sWindowSize windowSize = helper::getWindowSize(my_window);
 
-  my_swapChain.setRenderTarget(windowSize.width, windowSize.height, Formats::fR32G32B32A32);
+  my_swapChain.setRenderTarget(windowSize.width, windowSize.height, enFormats::fR32G32B32A32);
 
-  my_swapChain.setDepthStencilView(Formats::depthStencil_format);
+  my_swapChain.setDepthStencilView(enFormats::depthStencil_format);
   isSuccesful = my_swapChain.InitBuffer();
   //  isSuccesful = my_swapChain.GetBuffer(my_renderTarget.getTexture(), 0);
   assert(("Error with swap-chain getting a buffer " &&  isSuccesful == true));
@@ -363,7 +361,7 @@ InitDevice()
 
  /**********************************************************/
    // set depth-stencil-view
-  my_swapChain.setDepthStencilView(Formats::depthStencil_format);
+  my_swapChain.setDepthStencilView(enFormats::depthStencil_format);
 
   isSuccesful = my_device.CreateDepthStencilView(my_swapChain.getDepthStencilView());
   assert(isSuccesful == true && "Error with depth-stencil creation");
@@ -526,11 +524,11 @@ InitDevice()
 
 #endif // DIRECTX
 
-  my_sampler.setDescirption(static_cast< int >(Filter::Anisotropic),
-                            static_cast< int >(TextureAddress::Wrap), //equivalent to D3D11_TEXTURE_ADDRESS_WRAP
-                            static_cast< int >(TextureAddress::Wrap),
-                            static_cast< int >(TextureAddress::Wrap),
-                            static_cast< int >(Comparasion::Never),//equivalent to D3D11_COMPARISON_NEVER
+  my_sampler.setDescirption(static_cast< int >(enFilter::Anisotropic),
+                            static_cast< int >(enTextureAddress::Wrap), //equivalent to D3D11_TEXTURE_ADDRESS_WRAP
+                            static_cast< int >(enTextureAddress::Wrap),
+                            static_cast< int >(enTextureAddress::Wrap),
+                            static_cast< int >(enComparison::Never),//equivalent to D3D11_COMPARISON_NEVER
                             10);
 
   isSuccesful = my_device.CreateSamplerState(my_sampler);

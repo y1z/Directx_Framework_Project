@@ -1,7 +1,7 @@
 #pragma once
-#include "utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 
-enum Formats
+enum enFormats
 {
 #if DIRECTX
   /* one channel */

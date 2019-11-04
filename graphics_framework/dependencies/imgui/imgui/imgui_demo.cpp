@@ -3264,7 +3264,7 @@ struct ExampleAppConsole
     ImVector<const char*> Commands;
     ImVector<char*>       History;
     int                   HistoryPos;    // -1: new line, 0..History.Size-1 browsing history.
-    ImGuiTextFilter       Filter;
+    ImGuiTextFilter       enFilter;
     bool                  AutoScroll;
     bool                  ScrollToBottom;
 
@@ -3361,7 +3361,7 @@ struct ExampleAppConsole
         if (ImGui::Button("Options"))
             ImGui::OpenPopup("Options");
         ImGui::SameLine();
-        Filter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
+        enFilter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
         ImGui::Separator();
 
         const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing(); // 1 separator, 1 input text
@@ -3389,7 +3389,7 @@ struct ExampleAppConsole
         for (int i = 0; i < Items.Size; i++)
         {
             const char* item = Items[i];
-            if (!Filter.PassFilter(item))
+            if (!enFilter.PassFilter(item))
                 continue;
 
             // Normally you would store more information in your item (e.g. make Items[] an array of structure, store color/type etc.)
@@ -3594,7 +3594,7 @@ static void ShowExampleAppConsole(bool* p_open)
 struct ExampleAppLog
 {
     ImGuiTextBuffer     Buf;
-    ImGuiTextFilter     Filter;
+    ImGuiTextFilter     enFilter;
     ImVector<int>       LineOffsets;        // Index to lines offset. We maintain this with AddLog() calls, allowing us to have a random access on lines
     bool                AutoScroll;
     bool                ScrollToBottom;
@@ -3652,7 +3652,7 @@ struct ExampleAppLog
         ImGui::SameLine();
         bool copy = ImGui::Button("Copy");
         ImGui::SameLine();
-        Filter.Draw("Filter", -100.0f);
+        enFilter.Draw("Filter", -100.0f);
 
         ImGui::Separator();
         ImGui::BeginChild("scrolling", ImVec2(0,0), false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -3665,7 +3665,7 @@ struct ExampleAppLog
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         const char* buf = Buf.begin();
         const char* buf_end = Buf.end();
-        if (Filter.IsActive())
+        if (enFilter.IsActive())
         {
             // In this example we don't use the clipper when Filter is enabled.
             // This is because we don't have a random access on the result on our filter.
@@ -3675,7 +3675,7 @@ struct ExampleAppLog
             {
                 const char* line_start = buf + LineOffsets[line_no];
                 const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-                if (Filter.PassFilter(line_start, line_end))
+                if (enFilter.PassFilter(line_start, line_end))
                     ImGui::TextUnformatted(line_start, line_end);
             }
         }

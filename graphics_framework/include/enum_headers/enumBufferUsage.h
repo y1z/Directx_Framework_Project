@@ -1,8 +1,8 @@
 #pragma once
-#include "utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 
 
-enum class bufferUsage
+enum class enBufferUse
 {
 #if DIRECTX
   renderTragetOut = DXGI_USAGE_RENDER_TARGET_OUTPUT,

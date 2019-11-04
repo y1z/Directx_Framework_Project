@@ -2,7 +2,7 @@
 
 baseComponent::baseComponent()
 : m_Ready(false),
-m_componentType(componentTypes::NONE)
+m_componentType(enComponentTypes::NONE)
 {}
 
 void 
@@ -12,12 +12,12 @@ baseComponent::setReady(bool Readyness)
 }
 
 void 
-baseComponent::setComponentType(componentTypes type)
+baseComponent::setComponentType(enComponentTypes type)
 {
   m_componentType = type;
 }
 
-componentTypes 
+enComponentTypes 
 baseComponent::getComponentType() const
 {
   return this->m_componentType;

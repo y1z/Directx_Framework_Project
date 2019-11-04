@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 #include "utility/enDefs.h"
 #include "../Resource.h"
 class cDeviceContext;

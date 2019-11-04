@@ -82,7 +82,7 @@ cSwapChain::setSwapChain(uint32_t width, uint32_t height,
 }
 
 void
-cSwapChain::setRenderTarget(uint32 width, uint32 height, Formats format)
+cSwapChain::setRenderTarget(uint32 width, uint32 height, enFormats format)
 {
   this->m_renderTarget.setDescription(width, height, format);
 }
@@ -121,7 +121,7 @@ cRenderTargetView
 }
 
 void
-cSwapChain::setDepthStencilView(Formats format, int Dimension, int Mip)
+cSwapChain::setDepthStencilView(enFormats format, int Dimension, int Mip)
 {
   this->m_depthStencilView.init(format, Dimension, Mip);
 }
@@ -199,7 +199,7 @@ cSwapChain::Resize(cDevice &device,
 
   this->m_desc.buffWidth = width;
   this->m_desc.buffHeight = height;
-  this->m_depthStencilView.getDepthStencil().init(width, height, Formats::depthStencil_format /*45*/, 0, 0x40L);
+  this->m_depthStencilView.getDepthStencil().init(width, height, enFormats::depthStencil_format /*45*/, 0, 0x40L);
 
   mptr_swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
 

@@ -239,9 +239,9 @@
     <ClInclude Include="include\utility\CustomStructs.h" />
     <ClInclude Include="include\utility\enDefs.h" />
     <ClInclude Include="include\utility\enErrorHandling.h" />
+    <ClInclude Include="include\utility\enGraphics.h" />
     <ClInclude Include="include\utility\enHelperTemplates.h" />
     <ClInclude Include="include\utility\GraficsMacros.h" />
-    <ClInclude Include="include\utility\Grafics_libs.h" />
     <ClInclude Include="include\utility\HelperFuncs.h" />
     <ClInclude Include="include\utility\MacroslessWindow.h" />
     <ClInclude Include="include\utility\Timer.h" />

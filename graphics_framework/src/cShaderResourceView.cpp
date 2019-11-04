@@ -144,7 +144,7 @@ cShaderResourceView::getChannelCount() const
 }
 
 void
-cShaderResourceView::setDescriptor(Formats format, int newViewDim)
+cShaderResourceView::setDescriptor(enFormats format, int newViewDim)
 {
   this->m_desc.format = format;
   this->m_desc.viewDim = newViewDim;

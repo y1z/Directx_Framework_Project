@@ -1,4 +1,4 @@
-#include "../include/utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 #include "../include/utility/CustomStructs.h"
 
 class cWindow;

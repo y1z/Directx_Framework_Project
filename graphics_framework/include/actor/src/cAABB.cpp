@@ -9,7 +9,7 @@ cAABB::cAABB()
   :m_max(0.0f),
   m_min(0.0f)
 {
-  m_componentType = (componentTypes::AABB);
+  m_componentType = (enComponentTypes::AABB);
 }
 
 void

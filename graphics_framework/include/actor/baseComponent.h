@@ -42,13 +42,13 @@ protected:
     setReady(bool Readyness);
   /*!this set the component type  */
   void
-    setComponentType(componentTypes type);
+    setComponentType(enComponentTypes type);
   /*! returns the component type */
-  componentTypes
+  enComponentTypes
     getComponentType()const;
 protected:
   //! use to know if the component is ready to use 
   bool m_Ready;
   //! help's distinguish the drive classes
-  componentTypes m_componentType;
+  enComponentTypes m_componentType;
 };

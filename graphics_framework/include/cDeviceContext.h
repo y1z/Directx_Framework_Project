@@ -1,5 +1,5 @@
 #pragma once 
-#include "..//include/utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 #include "../include/utility/enDefs.h"
 // std includes 
 #include <cstdint>
@@ -95,7 +95,7 @@ public:// functions
     IASetIndexBuffer(cIndexBuffer &indexBuffer, int Format, int offSet = 0);
 
   void/*! set's the topology */
-    IASetPrimitiveTopology(int Topology);
+    IASetPrimitiveTopology(int enTopology);
 
   void/*! updates some resource on the graphic card
       \param Buffer [in] the buffer that contains the data that going to the graphics card

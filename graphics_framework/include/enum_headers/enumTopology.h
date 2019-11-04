@@ -1,6 +1,6 @@
 #pragma once
 /*! tell the api which topology to use */
-enum class Topology
+enum class enTopology
 {
   UnDefined = 0,
 #if DIRECTX

@@ -1,4 +1,4 @@
-#include "utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 #include "HelperFuncs.h"
 #include "cDevice.h"
 #include "cDeviceContext.h"
@@ -66,8 +66,8 @@ namespace helper
     };
     UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
-    swapChain.setSwapChain(width, height, Formats::R8G8B8A8_uniform_norm,//equivalent to DXGI_FORMAT_R8G8B8A8_UNORM
-                           static_cast< int >(bufferUsage::renderTragetOut),/*equivalent to DXGI_USAGE_RENDER_TARGET_OUTPUT*/ window);
+    swapChain.setSwapChain(width, height, enFormats::R8G8B8A8_uniform_norm,//equivalent to DXGI_FORMAT_R8G8B8A8_UNORM
+                           static_cast< int >(enBufferUse::renderTragetOut),/*equivalent to DXGI_USAGE_RENDER_TARGET_OUTPUT*/ window);
 
 
     for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
@@ -232,7 +232,7 @@ namespace helper
     memset(&TextureDesc, 0, sizeof(TextureDesc));
     TextureDesc.texHeight = height;
     TextureDesc.texWidth = width;
-    TextureDesc.texFormat = Formats::depthStencil_format;// equivalent to DXGI_FORMAT_D24_UNORM_S8_UINT
+    TextureDesc.texFormat = enFormats::depthStencil_format;// equivalent to DXGI_FORMAT_D24_UNORM_S8_UINT
   #if DIRECTX
     TextureDesc.BindFlags = 0x40L;// equivalent to DD3D11_BIND_DEPTH_STENCIL
   #elif OPEN_GL

@@ -148,9 +148,6 @@
     <ClInclude Include="include\imGuiManager.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\utility\Grafics_libs.h">
-      <Filter>include\utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\utility\GraficsMacros.h">
       <Filter>include\utility</Filter>
     </ClInclude>
@@ -234,6 +231,9 @@
     </ClInclude>
     <ClInclude Include="include\cShaderTarget.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utility\enGraphics.h">
+      <Filter>include\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

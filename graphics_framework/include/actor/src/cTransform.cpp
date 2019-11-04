@@ -9,7 +9,7 @@
 cTransform::cTransform()
 {
   setReady(true);
-  setComponentType(componentTypes::Transform);
+  setComponentType(enComponentTypes::Transform);
 }
 
 void

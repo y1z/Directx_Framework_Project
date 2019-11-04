@@ -1,7 +1,7 @@
 #pragma once
-#include "utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 
-enum class Comparasion
+enum class enComparison
 {
 #if DIRECTX
   Never = D3D11_COMPARISON_NEVER,

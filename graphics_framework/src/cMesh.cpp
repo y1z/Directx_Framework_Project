@@ -4,7 +4,7 @@
 #include "../include/utility/CustomStructs.h"
 
 cMesh::cMesh()
-  :m_topology(Topology::TriList)
+  :m_topology(enTopology::TriList)
 {
   mptr_indexBuffer = new cIndexBuffer();
   mptr_vertexBuffer = new cVertexBuffer();
@@ -97,12 +97,12 @@ void cMesh::setTransform(const sMatrix4x4 & newTransform)
   m_transform = newTransform.matrix;
 }
 
-void cMesh::setTopology(Topology topology)
+void cMesh::setTopology(enTopology topology)
 {
   m_topology = topology;
 }
 
-Topology
+enTopology
 cMesh::getTopology() const
 {
   return  m_topology;

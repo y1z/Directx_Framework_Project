@@ -7,7 +7,7 @@
 #include "../include/cDevice.h"
 #include "../include/cDeviceContext.h"
 #include "../include/cConstBuffer.h"
-#include "../include/utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 #include "enum_headers/enFormatEnums.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -36,7 +36,7 @@ cModel::cModel()
 // init the identity matrix 
 {
   m_transform.matrix = glm::identity<glm::mat4>();
-  setComponentType(componentTypes::Model);
+  setComponentType(enComponentTypes::Model);
 }
 
 cModel::cModel(std::string_view strView)
@@ -74,7 +74,7 @@ void
 cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &buffers, const sColorf &color)
 {
   GlChangeEveryFrame Cb;
-  //m_meshes[2].setTopology(Topology::LineList);
+  //m_meshes[2].setTopology(enTopology::LineList);
   const glm::mat4 Identidad(1.0f);
 
 #if DIRECTX
@@ -90,7 +90,7 @@ cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &
     //mesh.setTransform(Transform);
   for (cMesh &mesh : m_meshes)
   {
-    deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), Formats::uR16);
+    deviceContext.IASetIndexBuffer(mesh.getIndexBuffer(), enFormats::uR16);
     deviceContext.IASetVertexBuffers(&mesh.getVertexBuffer(), 1);
     deviceContext.IASetPrimitiveTopology(static_cast< int >(mesh.getTopology()));
   #if DIRECTX
@@ -100,7 +100,7 @@ cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &
     }
   #endif // DIRECTX
 
-    deviceContext.DrawIndexed(mesh.getIndexBuffer().getElementCount(),0);
+    deviceContext.DrawIndexed(mesh.getIndexBuffer().getElementCount(), 0);
   }
 
   sMatrix4x4 temp;
@@ -127,7 +127,7 @@ cModel::setMaterialPath(const std::string_view MaterialPath)
 
 void cModel::AddMesh(cMesh && newMesh)
 {
-  m_meshes.push_back (std::forward<cMesh>(newMesh));
+  m_meshes.push_back(std::forward<cMesh>(newMesh));
   setReady(true);
 }
 

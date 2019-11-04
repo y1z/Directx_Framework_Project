@@ -1,6 +1,6 @@
 #pragma once
 // TODO : update as more components are made 
-enum class componentTypes
+enum class enComponentTypes
 {
   NONE = -1,
   Transform,

@@ -179,12 +179,12 @@ cDeviceContext::IASetIndexBuffer(cIndexBuffer & indexBuffer, int Format, int off
 }
 
 void
-cDeviceContext::IASetPrimitiveTopology(int Topology)
+cDeviceContext::IASetPrimitiveTopology(int enTopology)
 {
 #if DIRECTX
-  mptr_deviceContext->IASetPrimitiveTopology(static_cast< D3D11_PRIMITIVE_TOPOLOGY >(Topology));
+  mptr_deviceContext->IASetPrimitiveTopology(static_cast< D3D11_PRIMITIVE_TOPOLOGY >(enTopology));
 #elif OPEN_GL
-  m_drawingData.currentTopology = Topology;
+  m_drawingData.currentTopology = enTopology;
 #endif // DIRECTX
 }
 

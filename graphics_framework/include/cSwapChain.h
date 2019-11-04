@@ -1,5 +1,5 @@
 #pragma once
-#include "../include/utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 #include "../include/cDepthStencilView.h"
 #include "../include/cRenderTargetView.h"
 #include "cRenderTarget.h"
@@ -77,7 +77,7 @@ public:// functions
                  bool isWindowed = true);
   /*! just passes the argument to the render-target*/
   void
-    setRenderTarget(uint32 width, uint32 height, Formats format);
+    setRenderTarget(uint32 width, uint32 height, enFormats format);
   
 #if OPEN_GL
           /*! set the window for the glfwSwapBuffers function */
@@ -104,7 +104,7 @@ public:// functions
 
   /*!*/
   void
-    setDepthStencilView(Formats format, int Dimension = 3, int Mip = 0);
+    setDepthStencilView(enFormats format, int Dimension = 3, int Mip = 0);
 
   /*! the swap-chain gets a buffer for swapping
   \param backBuffer [out] the resulting back buffer

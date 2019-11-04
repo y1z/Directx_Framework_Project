@@ -17,7 +17,7 @@ bool cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
   bool isSucceful = false;
 
   sTextureDescriptor  textureDesc = helper::createDepthStencilDesc(screenSize.width, screenSize.height);
-  textureDesc.texFormat = Formats::fR32G32B32A32;
+  textureDesc.texFormat = enFormats::fR32G32B32A32;
   textureDesc.Usage = 0;
   textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
@@ -38,7 +38,7 @@ bool cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
     return false;
   }
 
-  m_ResourceView.setDescriptor(static_cast< Formats >(textureDesc.texFormat), D3D11_DSV_DIMENSION_TEXTURE2D);
+  m_ResourceView.setDescriptor(static_cast< enFormats >(textureDesc.texFormat), D3D11_DSV_DIMENSION_TEXTURE2D);
 
   auto ResourceViewDesc = m_ResourceView.getDxDescriptor();
 

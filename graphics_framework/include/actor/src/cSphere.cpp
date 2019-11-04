@@ -5,7 +5,7 @@ cSphere::cSphere()
   :m_centerPoint(0.f, 0.f, 0.f, 0.f),
   m_radius(0.f, 0.f, 0.f) 
 {
-  m_componentType = componentTypes::Sphere;
+  m_componentType = enComponentTypes::Sphere;
 }
 
 void

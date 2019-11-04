@@ -1,7 +1,7 @@
 #pragma once
-#include "utility/Grafics_libs.h"
+#include "utility/enGraphics.h"
 
-enum class TextureAddress : int
+enum class enTextureAddress : int
 {
 #if DIRECTX
   Wrap = D3D11_TEXTURE_ADDRESS_WRAP,
