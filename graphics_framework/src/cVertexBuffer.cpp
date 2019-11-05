@@ -4,7 +4,7 @@
 cVertexBuffer::cVertexBuffer()
   :cBuffer()
 {
-  m_Type = BufferType::Vertex;
+  m_Type = enBufferType::Vertex;
 
 #if DIRECTX
   std::memset(&m_desc, 0, sizeof(m_desc));
@@ -34,7 +34,7 @@ cVertexBuffer::init(uint32_t singleElementSize,
   m_Desc.miscFlags = miscFlags;
   m_Desc.structured = structured;
   // equivalent to D3D11_BIND_VERTEX_BUFFER
-  m_Desc.bindFlags = static_cast< uint32_t >(BufferType::Vertex);
+  m_Desc.bindFlags = static_cast< uint32_t >(enBufferType::Vertex);
   m_Desc.usage = 0;//equivalent to D3D11_USAGE_DEFAULT 
 #if OPEN_GL
   glGenBuffers(1, &this->m_bufferID);

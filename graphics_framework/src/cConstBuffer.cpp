@@ -4,7 +4,7 @@
 cConstBuffer::cConstBuffer()
   :cBuffer()
 {
-  m_Type = BufferType::Const;
+  m_Type = enBufferType::Const;
   m_bufferIndexID = 0u;
 #if OPEN_GL
   m_glUniformBlockID = 0u;
@@ -32,7 +32,7 @@ cConstBuffer::init(uint32_t singleElementSize,
   m_Desc.miscFlags = miscFlags;
   m_Desc.structured = structured;
   // equivalent to D3D11_BIND_CONSTANT_BUFFER
-  m_Desc.bindFlags = static_cast< uint32_t >(BufferType::Const);
+  m_Desc.bindFlags = static_cast< uint32_t >(enBufferType::Const);
   m_Desc.usage = 0;//equivalent to D3D11_USAGE_DEFAULT 
 #if OPEN_GL
 

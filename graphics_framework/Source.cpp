@@ -6,6 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 #include "utility/enGraphics.h"
+#include "utility/enDefs.h"
 /******************************************************/
 #include "../include/cDevice.h"// FINISHED
 #include "../include/cDeviceContext.h" //FINISHED 
@@ -35,11 +36,6 @@
 #include "actor/cActor.h"
 #include "cShaderTarget.h"
 
-/*****************************************************/
-#include "enum_headers/enFormatEnums.h" 
-#include "enum_headers/enumTextureAddress.h"
-#include "enum_headers/enumFilter.h"
-#include "enum_headers/enumComparasion.h"
 /*****************************************************/
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
@@ -93,13 +89,13 @@ imGuiManager my_gui;
 Timer my_timer;
 /*****************************************************/
 cWindow my_window;
-std::unique_ptr <cActor>my_actor = std::make_unique<cActor>();
-std::unique_ptr <cActor>my_XArrow = std::make_unique<cActor>();
-std::unique_ptr <cActor>my_YArrow = std::make_unique<cActor>();
-std::unique_ptr <cActor>my_ZArrow = std::make_unique<cActor>();
-std::unique_ptr<cCameraManager>my_cameraManager = std::make_unique<cCameraManager>();
+std::unique_ptr <cActor> my_actor = std::make_unique<cActor>();
+std::unique_ptr <cActor> my_XArrow = std::make_unique<cActor>();
+std::unique_ptr <cActor> my_YArrow = std::make_unique<cActor>();
+std::unique_ptr <cActor> my_ZArrow = std::make_unique<cActor>();
+std::unique_ptr<cCameraManager> my_cameraManager = std::make_unique<cCameraManager>();
 std::unique_ptr <cActor> my_tornado = std::make_unique<cActor>();
-std::unique_ptr<cShaderTarget>  my_shaderTarget = std::make_unique<cShaderTarget>();
+std::unique_ptr<cShaderTarget> my_shaderTarget = std::make_unique<cShaderTarget>();
 /**********************************************************/
 cApiComponents my_apiComponent;
 /*****************************************************/
@@ -219,7 +215,7 @@ wWinMain(HINSTANCE hInstance,
   //my_YArrow->AddComponents(new cModel());
   //my_ZArrow->AddComponents(new cModel());
 
- /**init a console **/
+ /* init a console **/
   FILE *standardOutStream = nullptr;
   FILE *standardErrorStream = nullptr;
   if (AllocConsole())
@@ -273,8 +269,7 @@ wWinMain(HINSTANCE hInstance,
     std::cout << "worked someHow";
   }
 
-
-//  my_tornado->AddComponents(helper::createHelicoid(0.1f, 5.0f, 0.0f, 7.1f, 20, my_device));
+  // my_tornado->AddComponents(helper::createHelicoid(0.1f, 5.0f, 0.0f, 7.1f, 20, my_device));
 
   // Main message loop
   MSG msg = { 0 };
@@ -443,6 +438,7 @@ InitDevice()
   #if WIND_OS
     MessageBoxW(NULL,
                 L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+    hr = S_FALSE;
     return hr;
   #endif // WIND_OS
   }
@@ -538,14 +534,14 @@ InitDevice()
   g_World.matrix = glm::identity<glm::mat4>();
 
   cCamera CameraSecurity;
-  CameraSecurity.setEye(0.0f, 30.0f,  20.0f);
+  CameraSecurity.setEye(0.0f, 30.0f, 20.0f);
   CameraSecurity.setAt(0.0f, 0.0f, 0.0f);
   CameraSecurity.calculateAndSetView();
-  CameraSecurity.calculateAndSetPerpective(my_window, 100.0f, 1000.1f, 0.01f);
+  CameraSecurity.calculateAndSetPerpective(my_window, 100.0f, 300.1f, 0.01f);
 
   cCamera perspectiveCamera;
   perspectiveCamera.calculateAndSetView();
-  perspectiveCamera.calculateAndSetPerpective(my_window, 70.0f, 100.0f, 0.1f);
+  perspectiveCamera.calculateAndSetPerpective(my_window, 70.0f, 500.0f, 0.1f);
 
   my_cameraManager->pushBackCamera(perspectiveCamera);
   my_cameraManager->pushBackCamera(CameraSecurity);
@@ -601,7 +597,9 @@ void Render()
   // Update our time
   static float t = 0.0f;
   my_timer.StartTiming();
+
   cModel* ptr_toModel = helper::findModelComponent(*my_actor);
+
   //cModel *ptr_toTornado = helper::findComponent<cModel>(*my_tornado);
   //cModel* ptr_toXArrow = helper::findModelComponent(*my_XArrow);
   //cModel* ptr_toYArrow = helper::findModelComponent(*my_YArrow);
@@ -677,8 +675,7 @@ void Render()
 
   float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red, green, blue, alpha
 
-  //g_pImmediateContext->ClearRenderTargetView(my_renderTragetView.getRenderTragetView()
-/**************************************************************************************************************/
+  /**************************************************************************************************************/
 
   //my_deviceContext.ClearDepthStencilView(my_swapChain.getDepthStencilView());
 
@@ -689,13 +686,12 @@ void Render()
     &my_constViewMatrix
   };
 
-/************************************************************************************************************/
+  /************************************************************************************************************/
   // DRAW ONE 
-/************************************************************************************************************/
+  /************************************************************************************************************/
   my_actor->DrawAllComponents(my_deviceContext, bufferArray);
 
 
-  //my_actor->m_transform.rotateInYAxis(-0.3f);
   my_actor->update(my_deviceContext);
 
   my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargetView(), my_swapChain.getDepthStencilView());

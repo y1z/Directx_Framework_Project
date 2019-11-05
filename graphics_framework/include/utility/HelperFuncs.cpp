@@ -1,18 +1,17 @@
 #include "utility/enGraphics.h"
+#include "utility/enDefs.h"
 #include "HelperFuncs.h"
 #include "cDevice.h"
 #include "cDeviceContext.h"
 #include "cSwapChain.h"
 #include "cWindow.h"
 #include "cApiComponents.h"
-#include "enum_headers/enFormatEnums.h"
 #include  "cShaderBase.h"
 #include "cVertexShader.h"
 #include "cPixelShader.h"
 #include "actor/cActor.h"
 #include "../include/cModel.h"
 #include "../include/cCameraManager.h"
-#include "../include/enum_headers/enumBufferUsage.h"
 /***************************/
 #include <cstdio>
 #include <fstream> // for ifstream
@@ -586,9 +585,12 @@ namespace helper
 
     uint64 length = 0;
     size_t i = 0;
+    //size_t retValue = 0;
     for (const wchar_t wideChar : wideString)
     {
       length = wcrtomb(&Result[i], wideChar, &mbs);
+      //wcrtomb_s(&retValue, &Result[i], sizeof(char), wideChar, &mbs);
+
       if (length == 0 || length > MB_CUR_MAX)
       { break; }
       i++;
@@ -606,7 +608,7 @@ namespace helper
   #elif OPEN_GL
   //  Original.matrix = glm::transpose(Original.matrix);
   #endif // DIRECTX
-  }
+}
 /*****************/
 
   int32

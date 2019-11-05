@@ -1,6 +1,5 @@
 #include "cShaderTarget.h"
 #include "cDevice.h"
-#include "enum_headers/enFormatEnums.h"
 #include "utility/HelperFuncs.h"
 #include <cassert>
 
@@ -37,12 +36,21 @@ bool cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
     EN_LOG_ERROR;
     return false;
   }
+  //D3D11_RESOURCE_DIMENSION_TEXTURE2D
+  // D3D_SRV_DIMENSION 
+  // D3D11_SRV_DIMENSION_TEXTURE2D
+  //D3D11_RESOURCE_DIMENSION_TEXTURE2D
+  m_ResourceView.init(static_cast< enFormats >(textureDesc.texFormat),
+                      1, 0
+                      , D3D11_SRV_DIMENSION_TEXTURE2D);
 
-  m_ResourceView.setDescriptor(static_cast< enFormats >(textureDesc.texFormat), D3D11_DSV_DIMENSION_TEXTURE2D);
 
   auto ResourceViewDesc = m_ResourceView.getDxDescriptor();
+ // ResourceViewDesc.Texture2D.MipLevels = 1;
 
-  HRESULT hr = device.getDevice()->CreateShaderResourceView(m_render.getTexture().getTexture(), NULL, m_ResourceView.getShaderResourceRef());
+  HRESULT hr = device.getDevice()->CreateShaderResourceView(m_render.getTexture().getTexture(),
+                                                            &ResourceViewDesc,
+                                                            m_ResourceView.getShaderResourceRef());
 
   if (FAILED(hr))
   {

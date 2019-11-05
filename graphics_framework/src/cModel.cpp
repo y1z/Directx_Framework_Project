@@ -8,15 +8,16 @@
 #include "../include/cDeviceContext.h"
 #include "../include/cConstBuffer.h"
 #include "utility/enGraphics.h"
-#include "enum_headers/enFormatEnums.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "utility/CustomStructs.h"
 #include "utility/HelperFuncs.h"
+#include "utility/enDefs.h"
 
 #include <cassert>
 #include <iostream>
 #include <memory>
+
 #include <WICTextureLoader.h>
 
 namespace fs = std::filesystem;
@@ -81,7 +82,6 @@ cModel::DrawMeshes(cDeviceContext & deviceContext, std::vector<cConstBuffer *> &
   glm::mat4 Transform(Identidad * this->m_transform.matrix);
 #elif OPEN_GL
 
-//  glm::mat4 Transform(Identidad * this->m_transform.matrix);
   glm::mat4 Transform(Identidad * glm::transpose(this->m_transform.matrix));
 #else
   glm::mat4 Transform(Identidad);

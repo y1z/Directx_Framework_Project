@@ -4,7 +4,7 @@
 cIndexBuffer::cIndexBuffer()
   :cBuffer()
 {
-  m_Type = BufferType::Index;
+  m_Type = enBufferType::Index;
 #if OPEN_GL
   mptr_data = nullptr;
 #endif // OPEN_GL

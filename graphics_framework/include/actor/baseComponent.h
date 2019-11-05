@@ -1,5 +1,5 @@
 #pragma once
-#include "enum_headers/enumComponentTypes.h"
+#include "utility/enDefs.h"
 #include <vector>
 
 //Forward declarations

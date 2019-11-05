@@ -4,7 +4,6 @@
 #include "cTexture2D.h"
 #include "../include/directx_structs.h"
 #include "utility/CustomStructs.h"
-#include "enum_headers/enumTopology.h"
 #include "utility/enDefs.h"
 // std includes 
 #include <vector>

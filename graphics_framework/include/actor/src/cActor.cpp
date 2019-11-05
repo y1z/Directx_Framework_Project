@@ -115,7 +115,9 @@ cActor::getComponent(std::size_t Index)
   else
   {
     assert("Error out of vector Bounds " && m_components.size() - 1 > Index);
+
   }
+  return nullptr;
 }
 
 

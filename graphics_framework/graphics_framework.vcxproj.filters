@@ -157,41 +157,17 @@
     <ClInclude Include="include\cApiComponents.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\enum_headers\enumTextureAddress.h">
-      <Filter>include\enums</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enFormatEnums.h">
-      <Filter>include\enums</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enumBufferType.h">
-      <Filter>include\enums</Filter>
-    </ClInclude>
     <ClInclude Include="include\enum_headers\enums.h">
-      <Filter>include\enums</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enumTopology.h">
       <Filter>include\enums</Filter>
     </ClInclude>
     <ClInclude Include="include\cShaderBase.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enumFilter.h">
-      <Filter>include\enums</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enumComparasion.h">
-      <Filter>include\enums</Filter>
     </ClInclude>
     <ClInclude Include="include\utility\HelperFuncs.h">
       <Filter>include\utility</Filter>
     </ClInclude>
     <ClInclude Include="include\actor\cActor.h">
       <Filter>include\actor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enumActorTypes.h">
-      <Filter>include\enums</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enumComponentTypes.h">
-      <Filter>include\enums</Filter>
     </ClInclude>
     <ClInclude Include="include\cCameraManager.h">
       <Filter>include</Filter>
@@ -222,9 +198,6 @@
     </ClInclude>
     <ClInclude Include="dependencies\imgui\imgui\imgui_impl_opengl3.h">
       <Filter>depencies\imgui\include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\enum_headers\enumBufferUsage.h">
-      <Filter>include\enums</Filter>
     </ClInclude>
     <ClInclude Include="include\utility\enErrorHandling.h">
       <Filter>include\utility</Filter>

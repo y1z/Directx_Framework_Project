@@ -4,7 +4,6 @@
 #include "../include/cRenderTargetView.h"
 #include "cRenderTarget.h"
 #include "utility/enDefs.h"
-#include "enum_headers/enFormatEnums.h"
 #include <cstdint>
 //forward declarations
 class cRenderTargetView;

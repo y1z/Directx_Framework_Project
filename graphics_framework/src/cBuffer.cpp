@@ -66,7 +66,7 @@ cBuffer::getDescriptor() const
   return  this->m_Desc;
 }
 
-BufferType
+enBufferType
 cBuffer::getBufferType() const
 {
   return m_Type;

@@ -1,4 +1,4 @@
-#include "../include/cShaderResourceView.h"
+#include "cShaderResourceView.h"
 #include "cDevice.h"
 #include "cDeviceContext.h"
 #include "utility/enErrorHandling.h"
@@ -49,9 +49,26 @@ D3D11_SHADER_RESOURCE_VIEW_DESC
 cShaderResourceView::getDxDescriptor()
 {
   D3D11_SHADER_RESOURCE_VIEW_DESC result;
+
   std::memset(&result, 0, sizeof(result));
+
   result.Format = static_cast< DXGI_FORMAT >(m_desc.format);
   result.ViewDimension = static_cast< D3D11_SRV_DIMENSION >(m_desc.viewDim);
+
+  if (m_desc.resource.size <= 1)
+  {
+    result.Texture2D.MipLevels = m_desc.resource.mipsLevel;
+    result.Texture2D.MostDetailedMip = m_desc.resource.bestMipsLevel;
+  }
+  else
+  {
+    result.Texture2DArray.ArraySize = m_desc.resource.size;
+    result.Texture2DArray.FirstArraySlice = m_desc.resource.startingIndex;
+    result.Texture2DArray.MipLevels = m_desc.resource.mipsLevel;
+    result.Texture2DArray.MostDetailedMip = m_desc.resource.bestMipsLevel;
+  }
+
+
   return  result;
 }
 #endif // DIRECTX
@@ -144,9 +161,11 @@ cShaderResourceView::getChannelCount() const
 }
 
 void
-cShaderResourceView::setDescriptor(enFormats format, int newViewDim)
+cShaderResourceView::init(enFormats format,uint32 MipsLevel,uint32 BestMipsLevel , int32 viewDim) 
 {
   this->m_desc.format = format;
-  this->m_desc.viewDim = newViewDim;
+  this->m_desc.resource.mipsLevel = MipsLevel;
+  this->m_desc.resource.bestMipsLevel = BestMipsLevel;
+  this->m_desc.viewDim = viewDim;
 }
 

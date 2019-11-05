@@ -16,7 +16,6 @@
 #include "../include/cBuffer.h"
 #include "../include/cShaderResourceView.h"
 #include "../include/cMesh.h"
-#include "../include/enum_headers/enumTopology.h"
 
 #include "../include/cApiComponents.h"
 #include "utility/HelperFuncs.h"
@@ -329,7 +328,7 @@ void cDeviceContext::VSSetConstantBuffers(cConstBuffer & Buffer, uint8_t Slot)
 #elif OPEN_GL
 #endif // DIRECTX
 
-  }
+}
 
 void cDeviceContext::PSSetShader(cPixelShader & pixelShader)
 {
@@ -349,7 +348,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
   {
 
     ID3D11ShaderResourceView* ShaderPtrArr[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
-    for (uint8_t i = 0; i < numResources; ++i)
+    for (uint16_t i = 0; i < numResources; ++i)
     {
       ShaderPtrArr[i] = shaderResources[i].getShaderResource();
     }
@@ -361,6 +360,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
   }
   else
   {
+    EN_LOG_ERROR_WITH_CODE(enErrorCode::UnClassified);
     assert(("Error asking for too many slots", Slots <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1));
   }
 #elif OPEN_GL
@@ -471,7 +471,7 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
   // draw the indices 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_drawingData.currentIndexBuffer);
 
-  glDrawElements(m_drawingData.currentTopology, indexCount, m_drawingData.currentFormat /*equivalent to GL_UNSIGNED_SHORT*/, reinterpret_cast< const void* >(0));
+  glDrawElements(m_drawingData.currentTopology, indexCount, m_drawingData.currentFormat, reinterpret_cast< const void* >(0));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

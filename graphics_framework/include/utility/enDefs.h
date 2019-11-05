@@ -38,9 +38,11 @@ using uByte4 = uint_least32_t;//!<  4 bytes per instance
 using uByte8 = uint_least64_t;//!<  8 bytes per instance 
 
 /*++++++++++++++++++++++++++++++++++++*/
-/** ENUM'S / error codes  */
+/** ENUM'S*/
 /*++++++++++++++++++++++++++++++++++++*/
-
+/**
+*@brief used to determine the error that was committed
+*/
 enum class enErrorCode :Byte4
 {
   Sucessful = 0b000'0000'0000'0000'0000'0000'0000'0000, //!<  indicates that no error occurred  
@@ -52,66 +54,220 @@ enum class enErrorCode :Byte4
   ActorComponentError = 0b000'0000'0000'0000'0000'0000'0010'0000//!< means that a provided path 
 };
 
+/* tells the a.p.i how the information is
+formated
+*/
+enum enFormats
+{
+#if DIRECTX
+  /* one channel */
+  uR8 = DXGI_FORMAT_R8_UINT,
+  uR16 = DXGI_FORMAT_R16_UINT,
+  fR16 = DXGI_FORMAT_R16_FLOAT,
+  uR32 = DXGI_FORMAT_R32_UINT,
+  fR32 = DXGI_FORMAT_R32_FLOAT,
+
+  /* two channel*/
+  fR16G16 = DXGI_FORMAT_R16G16_FLOAT,
+  /* three channel */
+
+  /*Four channel */
+  R8G8B8A8_uniform_norm = DXGI_FORMAT_R8G8B8A8_UNORM,
+  fR16G16B16A16 = DXGI_FORMAT_R16G16B16A16_FLOAT,
+  fR32G32B32A32 = DXGI_FORMAT_R32G32B32A32_FLOAT,
+  /* other */
+  depthStencil_format = DXGI_FORMAT_D24_UNORM_S8_UINT
+#elif OPEN_GL//TODO : GL
+  /* one channel */
+  uR8 = GL_UNSIGNED_BYTE, //GL_R8
+  uR16 = GL_UNSIGNED_SHORT,
+  fR16 = GL_HALF_FLOAT,
+  uR32 = GL_UNSIGNED_INT,
+  fR32 = GL_FLOAT,
+/*two channel */
+fR16G16 = GL_RGB16F,
+/* three channel */
+
+/*Four channel */
+R8G8B8A8_uniform_norm,
+fR16G16B16A16,
+
+fR32G32B32A32 = GL_RGBA32F,
+/* other */
+depthStencil_format = GL_DEPTH24_STENCIL8,
+#else
+
+  uR8,
+  uR16,
+  fR16,
+  uR32,
+  fR32,
+/*two channel */
+fR16G16,
+/* three channel */
+
+/*Four channel */
+R8G8B8A8_uniform_norm,
+fR16G16B16A16,
+fR32G32B32A32,
+/* other */
+depthStencil_format,
+#endif // DIRECTX
+};
 
 /**
-*@brief tell's each a.p.i how to interpret some piece of data  
+*@brief tells the api how the comparison function(for the sampler) is going to work
 */
-//enum enFormats
-//{
-//#if DIRECTX
-//  /* one channel */
-//  uR8 = DXGI_FORMAT_R8_UINT,
-//  uR16 = DXGI_FORMAT_R16_UINT,
-//  fR16 = DXGI_FORMAT_R16_FLOAT,
-//  uR32 = DXGI_FORMAT_R32_UINT,
-//  fR32 = DXGI_FORMAT_R32_FLOAT,
-///*two channel */
-//fR16G16 = DXGI_FORMAT_R16G16_FLOAT,
-///* three channel */
-//
-///*Four channel */
-//R8G8B8A8_uniform_norm = DXGI_FORMAT_R8G8B8A8_UNORM,
-//fR16G16B16A16 = DXGI_FORMAT_R16G16B16A16_FLOAT,
-//fR32G32B32A32 = DXGI_FORMAT_R32G32B32A32_FLOAT,
-///* other */
-//depthStencil_format = DXGI_FORMAT_D24_UNORM_S8_UINT
-//#elif OPEN_GL//TODO : GL
-//  /* one channel */
-//  uR8 = GL_UNSIGNED_BYTE,
-//  uR16 = GL_UNSIGNED_SHORT,
-//  fR16,
-//  uR32 = GL_UNSIGNED_INT,
-//  fR32 = GL_FLOAT,
-///*two channel */
-//fR16G16,
-///* three channel */
-//
-///*Four channel */
-//R8G8B8A8_uniform_norm,
-//fR16G16B16A16,
-//fR32G32B32A32,
-///* other */
-//depthStencil_format = GL_DEPTH24_STENCIL8,
-//#else
-//
-//  uR8,
-//  uR16,
-//  fR16,
-//  uR32,
-//  fR32,
-///*two channel */
-//fR16G16,
-///* three channel */
-//
-///*Four channel */
-//R8G8B8A8_uniform_norm,
-//fR16G16B16A16,
-//fR32G32B32A32,
-///* other */
-//depthStencil_format,
-//#endif // DIRECTX
-//};
-//
+enum class enComparison
+{
+#if DIRECTX
+  Never = D3D11_COMPARISON_NEVER,
+  Less = D3D11_COMPARISON_LESS,
+  Equal = D3D11_COMPARISON_EQUAL,
+  Less_Equal = D3D11_COMPARISON_LESS_EQUAL,
+  Greater = D3D11_COMPARISON_GREATER,
+#elif OPEN_GL 
+  Never = GL_NEVER,
+  Less = GL_LESS,
+  Equal = GL_EQUAL,
+  Less_Equal = GL_LEQUAL
+#else 
+
+  Never,
+  Less,
+  Equal,
+  Less_Equal
+#endif // DIRECTX
+};
+
+/**
+*@brief used to tell the a.p.i which type of buffer we are dealing with.
+*/
+enum enBufferType
+{
+  NONE = 0,
+#if DIRECTX
+  Vertex = D3D11_BIND_VERTEX_BUFFER,
+  Index = D3D11_BIND_INDEX_BUFFER,
+  Const = D3D11_BIND_CONSTANT_BUFFER
+#else
+  Vertex = 0b00'00'00'00'01,
+  Index = 0b00'00'00'00'10,
+  Const = 0b00'00'00'01'00,
+#endif // DIRECTX
+};
+
+/**
+*@ this enum tells the current a.p.i how too use a buffer
+*/
+enum class enBufferUse
+{
+#if DIRECTX
+  renderTragetOut = DXGI_USAGE_RENDER_TARGET_OUTPUT,
+  backBuffer = DXGI_USAGE_BACK_BUFFER,
+#else
+  renderTragetOut,
+  backBuffer,
+#endif // DIRECTX
+};
+
+//! used to know which type of component the actor has attached
+enum class enComponentTypes
+{
+  NONE = -1,
+  Transform,
+  AABB,
+  Sphere,
+  Model
+};
+
+
+/**
+*@brief tells the sampler how to filter the images it was given
+*/
+enum class enFilter
+{
+#if DIRECTX
+  MinMagMip_Point = D3D11_FILTER_MIN_MAG_MIP_POINT,
+  MinMagMip_Point_Linear = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR,
+  MinMagMip_Linear_Mip_Point = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT,
+  MinMagMip_MagMip_Linear = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR,
+  MinMagMip_Linear = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+  /**************************************/
+  Anisotropic = D3D11_FILTER_ANISOTROPIC,
+  Anisotropic_Comperasion = D3D11_FILTER_COMPARISON_ANISOTROPIC,
+  Anisotropic_Minimum = D3D11_FILTER_MINIMUM_ANISOTROPIC,
+  Anisotropic_Maximum = D3D11_FILTER_MAXIMUM_ANISOTROPIC
+#elif OPEN_GL
+  MinMagMip_Point,
+  MinMagMip_Point_Linear,
+  MinMagMip_Linear_Mip_Point,
+  MinMagMip_MagMip_Linear,
+  MinMagMip_Linear,
+  /**************************************/
+  Anisotropic,
+  Anisotropic_Comperasion,
+  Anisotropic_Minimum,
+  Anisotropic_Maximum
+#else
+  MinMagMip_Point,
+  MinMagMip_Point_Linear,
+  MinMagMip_Linear_Mip_Point,
+  MinMagMip_MagMip_Linear,
+  MinMagMip_Linear,
+    /**************************************/
+  Anisotropic,
+  Anisotropic_Comperasion,
+  Anisotropic_Minimum,
+  Anisotropic_Maximum,
+  #endif // DIRECTX
+};
+
+/*! tell the api which topology to use */
+enum class enTopology
+{
+  UnDefined = 0,
+#if DIRECTX
+  TriList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+  PointList = D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+  LineList = D3D_PRIMITIVE_TOPOLOGY_LINELIST
+#elif OPEN_GL
+  TriList = GL_TRIANGLES,
+  PointList = GL_POINTS,
+  LineList = GL_LINES
+#else
+  TriList,
+  PointList,
+  LineList,
+#endif // DIRECTX
+};
+
+/**
+*@ brief tells the a.p.i how to use the x,y,z(aka u,v,w) of a given texture
+*/
+enum class enTextureAddress : int
+{
+#if DIRECTX
+  Wrap = D3D11_TEXTURE_ADDRESS_WRAP,
+  Mirror = D3D11_TEXTURE_ADDRESS_MIRROR,
+  Clamp = D3D11_TEXTURE_ADDRESS_CLAMP,
+  Border = D3D11_TEXTURE_ADDRESS_BORDER,
+  Mirror_once = D3D11_TEXTURE_ADDRESS_MIRROR_ONCE
+#elif OPEN_GL
+  Wrap,
+  Mirror,
+  Clamp,
+  Border,
+  Mirror_once
+#else
+  Wrap,
+  Mirror,
+  Clamp,
+  Border,
+  Mirror_once
+#endif // DIRECTX
+};
+
 
 
 
@@ -167,7 +323,7 @@ namespace enError
     break;
     case enErrorCode::ActorComponentError:
     messageFormat(FunctionName, "Component is one of the following \n"
-                  " ==> 1) does not exist in the current actor "
+                  " ==> 1) does not exist in the current actor \n"
                   " ==> 2) the component needed more set-up in order to do it's job ");
     break;
     default:

@@ -109,12 +109,13 @@ bool cDevice::CreateRenderTargetView(cRenderTarget & renderTarget, cRenderTarget
 }
 
 
-bool cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Texture)
+bool 
+cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Texture)
 {
 #ifdef DIRECTX
   HRESULT hr;
   D3D11_TEXTURE2D_DESC descDepth;
-  SecureZeroMemory(&descDepth, sizeof(descDepth));
+  std::memset(&descDepth, 0, sizeof(descDepth));
   descDepth.Width = Description.texWidth;
   descDepth.Height = Description.texHeight;
   descDepth.MipLevels = 1;
@@ -345,7 +346,7 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
 
 bool cDevice::CreateVertexBuffer(cVertexBuffer & VertexBuffer)
 {
-  if (VertexBuffer.getBufferType() != BufferType::Vertex)
+  if (VertexBuffer.getBufferType() != enBufferType::Vertex)
   {
     OutputDebugStringA("inserted the wrong buffer in CreateVertexBuffer function ");
     return false;
@@ -400,7 +401,7 @@ bool cDevice::CreateVertexBuffer(cVertexBuffer & VertexBuffer)
 
 bool cDevice::CreateIndexBuffer(cIndexBuffer & indexBuffer)
 {
-  if (indexBuffer.getBufferType() != BufferType::Index)
+  if (indexBuffer.getBufferType() != enBufferType::Index)
   {
     OutputDebugStringA("inserted the wrong buffer in CreateIndexBuffer function ");
     return false;
@@ -454,7 +455,7 @@ bool cDevice::CreateIndexBuffer(cIndexBuffer & indexBuffer)
 
 bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
 {
-  if (constBuffer.getBufferType() != BufferType::Const)
+  if (constBuffer.getBufferType() != enBufferType::Const)
   {
     OutputDebugStringA("inserted the wrong buffer in CreateIndexBuffer function ");
     return false;

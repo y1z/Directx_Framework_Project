@@ -1,6 +1,6 @@
 #pragma once
 #include "utility/enGraphics.h"
-#include "enum_headers/enumBufferType.h"
+#include "utility/enDefs.h"
 #include <cstdint>
 #include <cstddef>
 
@@ -64,7 +64,7 @@ public: // functions
     getDescriptor() const;
 
   //!return the type the buffer is (vertex ,index , const)
-  BufferType
+  enBufferType
     getBufferType() const;
 
   //! return the stride of the buffer 
@@ -89,6 +89,6 @@ protected:
   //! to keep track of the stats of the buffer 
   sBufferDesc m_Desc;
   //! to know which type of buffer it being used (vertex, index ,const etc...)
-  BufferType m_Type;
+  enBufferType m_Type;
 };
 

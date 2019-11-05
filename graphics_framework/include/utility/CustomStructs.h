@@ -12,32 +12,8 @@
 
 struct sVertexPosTex
 {
-
   glm::vec4 pos;
   glm::vec2 tex;
-  sVertexPosTex()
-  {
-    pos = glm::vec4(0.0, 0.0, 0.0, 1.0f);
-    tex = glm::vec2(0.5f, 0.5f);
-  }
-
-  sVertexPosTex(const glm::vec4  newPos)
-  {
-    pos = newPos;
-    tex = glm::vec2(0.5f, 0.5f);
-  }
-
-  sVertexPosTex(const glm::vec4 &newPos)
-  {
-    pos = newPos;
-    tex = glm::vec2(0.5f, 0.5f);
-  }
-
-  sVertexPosTex(const glm::vec4 &newPos, glm::vec2 newTex)
-  {
-    pos = newPos;
-    tex = newTex;
-  }
 };
 
 /**

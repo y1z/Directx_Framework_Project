@@ -225,16 +225,7 @@
     <ClInclude Include="include\cViewport.h" />
     <ClInclude Include="include\cWindow.h" />
     <ClInclude Include="include\directx_structs.h" />
-    <ClInclude Include="include\enum_headers\enFormatEnums.h" />
-    <ClInclude Include="include\enum_headers\enumBufferType.h" />
-    <ClInclude Include="include\enum_headers\enumComparasion.h" />
-    <ClInclude Include="include\enum_headers\enumComponentTypes.h" />
-    <ClInclude Include="include\enum_headers\enumFilter.h" />
     <ClInclude Include="include\enum_headers\enums.h" />
-    <ClInclude Include="include\enum_headers\enumActorTypes.h" />
-    <ClInclude Include="include\enum_headers\enumTextureAddress.h" />
-    <ClInclude Include="include\enum_headers\enumTopology.h" />
-    <ClInclude Include="include\enum_headers\enumBufferUsage.h" />
     <ClInclude Include="include\imGuiManager.h" />
     <ClInclude Include="include\utility\CustomStructs.h" />
     <ClInclude Include="include\utility\enDefs.h" />
