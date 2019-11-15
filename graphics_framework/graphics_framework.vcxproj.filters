@@ -157,9 +157,6 @@
     <ClInclude Include="include\cApiComponents.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\enum_headers\enums.h">
-      <Filter>include\enums</Filter>
-    </ClInclude>
     <ClInclude Include="include\cShaderBase.h">
       <Filter>include</Filter>
     </ClInclude>

@@ -4,8 +4,9 @@
 
 #include "cDeviceContext.h"
 #include "cWindow.h"
+
+#include <cstdint>
 #include <string_view>
-using namespace std::string_literals;
 /*******************************/
 #include"imgui/imgui.h"
 #ifdef DIRECTX
@@ -15,12 +16,10 @@ using namespace std::string_literals;
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/imgui_impl_glfw.h" 
 #endif // USING_DIRECTX
-//#include "CWindow.h"
 /*****************************/
 
-#include <cstdint>
-
 namespace ig = ImGui;
+using namespace std::string_literals;
 
 static constexpr uint32_t c_fpsSamplesCount = 360;
 //! this variable is for ImGui_ImplOpenGL3_Init
@@ -107,8 +106,8 @@ imGuiManager::beginChildWithFpsCount(float DeltaTime)
 {
   m_childCount++;
   float averageFps = this->calculateAverageFPS(DeltaTime);
-  std::string fpsMassage("Average FPS :%f ");
-  //fpsMassage += std::to_string(averageFps);
+  static const std::string fpsMassage("Average FPS :%f ");
+   //fpsMassage += std::to_string(averageFps);
 
   ImGui::BeginChild("FPS", ImVec2(420, 130));
   ImGui::Text(fpsMassage.c_str(), averageFps);

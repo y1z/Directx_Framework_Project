@@ -87,6 +87,7 @@ cShaderResourceView::createShaderResourceFromFile(std::string_view file,
   glGenTextures(1, &m_resourceID);
   glBindTexture(GL_TEXTURE_2D, m_resourceID);
 
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -97,7 +98,12 @@ cShaderResourceView::createShaderResourceFromFile(std::string_view file,
 
   if (mptr_resourceData != nullptr)
   {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_witdth, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, mptr_resourceData);
+    glTexImage2D(GL_TEXTURE_2D, 0, 
+                 GL_RGBA, m_witdth,
+                 m_height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE,
+                 mptr_resourceData);
+
     glGenerateMipmap(GL_TEXTURE_2D);
     m_imageID = GlTextureTacker;
     GlTextureTacker++;
@@ -140,6 +146,18 @@ cShaderResourceView::getTextureID() const
   return m_imageID;
 }
 
+uint32_t * 
+cShaderResourceView::getResourceIDPtr()
+{
+  return &m_resourceID;
+}
+
+uint32_t * 
+cShaderResourceView::getTextureIDPtr()
+{
+  return &m_imageID;
+}
+
 #endif // OPEN_GL
 
 int32_t
@@ -161,7 +179,8 @@ cShaderResourceView::getChannelCount() const
 }
 
 void
-cShaderResourceView::init(enFormats format,uint32 MipsLevel,uint32 BestMipsLevel , int32 viewDim) 
+cShaderResourceView::init(enFormats format,uint32 MipsLevel,
+                          uint32 BestMipsLevel , int32 viewDim) 
 {
   this->m_desc.format = format;
   this->m_desc.resource.mipsLevel = MipsLevel;

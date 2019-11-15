@@ -117,6 +117,17 @@ namespace helper
   [[nodiscard]] bool
     loadNewActorModelFromFile(cActor &actor, cWindow &windowToOpen,cDevice &device);
 
+  /**
+  *@brief updates a uniform using the data provided
+  */
+#if OPEN_GL
+  void
+    GlUpdateUniform(sUniformDetails &details);
+
+  sUniformDetails 
+  GlCreateUniformDetail(std::string_view name, enConstBufferElem type);
+
+#endif // OPEN_GL
 
 }
 

@@ -137,9 +137,6 @@ public:// functions
       \param indexOffset [in] if for some reason you what an off set ???*/
     DrawIndexed(uint32_t indexCount, uint32_t indexOffset);
 
-  void
-    DrawIndexed(cIndexBuffer &indexBuffer);
-
   /**/
   bool
     SetShaders(cVertexShader &vertexShader, cPixelShader &pixelShader);

@@ -109,7 +109,7 @@ bool cDevice::CreateRenderTargetView(cRenderTarget & renderTarget, cRenderTarget
 }
 
 
-bool 
+bool
 cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Texture)
 {
 #ifdef DIRECTX
@@ -154,7 +154,8 @@ cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Texture)
 }
 
 
-bool cDevice::CreateDepthStencilView(cDepthStencilView & DepthView)
+bool
+cDevice::CreateDepthStencilView(cDepthStencilView & DepthView)
 {
 #if DIRECTX
   HRESULT hr;
@@ -175,10 +176,11 @@ bool cDevice::CreateDepthStencilView(cDepthStencilView & DepthView)
   GlRemoveAllErrors();
   glEnable(GL_DEPTH_TEST);
   glGenRenderbuffers(1, DepthView.getDepthStencil().getIDPtr());
-  glBindRenderbuffer(GL_RENDERBUFFER,DepthView.getDepthStencil().getID());
+  glBindRenderbuffer(GL_RENDERBUFFER, DepthView.getDepthStencil().getID());
 
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, DepthView.getDepthStencil().getDescriptor().texWidth,
-                        DepthView.getDepthStencil().getDescriptor().texHeight);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+                        DepthView.getWidth(),
+                        DepthView.getHeight());
 
   glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -300,6 +302,18 @@ bool cDevice::CreateInputLayout(cInputLayout &inputLayout
     return true;
   }
 #elif OPEN_GL
+  GlRemoveAllErrors();
+
+  glEnableVertexAttribArray(0);// position 
+  glEnableVertexAttribArray(1);// normals 
+  glEnableVertexAttribArray(2);// textures
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+
   //TODO:  create input layout  
   return true;
 #endif // DIRECTX
@@ -338,7 +352,18 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
     return true;
   }
 #elif OPEN_GL
+  GlRemoveAllErrors();
   // TODO : create input layout 
+  glEnableVertexAttribArray(0);// position 
+  glEnableVertexAttribArray(1);// normals 
+  glEnableVertexAttribArray(2);// textures
+  //glGetVertexArrayiv()
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR
+      return false;
+  }
   return true;
 #endif // DIRECTX
   return false;
@@ -455,11 +480,6 @@ bool cDevice::CreateIndexBuffer(cIndexBuffer & indexBuffer)
 
 bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
 {
-  if (constBuffer.getBufferType() != enBufferType::Const)
-  {
-    OutputDebugStringA("inserted the wrong buffer in CreateIndexBuffer function ");
-    return false;
-  }
 #if DIRECTX
   HRESULT hr;
   D3D11_BUFFER_DESC directxDesc = constBuffer.getDirectXDesc();
@@ -501,8 +521,29 @@ bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
     //glUniformBlockBinding()
     *constBuffer.getIDPtr() = glGetUniformBlockIndex(*shaderProgram, "u_worldAndColor");
     glGenBuffers(1, constBuffer.getGlUniformBlockIDPtr());
+    std::cout << "uniform block id for u_worldAndColor [" << constBuffer.getGlUniformBlockID() << ']' << '\n';
+    std::cout << "regular buffer id for u_worldAndColor [" << constBuffer.getID() << ']' << '\n';
     glBindBuffer(GL_UNIFORM_BUFFER, constBuffer.getGlUniformBlockID());
+
+    //constBuffer.setData(glMapBuffer(GL_UNIFORM_BUFFER, GL_READ_WRITE));
+
+     //glUniformBlockBinding()
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+  }
+  else if (constBuffer.getIndex() == 3)
+  {
+    auto refToContainer = constBuffer.getGlUniforms();
+    refToContainer->push_back(helper::GlCreateUniformDetail("uAmbientColor", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uLightColor", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uLightPos", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uLightDir", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uLightIntensity", enConstBufferElem::single_float));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uAmbientIntensity", enConstBufferElem::single_float));
+
+    for (sUniformDetails &uni : *refToContainer)
+    {
+      uni.id = glGetUniformLocation(*shaderProgram, uni.name.c_str());
+    }
   }
 
   if (GlCheckForError())
@@ -551,7 +592,7 @@ bool cDevice::CreateSamplerState(cSampler & sampler)
 ID3D11Device * cDevice::getDevice()
 {
   return mptr_device;
-}
+  }
 
 ID3D11Device ** cDevice::getDeviceRef()
 {

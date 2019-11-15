@@ -32,10 +32,19 @@ public:
   uint32
     getDepthStencilID() const;
 
+  uint32*
+    getDepthStencilIDPtr();
+
 #endif // DIRECTX
 
   sDepthStencilDescriptor 
     getDescriptor() const;
+
+  uint32
+    getWidth() const;
+
+  uint32
+    getHeight() const;
 
   void 
     init(int Format,int Dimension = 3, int mip = 0);

@@ -68,10 +68,15 @@ void cMesh::initIndexBuffer(std::unique_ptr<std::vector<uint16>> & indeces)
   mptr_indexBuffer->setData(mptr_indiceData->data());
 }
 
-void cMesh::initVertexBuffer(std::unique_ptr<std::vector<sVertexPosTex>> & vertexes)
+void cMesh::initVertexBuffer(std::unique_ptr<std::vector<sVertexPosNormTex>> & vertexes)
 {
   mptr_vertexData = std::move(vertexes);
-  mptr_vertexBuffer->init(sizeof(sVertexPosTex), mptr_vertexData->size(), 0);
+  if ( mptr_vertexData->empty() == false)
+  {
+    uint32 singleElementSize = sizeof(mptr_vertexData->at(0));
+    mptr_vertexBuffer->init(sizeof(sVertexPosNormTex), mptr_vertexData->size(), 0);
+  }
+
   mptr_vertexBuffer->setData(mptr_vertexData->data());
 }
 
@@ -121,7 +126,7 @@ cMesh::getIndexBuffer()
   return  *this->mptr_indexBuffer;
 }
 
-const std::vector<sVertexPosTex>*
+const std::vector<sVertexPosNormTex>*
 cMesh::getVertexData() const
 {
   return mptr_vertexData.get();

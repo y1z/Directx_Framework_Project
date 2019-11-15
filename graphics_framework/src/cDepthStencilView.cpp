@@ -18,6 +18,8 @@ cDepthStencilView::~cDepthStencilView()
     mptr_depthStencilView->Release();
   }
 
+#elif OPEN_GL
+
 #endif // DIRECTX
 }
 
@@ -50,12 +52,30 @@ cDepthStencilView::getDepthStencilID() const
 {
   return m_depthStencilID;
 }
+
+uint32 *
+cDepthStencilView::getDepthStencilIDPtr()
+{
+  return &m_depthStencilID;
+}
 #endif // DIRECTX 
 
 sDepthStencilDescriptor
 cDepthStencilView::getDescriptor() const
 {
   return this->m_Descriptor;
+}
+
+uint32 
+cDepthStencilView::getWidth() const
+{
+  return  m_depthStencil.getWidth();
+}
+
+uint32 
+cDepthStencilView::getHeight() const
+{
+  return  m_depthStencil.getHeight();
 }
 
 void
@@ -85,5 +105,6 @@ cDepthStencilView::ReleaseAll()
   mptr_depthStencilView->Release();
   mptr_depthStencilView = nullptr;
 #elif OPEN_GL
+  glDeleteRenderbuffers(1, &m_depthStencilID);
 #endif // DIRECTX
 }

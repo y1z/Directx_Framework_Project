@@ -9,11 +9,12 @@
 class cDevice;
 
 /**
-*@
+*@brief creates a self contained instance of a render-target and 
+* everything needed to make it work.
 *
 */
 
-class 
+class
   cShaderTarget
 {
 public:
@@ -21,7 +22,8 @@ public:
 
   ~cShaderTarget();
 
-  bool init(const sWindowSize &screenSize, cDevice &device);
+  bool
+    init(const sWindowSize &screenSize, cDevice &device);
 
   cRenderTargetView&
     getRenderTargetView();
@@ -33,7 +35,7 @@ private:
   cDepthStencilView m_depthStencilView;
   cRenderTargetView m_renderTargetView;
   cShaderResourceView m_ResourceView;
-  cRenderTarget m_render;
+  cRenderTarget m_renderTarget;
   cTexture2D m_texture;
 };
 

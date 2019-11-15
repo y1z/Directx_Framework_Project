@@ -9,7 +9,8 @@ cShaderTarget::cShaderTarget()
 cShaderTarget::~cShaderTarget()
 {}
 
-bool cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
+bool
+cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
 {
 #if DIRECTX
 
@@ -20,16 +21,16 @@ bool cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
   textureDesc.Usage = 0;
   textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-  isSucceful = device.CreateTexture2D(textureDesc, m_render.getTexture());
+  isSucceful = device.CreateTexture2D(textureDesc, m_renderTarget.getTexture());
   if (isSucceful == false)
   {
     EN_LOG_ERROR;
     return false;
   }
 
-  m_render.setDescription(screenSize.width, screenSize.height, textureDesc.texFormat);
+  m_renderTarget.init(screenSize.width, screenSize.height, textureDesc.texFormat);
 
-  isSucceful = device.CreateRenderTargetView(m_render.getTexture(), m_renderTargetView);
+  isSucceful = device.CreateRenderTargetView(m_renderTarget.getTexture(), m_renderTargetView);
 
   if (isSucceful == false)
   {
@@ -48,7 +49,7 @@ bool cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
   auto ResourceViewDesc = m_ResourceView.getDxDescriptor();
  // ResourceViewDesc.Texture2D.MipLevels = 1;
 
-  HRESULT hr = device.getDevice()->CreateShaderResourceView(m_render.getTexture().getTexture(),
+  HRESULT hr = device.getDevice()->CreateShaderResourceView(m_renderTarget.getTexture().getTexture(),
                                                             &ResourceViewDesc,
                                                             m_ResourceView.getShaderResourceRef());
 
@@ -60,6 +61,37 @@ bool cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
 
 
   return true;
+#elif OPEN_GL
+  GlRemoveAllErrors();
+
+  if (m_depthStencilView.getDepthStencil().getID() == 0 &&
+      m_ResourceView.getResourceID() == 0 &&
+      m_texture.getID() == 0)
+  {
+    m_depthStencilView.init(enFormats::depthStencil_format);
+
+    m_ResourceView.init(enFormats::fR32G32B32A32, 1, 0, 3);
+
+    m_texture.init(screenSize.width, screenSize.height,
+                   enFormats::fR32G32B32A32, 0,
+                   ( int )enBufferUse::renderTragetOut);
+
+  }
+  else
+  {
+    EN_LOG_ERROR_WITH_CODE(enErrorCode::NotReady);
+    return false;
+  }
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR;
+    return false;
+
+  }
+
+  device.CreateRenderTargetView(m_renderTarget, m_renderTargetView);
+
 #endif // DIRECTX
 
   return false;

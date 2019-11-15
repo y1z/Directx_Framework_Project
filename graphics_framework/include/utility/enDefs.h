@@ -7,7 +7,6 @@
 /**
  * @brief This file contains all  typedef, #define and all other data
  * that can be check at compile time
- *
  */
 
  /*++++++++++++++++++++++++++++++++++++*/
@@ -90,7 +89,7 @@ fR16G16 = GL_RGB16F,
 
 /*Four channel */
 R8G8B8A8_uniform_norm,
-fR16G16B16A16,
+fR16G16B16A16 = GL_RGBA16F,
 
 fR32G32B32A32 = GL_RGBA32F,
 /* other */
@@ -243,9 +242,9 @@ enum class enTopology
 };
 
 /**
-*@ brief tells the a.p.i how to use the x,y,z(aka u,v,w) of a given texture
+*@brief tells the a.p.i how to use the x,y,z(aka u,v,w) of a given texture
 */
-enum class enTextureAddress : int
+enum class enTextureAddress : int32_t 
 {
 #if DIRECTX
   Wrap = D3D11_TEXTURE_ADDRESS_WRAP,
@@ -265,9 +264,34 @@ enum class enTextureAddress : int
   Clamp,
   Border,
   Mirror_once
-#endif // DIRECTX
+#endif // DIRECTXe
 };
 
+/**
+*@brief  this is used to tell me which type of element is used by the uniform
+*/
+enum class enConstBufferElem :int32
+{
+  NONE = 0,
+mat4x4,
+mat3x3,
+
+vec4,
+vec3,
+vec2,
+
+single_float,
+// integer types  
+imat4x4,
+imat3x3,
+
+ivec4,
+ivec3,
+ivec2,
+
+single_int,
+
+};
 
 
 

@@ -32,7 +32,7 @@ public:// functions
     initIndexBuffer(std::unique_ptr<std::vector<uint16>> & indeces);
   //! set up the vertex buffer for creation
   void
-    initVertexBuffer(std::unique_ptr<std::vector<sVertexPosTex>> & vertexes);
+    initVertexBuffer(std::unique_ptr<std::vector<sVertexPosNormTex>> & vertexes);
   //! creates the vertex buffer 
   bool
     createVertexBuffer(cDevice &device);
@@ -57,7 +57,7 @@ public: // functions
   cVertexBuffer &getVertexBuffer();
   cIndexBuffer &getIndexBuffer();
 /*! returns a vector that contains all data related with vertexes of the mesh */
-  const std::vector<sVertexPosTex>* getVertexData() const;
+  const std::vector<sVertexPosNormTex>* getVertexData() const;
 /*! returns a vector that contains all data related with indices of the mesh */
   const std::vector<uint16>* getIndiceData() const;
 
@@ -78,7 +78,7 @@ private:
   //! this is so a mesh can share a texture with a another mesh 
   std::shared_ptr<cTexture2D> mptr_Texture;
   /*! this contains the values that consist of the vertex data */
-  std::unique_ptr<std::vector<sVertexPosTex>> mptr_vertexData;
+  std::unique_ptr<std::vector<sVertexPosNormTex>> mptr_vertexData;
   /*! this contains the values that represent the indices */
   std::unique_ptr<std::vector<uint16>> mptr_indiceData;
   //! controls which topology it used be each mesh.

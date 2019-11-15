@@ -46,10 +46,22 @@ cConstBuffer::setIndex(const uint32_t newIndex)
   m_bufferIndexID = newIndex;
 }
 
+void 
+cConstBuffer::setData(void * ptr_data)
+{
+  this->m_Desc.ptr_data = ptr_data;
+}
+
 uint32_t
 cConstBuffer::getIndex() const
 {
   return  this->m_bufferIndexID;
+}
+
+void * 
+cConstBuffer::getData()
+{
+  return m_Desc.ptr_data;
 }
 
 #if DIRECTX
@@ -77,6 +89,12 @@ uint32_t *
 cConstBuffer::getGlUniformBlockIDPtr()
 {
   return &m_glUniformBlockID;
+}
+
+std::vector<sUniformDetails>* 
+cConstBuffer::getGlUniforms()
+{
+  return &m_uniforms;
 }
 
 void

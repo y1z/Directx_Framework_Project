@@ -37,9 +37,16 @@ public:
          int bindFlags, int CpuAccess = 0,
          int arraySize = 1);
 
-/**/
+
   sTextureDescriptor
     getDescriptor();
+
+  uint32
+    getWidth() const;
+
+  uint32
+    getHeight() const;
+
 #if OPEN_GL
 
   uint32

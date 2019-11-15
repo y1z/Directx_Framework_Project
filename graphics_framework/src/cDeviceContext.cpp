@@ -193,6 +193,8 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
 #if DIRECTX
   mptr_deviceContext->UpdateSubresource(Buffer->getBuffer(), 0, nullptr, originOfData, 0, 0);
 #elif OPEN_GL
+  GlRemoveAllErrors();
+
   cConstBuffer * constBuffer = dynamic_cast< cConstBuffer * >(Buffer);
   if (constBuffer != nullptr)
   {
@@ -211,9 +213,13 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
     else if (constBuffer->getIndex() == 2)
     {
       // TODO : update  when new members are added 
-      static constexpr const char *uniformBlockVarName[] = { {"u_world"},{"u_color"} };
+      static constexpr const char *uniformBlockVarNameWorld[] = { {"u_world"},{"u_color"} };
       // TODO : update when using a different struct
       const GlChangeEveryFrame *worldMatrix = reinterpret_cast< const GlChangeEveryFrame* >(originOfData);
+
+      GlChangeEveryFrame debugTemp;
+      debugTemp.world = glm::mat4(1.0f);
+      debugTemp.color = { 0.0f,0.0f,0.1,1.0f };
 
       // how big is the data i what to pass over 
       int32 uniformBlockSize = 0;
@@ -225,17 +231,19 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
       //TODO: update with the struct bing used 
       uint32 indices[2];
       glGetUniformIndices(*cApiComponents::getShaderProgram(), 2,
-                          uniformBlockVarName, indices);
+                          uniformBlockVarNameWorld, indices);
 
       //TODO: update with the struct bing used 
       int32  offsets[2];
       glGetActiveUniformsiv(*cApiComponents::getShaderProgram(), 2, indices,
                             GL_UNIFORM_OFFSET, offsets);
 
-      std::memcpy(DataBuffer + offsets[0], &worldMatrix->world,
+      //std::memcpy(DataBuffer, worldMatrix, sizeof(GlChangeEveryFrame));
+
+      std::memcpy(DataBuffer + offsets[0], &debugTemp.world,
                   sizeof(glm::mat4));
 
-      std::memcpy(DataBuffer + offsets[1], &worldMatrix->color,
+      std::memcpy(DataBuffer + offsets[1], &debugTemp.color,// worldMatrix->color,
                   sizeof(sColorf));
 
       glBindBuffer(GL_UNIFORM_BUFFER, constBuffer->getGlUniformBlockID());
@@ -246,6 +254,76 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
 
       glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
+/****************************************/
+
+/****************************************/
+    else if (constBuffer->getIndex() == 3)
+    {
+    //   TODO : update  when new members are added 
+    //  static constexpr const char *uniformBlockVarNameLight[] =
+    //  {
+    //    {"c_AmbientColor"},{"c_LightColor"},
+    //     {"c_LightPos"}, {"c_LightDir"},
+    //    {"c_LightIntensity"},{"c_LightAmbientIntensity"}
+    //  };
+    //   TODO; : update when using a different struct
+      const sLightData* LightData = reinterpret_cast< const sLightData* >(originOfData);
+      std::vector<sUniformDetails>* refToContainer = constBuffer->getGlUniforms();
+
+      refToContainer->at(3).ptr_data = reinterpret_cast<const void*>(&LightData->dir.vector4);
+
+      helper::GlUpdateUniform(refToContainer->at(3));
+
+    //   how big is the data i what to pass over 
+    //  int32 uniformBlockSize = 0;
+    //  glGetActiveUniformBlockiv(*cApiComponents::getShaderProgram(), constBuffer->getID(),
+    //                            GL_UNIFORM_BLOCK_DATA_SIZE, &uniformBlockSize);
+
+    //  uByte *DataBuffer = static_cast< uByte* > (alloca(uniformBlockSize));
+
+    //  std::memcpy(DataBuffer, LightData, uniformBlockSize );
+
+
+    //  uint32 *ptr_program = cApiComponents::getShaderProgram();
+    //std::memset(DataBuffer, 0, uniformBlockSize);
+
+    //  //TODO: update with the struct bing used 
+    //  uint32 indices[4];
+    //  glGetUniformIndices(*cApiComponents::getShaderProgram(), 4,
+    //                      uniformBlockVarNameLight, indices);
+
+    //   TODO: update with the struct bing used 
+    //  int32  offsets[4];
+    //  glGetActiveUniformsiv(*cApiComponents::getShaderProgram(), 4, indices,
+    //                        GL_UNIFORM_OFFSET, offsets);
+    //   ***
+    //  std::memcpy(DataBuffer + offsets[0], &LightData->ambientColor,
+    //              sizeof(sColorf));
+
+    //  std::memcpy(DataBuffer + offsets[1], &LightData->lightColor,
+    //              sizeof(sColorf));
+
+    //  std::memcpy(DataBuffer + offsets[2], &LightData->pos,
+    //              sizeof(sVector4));
+
+    //  std::memcpy(DataBuffer + (offsets[3]), &LightData->dir,
+    //              sizeof(sVector3));
+
+    //  glBindBuffer(GL_UNIFORM_BUFFER, constBuffer->getGlUniformBlockID()); // constBuffer->getID());
+    //  glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, //uniformBlockSize
+    //               DataBuffer, GL_STATIC_DRAW);
+
+    //  glBindBufferBase(GL_UNIFORM_BUFFER, constBuffer->getID(), constBuffer->getGlUniformBlockID());
+
+    //  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
+    }
+  }
+
+  if (GlCheckForError())
+  {
+    EN_LOG_ERROR;
   }
 
   //TODO: add check for the other buffer when you start using them in this function. 
@@ -357,7 +435,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
                                              numResources,
                                              ShaderPtrArr);
 
-  }
+}
   else
   {
     EN_LOG_ERROR_WITH_CODE(enErrorCode::UnClassified);
@@ -385,7 +463,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
   }
 
 #endif // DIRECTX
-}
+  }
 
 void cDeviceContext::PSSetShaderResources(cMesh & ShaderResources, uint32_t Slot)
 {
@@ -404,7 +482,7 @@ void cDeviceContext::PSSetConstantBuffers(cConstBuffer & Buffer, uint32_t Slots)
     mptr_deviceContext->PSSetConstantBuffers(Slots,
                                              1,
                                              Buffer.getBufferRef());
-  }
+}
   else
   {
     assert(("Error setting PSSetConstantBuffer ", Slots <= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - 1));
@@ -446,15 +524,25 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
   GlRemoveAllErrors();
 
   glUseProgram(*cApiComponents::getShaderProgram());
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
-  unsigned int OffSetOfFirst = offsetof(sVertexPosTex, pos);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void* >(OffSetOfFirst));
 
-  glEnableVertexAttribArray(1);
+  //glEnableVertexAttribArray(0);// position 
+  //glEnableVertexAttribArray(1);// normals 
+  //glEnableVertexAttribArray(2);// textures
+
+  glEnableVertexAttribArray(0);// position 
+  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
+  uint32 OffSetOfFirst = offsetof(sVertexPosNormTex, pos);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTex), reinterpret_cast< const void* >(OffSetOfFirst));
+
+  glEnableVertexAttribArray(1);// normals 
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
-  unsigned int OffSetOfSecond = offsetof(sVertexPosTex, tex);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void * >(OffSetOfSecond));
+  uint32 OffSetOfSecond = offsetof(sVertexPosNormTex, norm);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTex), reinterpret_cast< const void * >(OffSetOfSecond));
+
+  glEnableVertexAttribArray(2);// textures
+  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
+  uint32 OffSetOfThird = offsetof(sVertexPosNormTex, tex);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTex), reinterpret_cast< const void * > (OffSetOfThird));
 
   if (GlCheckForError())
   {
@@ -483,50 +571,6 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
 #endif // DIRECTX
 }
 
-void cDeviceContext::DrawIndexed(cIndexBuffer & indexBuffer)
-{
-
-#if DIRECTX
-  mptr_deviceContext->DrawIndexed(indexBuffer.getElementCount(), 0, 0);
-#elif OPEN_GL
-  GlRemoveAllErrors();
-
-  //glUseProgram(*cApiComponents::getShaderProgram());
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
-  unsigned int OffSetOfFirst = offsetof(sVertexPosTex, pos);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void* >(OffSetOfFirst));
-
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
-  unsigned int OffSetOfSecond = offsetof(sVertexPosTex, tex);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosTex), reinterpret_cast< const void * >(OffSetOfSecond));
-
-  if (GlCheckForError())
-  {
-    std::cout << " Error ";
-  }
-  //glEnableVertexAttribArray(2);
-  //glBindBuffer(GL_ARRAY_BUFFER, this->m_VertexBuffer.GetBufferID());
-  //unsigned int OffSetOfThird = offsetof(VertexPosNormTex, TexCoord);
-  //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPosNormTex), reinterpret_cast< const void * >(OffSetOfThird));
-
-  // draw the indices 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.getID());
-
-  glDrawElements(GL_TRIANGLES, indexBuffer.getElementCount(), GL_UNSIGNED_SHORT, reinterpret_cast< const void* >(0));
-
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-  if (GlCheckForError())
-  {
-    std::cout << " Error ";
-  }
-
-#endif // DIRECTX
-}
-
 bool cDeviceContext::SetShaders(cVertexShader & vertexShader, cPixelShader & pixelShader)
 {
 #if DIRECTX
@@ -535,7 +579,7 @@ bool cDeviceContext::SetShaders(cVertexShader & vertexShader, cPixelShader & pix
 
   return true;
 #elif OPEN_GL
-  unsigned int * ShaderProgram = cApiComponents::getShaderProgram();
+  uint32 * ShaderProgram = cApiComponents::getShaderProgram();
   glLinkProgram(*(ShaderProgram));
   glValidateProgram(*(ShaderProgram));
 

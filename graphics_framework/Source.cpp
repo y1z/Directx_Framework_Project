@@ -81,6 +81,7 @@ cIndexBuffer my_indexBuffer;
 cConstBuffer my_constViewMatrix;
 cConstBuffer my_constProjectionMatrix;
 cConstBuffer my_constChangesEveryFrame;
+cConstBuffer my_constLightData;
 cSampler my_sampler;
 cViewport my_viewport;
 cShaderResourceView my_shaderResourceView;
@@ -239,24 +240,6 @@ wWinMain(HINSTANCE hInstance,
   //static sVertexPosTex Pos2;
   //Pos2.pos = glm::vec4(-1.0, 1.0, 0.0, 1.0);
 
-  //static uint16 indice[] = { 0,2,1 };
-
-  //static sVertexPosTex Triangle[] =
-  //{
-  //  {Pos0},
-  //  {Pos1},
-  //  {Pos2}
-  //};
-  //glGenBuffers(1, &g_tempVertBuffer);
-  //glBindBuffer(GL_ARRAY_BUFFER, g_tempVertBuffer);
-  //glBufferData(GL_ARRAY_BUFFER, sizeof(sVertexPosTex) * 3, Triangle, GL_STATIC_DRAW);
-  //glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  //glGenBuffers(1, &g_tempIndexBuffer);
-  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_tempVertBuffer);
-  //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16) * 3, indice, GL_STATIC_DRAW);
-  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
   if (FAILED(InitDevice()))
   {
     return -1;
@@ -266,10 +249,8 @@ wWinMain(HINSTANCE hInstance,
 
   if (my_shaderTarget->init(sizeOfWindow, my_device))
   {
-    std::cout << "worked someHow";
+    std::cout << "worked someHow" << "\n\n" << std::endl;
   }
-
-  // my_tornado->AddComponents(helper::createHelicoid(0.1f, 5.0f, 0.0f, 7.1f, 20, my_device));
 
   // Main message loop
   MSG msg = { 0 };
@@ -373,15 +354,15 @@ InitDevice()
   std::filesystem::path shaderPath(g_initPath);
 
 #if DIRECTX
-  shaderPath += L"//dx_shaders//";
+  shaderPath += L"\\DxShaders\\";
 #elif  OPEN_GL
-  shaderPath += L"//gl_shaders//";
+  shaderPath += L"\\GlShaders\\";
 #endif // DIRECTX
 
 #if DIRECTX
-  const wchar_t *selectedVertexShader = L"Tutorial07.fx";
+  const wchar_t *selectedVertexShader = L"Tutorial_lambert.hlsl";
 #elif OPEN_GL
-  const wchar_t *selectedVertexShader = L"tutorial_imporved.vert";
+  const wchar_t *selectedVertexShader = L"tutorial_lambert.vert";
 #else 
   const wchar_t *selectedVertexShader = L"tutorial_imporved.vert";
 #endif // DIRECTX
@@ -418,11 +399,11 @@ InitDevice()
 
   shaderPath = g_initPath;
 #if DIRECTX
-  const wchar_t *selectedPixelhader = L"Tutorial07.fx";
-  shaderPath += L"//dx_shaders//";
+  const wchar_t *selectedPixelhader = L"Tutorial_lambert.hlsl";
+  shaderPath += L"//DxShaders//";
 #elif OPEN_GL
   const wchar_t *selectedPixelhader = L"tutorial.frag";
-  shaderPath += L"//gl_shaders//";
+  shaderPath += L"\\GlShaders\\";
 #else 
 
   const wchar_t * selectedPixelhader = L"no shader";
@@ -494,13 +475,15 @@ InitDevice()
 
   isSuccesful = my_device.CreateConstBuffer(my_constChangesEveryFrame);
   assert(isSuccesful == true && "Error Creating constant buffer");
+//***
+  my_constLightData.init(sizeof(sLightData), 1, 0);
 
-  //bd.ByteWidth = sizeof(CBChangesEveryFrame);
-  //hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
-  //if (FAILED(hr))
-  //  return hr;
+  my_constLightData.setIndex(3);
 
+  isSuccesful = my_device.CreateConstBuffer(my_constLightData);
+  assert(isSuccesful == true && "Error Creating constant buffer");
   // Load the Texture
+   //TODO : move all this code inside the shader resource view 
 #if DIRECTX
   const wchar_t *SelectedTextureFile = L"//base_albedo.jpg";
   std::filesystem::path PathToResoure(g_initPath);
@@ -534,7 +517,7 @@ InitDevice()
   g_World.matrix = glm::identity<glm::mat4>();
 
   cCamera CameraSecurity;
-  CameraSecurity.setEye(0.0f, 30.0f, 20.0f);
+  CameraSecurity.setEye(0.0f, 10.0f, 20.0f);
   CameraSecurity.setAt(0.0f, 0.0f, 0.0f);
   CameraSecurity.calculateAndSetView();
   CameraSecurity.calculateAndSetPerpective(my_window, 100.0f, 300.1f, 0.01f);
@@ -559,23 +542,29 @@ InitDevice()
   my_deviceContext.UpdateSubresource(&my_constProjectionMatrix,
                                      &cbChangesOnResize);
 
-  std::filesystem::path arrowModelPath(g_initPath);
+  GlChangeEveryFrame cbEveryFrame;
+  cbEveryFrame.world = glm::mat4(1.0f);
+  cbEveryFrame.color = sColorf{ 0.0f,0.f,0.5f,1.0f };
 
-  arrowModelPath += "\\resources\\media\\3d models\\fbx\\Arrow.fbx";
+  my_deviceContext.UpdateSubresource(&my_constChangesEveryFrame,
+                                     &cbEveryFrame);
+//***
+  sLightData LightData;
+  //std::memset(&LightData, 0, sizeof(LightData));
+  LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
+  LightData.dir.vector4 = { 1.0f,0.f,0.f,1.0f };
 
-  cModel *ptr_YArrow = helper::findComponent<cModel>(*my_YArrow);
-  cModel *ptr_ZArrow = helper::findComponent<cModel>(*my_ZArrow);
+  LightData.ambientColor = { 0.7f,0.0f,0.0f };
 
-  if (ptr_YArrow != nullptr)
-  {
-    ptr_YArrow->setModelPath(arrowModelPath.generic_string());
-    ptr_YArrow->LoadModelFromFile(my_device);
-  }
-  if (ptr_ZArrow)
-  {
-    ptr_ZArrow->setModelPath(arrowModelPath.generic_string());
-    ptr_ZArrow->LoadModelFromFile(my_device);
-  }
+  //LightData.lightIntensity = 0.5f;
+  //LightData.ambientIntensity = 0.5f;
+
+  my_deviceContext.UpdateSubresource(&my_constLightData,
+                                     &LightData);
+
+  //std::filesystem::path arrowModelPath(g_initPath);
+
+  //arrowModelPath += "\\resources\\media\\3d models\\fbx\\Arrow.fbx";
 
   g_isInit = true;
 
@@ -658,9 +647,11 @@ void Render()
   my_deviceContext.VSSetConstantBuffers(my_constViewMatrix, my_constViewMatrix.getIndex());
   my_deviceContext.VSSetConstantBuffers(my_constProjectionMatrix, my_constProjectionMatrix.getIndex());
   my_deviceContext.VSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
+  my_deviceContext.VSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
 
   /*setting values for the pixel shader */
   my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
+  my_deviceContext.PSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
   my_deviceContext.PSSetShaderResources(*shaderResources, 2);
   my_deviceContext.PSSetSamplers(&my_sampler);
 
@@ -691,7 +682,6 @@ void Render()
   /************************************************************************************************************/
   my_actor->DrawAllComponents(my_deviceContext, bufferArray);
 
-
   my_actor->update(my_deviceContext);
 
   my_deviceContext.OMSetRenderTargets(&my_swapChain.getRenderTargetView(), my_swapChain.getDepthStencilView());
@@ -704,9 +694,11 @@ void Render()
   my_deviceContext.VSSetConstantBuffers(my_constViewMatrix, my_constViewMatrix.getIndex());
   my_deviceContext.VSSetConstantBuffers(my_constProjectionMatrix, my_constProjectionMatrix.getIndex());
   my_deviceContext.VSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
+  my_deviceContext.VSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
 
   /*setting values for the pixel shader */
   my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
+  //my_deviceContext.PSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
   //my_deviceContext.PSSetShaderResources(&my_shaderTarget->getShaderResourceView());
   my_deviceContext.PSSetShaderResources(*shaderResources, 2);
   my_deviceContext.PSSetSamplers(&my_sampler);
@@ -719,13 +711,29 @@ void Render()
   my_deviceContext.UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
                                      &neverChange.matrix);
 
-  Proj.matrix = my_cameraManager->getProjectionMatrix().matrix;;
+  Proj.matrix = my_cameraManager->getProjectionMatrix().matrix;
   my_deviceContext.UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constProjectionMatrix),
-                                     &Proj);
+                                     &Proj.matrix);
+//***
+  sLightData LightData;
+  std::memset(&LightData, 0, sizeof(LightData));
+  LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
+  LightData.dir.vector4 = { cosf(-t),sinf(t),0.f ,1.0f };
+  LightData.lightColor = { sinf(50), 0.9f,0.0f,1.0f };
+
+  LightData.ambientColor = { 0.7f,cosf(50),0.0f,1.0f };
+
+  //LightData.lightIntensity = 0.5f;
+  //LightData.ambientIntensity = 0.5f;
+
+  my_deviceContext.UpdateSubresource(&my_constLightData,
+                                     &LightData);
 
 /************************************************************************************************************/
   //DARW TWO
 /************************************************************************************************************/
+
+  //ptr_toModel->DrawMeshes(my_deviceContext, bufferArray, purple);
   my_actor->DrawAllComponents(my_deviceContext, bufferArray);
 
   my_timer.EndTiming();

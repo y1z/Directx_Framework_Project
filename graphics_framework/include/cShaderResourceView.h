@@ -9,14 +9,14 @@ class cDeviceContext;
 
 struct sResource2D
 {
-  uint32 mipsLevel{ 1u};
-  uint32 bestMipsLevel{ 0u};
+  uint32 mipsLevel{ 1u };
+  uint32 bestMipsLevel{ 0u };
 
   //! for  when we are dealing with multiple resources aka a texture array
-  uint32 size{ 1u};
+  uint32 size{ 1u };
 
   //! to know where to start when dealing with multiple  texture arrays 
-  uint32 startingIndex{ 0u};
+  uint32 startingIndex{ 0u };
 };
 
 /*! intermediate descriptor intended for use
@@ -70,6 +70,11 @@ public:
   uint32_t
     getTextureID() const;
 
+  uint32_t *
+    getResourceIDPtr();
+
+  uint32_t *
+    getTextureIDPtr();
 #endif // OPEN_GL
 
   /*! returns the width of the resource associated
@@ -90,7 +95,7 @@ public:
     getChannelCount()const;
 
   void
-    init(enFormats format,uint32 MipsLevel,uint32 BestMipsLevel , int32 viewDim);
+    init(enFormats format, uint32 MipsLevel, uint32 BestMipsLevel, int32 viewDim);
 private:
   sShaderResourceDesc2D m_desc;
 

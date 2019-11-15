@@ -32,7 +32,7 @@ public:
 
   /*! this functions draws all the meshes to the back buffer */
   void
-    DrawMeshes(cDeviceContext &deviceContext, std::vector<cConstBuffer *> &buffers, const sColorf &color = {0.0f,0.0f,0.7f,1.0f});
+    DrawMeshes(cDeviceContext &deviceContext, std::vector<cConstBuffer *> &buffers, const sColorf &color = {0.5f,0.5f,0.5f,1.0f});
 
   //! this is to set the path to a  
   void 

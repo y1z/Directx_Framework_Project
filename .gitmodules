@@ -1,0 +1,6 @@
+[submodule "GlShaders"]
+	path = GlShaders
+	url = https://github.com/y1z/GlShaders.git
+[submodule "DxShaders"]
+	path = DxShaders
+	url = https://github.com/y1z/DxShaders.git

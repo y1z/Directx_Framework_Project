@@ -10,6 +10,13 @@
 // Vector type struct's 
 /******************************/
 
+struct sVertexPosNormTex
+{
+  glm::vec4 pos;
+  glm::vec3 norm;
+  glm::vec2 tex;
+};
+
 struct sVertexPosTex
 {
   glm::vec4 pos;
@@ -17,7 +24,7 @@ struct sVertexPosTex
 };
 
 /**
-* 4D VECTOR'S OR struct's with amount of components
+* 4D VECTOR'S OR struct's with same amount of components
 */
 struct sVector4
 {
@@ -77,12 +84,6 @@ public:// constructor
 // matrix type struct's 
 /******************************/
 
-struct GlChangeEveryFrame
-{
-  glm::mat4 world;
-  sColorf color;
-};
-
 /**
 * 4 by 4 matrices OR struct's with similar amount of data.
 */
@@ -95,8 +96,9 @@ struct sMatrix4x4
 ////////////////////////////////////////////////
 // type defs of sMatrix4x4 
 ////////////////////////////////////////////////
-typedef sMatrix4x4 ViewMatrix;
-typedef sMatrix4x4 ProjectionMatrix;
+
+using ViewMatrix = sMatrix4x4;
+using ProjectionMatrix = sMatrix4x4;
 
 /******************************/
 // Geometric type struct's 
@@ -111,4 +113,38 @@ struct sQuad
 {
   sTri triangles[2];
 };
+
+/******************************/
+// Other struct type 
+/******************************/
+
+struct alignas(16) sLightData
+{
+  sColorf ambientColor;
+  sColorf lightColor = { 0.0f,0.7f,0.7f,1.0f };
+  sVector4 pos;
+
+  sVector4 dir;
+
+  //float lightIntensity{0.5f};
+  // float ambientIntensity{0.5f};
+};
+
+struct alignas(16)GlChangeEveryFrame
+{
+  glm::mat4 world;
+  sColorf color;
+};
+
+/*!
+* @brief used to keep track of the necessary data used in a uniform
+*/
+struct sUniformDetails
+{
+  std::string name{ "\0" };
+  const void *ptr_data{ nullptr };
+  int32 id{ -1 };
+  enConstBufferElem element = enConstBufferElem::NONE;
+};
+
 

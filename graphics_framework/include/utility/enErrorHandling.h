@@ -31,6 +31,11 @@ static bool GlCheckForError()
     {
       std::cout << "invalid Enum \n";
     }
+    if (Error == GL_INVALID_OPERATION)
+    {
+
+      std::cout << "invalid operation \n";
+    }
 
 
   }

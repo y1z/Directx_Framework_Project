@@ -84,7 +84,7 @@ cSwapChain::setSwapChain(uint32_t width, uint32_t height,
 void
 cSwapChain::setRenderTarget(uint32 width, uint32 height, enFormats format)
 {
-  this->m_renderTarget.setDescription(width, height, format);
+  this->m_renderTarget.init(width, height, format);
 }
 
 #if OPEN_GL
@@ -173,11 +173,18 @@ cSwapChain::Present(uint32_t SycroOption, uint32_t PresentationOption, unsigned 
     return true;
   }
 #elif OPEN_GL
+  GlRemoveAllErrors();
   glfwPollEvents();
   if (mptr_window != nullptr)
   {
 
     glfwSwapBuffers(mptr_window);
+
+    if (GlCheckForError())
+    {
+      EN_LOG_ERROR;
+    }
+
     return true;
   }
   else { return false; }

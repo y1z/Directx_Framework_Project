@@ -31,10 +31,18 @@ cRenderTarget::getDiscriptor()
   result.ViewDimension = static_cast< D3D11_RTV_DIMENSION >(m_desc.dimension);
   return  result;
 }
+#elif OPEN_GL
+
+sRenderTarget 
+cRenderTarget::getDiscriptor() const
+{
+  return  m_desc;
+}
+
 #endif // DIRECTX
 
 void
-cRenderTarget::setDescription(uint32_t width, uint32_t height,
+cRenderTarget::init(uint32_t width, uint32_t height,
                               int Format, int Type)
 {
   m_desc.format = Format;

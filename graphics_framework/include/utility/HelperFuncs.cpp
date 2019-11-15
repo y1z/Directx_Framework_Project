@@ -102,16 +102,20 @@ namespace helper
     std::cout << "GLFW version : " << "Major [" << majorVersion << "] Minor [" << minorVersion << "]\n"
       << "Open_gl version : " << OpenglVersion << '\n'
       << "Glsl  Shader version : " << GlslVersion << '\n'
-      << "Open_gl renderer : " << OpenglRenderer << '\n' << std::endl;
+      << "Open_gl renderer : " << OpenglRenderer << '\n' <<
+      "alignment of sLightData : " << alignof(sLightData) << '\n' <<
+      " size of sLightData : " << sizeof(sLightData) << std::endl;
 
     apiComponent.setSupportedVersion(majorVersion, minorVersion);
 
-    unsigned int* ptr_vertexArrayObject = cApiComponents::getvertexArrayObject();
+    uint32* ptr_vertexArrayObject = cApiComponents::getvertexArrayObject();
 
     glGenVertexArrays(1, ptr_vertexArrayObject);
     glBindVertexArray(*ptr_vertexArrayObject);
 
-    unsigned int* ptr_ShaderProgram = cApiComponents::getShaderProgram();
+    glfwSwapInterval(1);
+
+    uint32* ptr_ShaderProgram = cApiComponents::getShaderProgram();
 
     *(ptr_ShaderProgram) = glCreateProgram();
 
@@ -160,7 +164,7 @@ namespace helper
     return true;
   #elif OPEN_GL
     GlRemoveAllErrors();
-  //unsigned int * shaderProgram = cApiComponents::getShaderProgram();
+    unsigned int * shaderProgram = cApiComponents::getShaderProgram();
     shader.setShader(helper::loadFileToString(FileName));
     uint32_t shaderType{ 0u };
 
@@ -608,8 +612,8 @@ namespace helper
   #elif OPEN_GL
   //  Original.matrix = glm::transpose(Original.matrix);
   #endif // DIRECTX
-}
-/*****************/
+  }
+  /*****************/
 
   int32
     convertKeyValue(const int32 originalValue)
@@ -647,7 +651,7 @@ namespace helper
     float currentAngle = lowerAngle;
     float currentMultiplier = lowerMultiplier;
 
-    std::unique_ptr<std::vector<sVertexPosTex>>vertexes = std::make_unique<std::vector<sVertexPosTex>>(); // std::vector<sVertexPosTex> vertexes; 
+    std::unique_ptr<std::vector<sVertexPosNormTex  >>vertexes = std::make_unique<std::vector<sVertexPosNormTex>>(); // std::vector<sVertexPosTex> vertexes; 
     std::unique_ptr<std::vector< uint16 >>indices = std::make_unique<std::vector<uint16>>(); // std::vector<sVertexPosTex> vertexes; 
 
     auto calculateQuad = [](glm::vec3 &bottomRight, uint32_t Iteration)->sQuad
@@ -692,9 +696,9 @@ namespace helper
           indices->emplace_back(currentQuad.triangles[k].indices[1]);
           indices->emplace_back(currentQuad.triangles[k].indices[2]);
           //fill the vertex 
-          sVertexPosTex Pos0{ glm::vec4(currentQuad.triangles[k].positions[0],1.0f), glm::vec2(0.5f,0.5f) };
-          sVertexPosTex Pos1{ glm::vec4(currentQuad.triangles[k].positions[1],1.0f), glm::vec2(0.5f,0.5f) };
-          sVertexPosTex Pos2{ glm::vec4(currentQuad.triangles[k].positions[2],1.0f), glm::vec2(0.5f,0.5f) };
+          sVertexPosNormTex Pos0{ glm::vec4(currentQuad.triangles[k].positions[0],1.0f),glm::vec3(1.0,0.0,0.0),  glm::vec2(0.5f,0.5f) };
+          sVertexPosNormTex Pos1{ glm::vec4(currentQuad.triangles[k].positions[1],1.0f),glm::vec3(1.0,0.0,0.0) , glm::vec2(0.5f,0.5f) };
+          sVertexPosNormTex Pos2{ glm::vec4(currentQuad.triangles[k].positions[2],1.0f), glm::vec3(1.0,0.0,0.0),glm::vec2(0.5f,0.5f) };
           //get the vertexes 
           vertexes->emplace_back(Pos0);
           vertexes->emplace_back(Pos1);
@@ -742,6 +746,63 @@ namespace helper
   }
 /*****************/
 
+#if OPEN_GL
+  void
+    GlUpdateUniform(sUniformDetails & details)
+  {
+    if (details.ptr_data == nullptr)
+    {
+      std::cerr << "uniform data pointer is null ";
+      assert(details.ptr_data != nullptr);
+    }
+
+    if (details.element == enConstBufferElem::mat4x4)
+    {
+      glUniformMatrix4fv(details.id, 1, GL_TRUE, static_cast< const GLfloat* > (details.ptr_data));
+    }
+    else if (details.element == enConstBufferElem::mat3x3)
+    {
+      glUniformMatrix3fv(details.id, 1, GL_TRUE, static_cast< const  GLfloat* > (details.ptr_data));
+    }
+
+    else if (details.element == enConstBufferElem::vec4)
+    {
+      glUniform4fv(details.id, 1, static_cast< const  GLfloat* > (details.ptr_data));
+    }
+
+    else if (details.element == enConstBufferElem::vec3)
+    {
+      glUniform3fv(details.id, 1, static_cast< const GLfloat* > (details.ptr_data));
+    }
+
+    else if (details.element == enConstBufferElem::vec2)
+    {
+      glUniform2fv(details.id, 1, static_cast< const  GLfloat* > (details.ptr_data));
+    }
+
+    else if (details.element == enConstBufferElem::single_float)
+    {
+      glUniform1fv(details.id, 1, static_cast< const  GLfloat* > (details.ptr_data));
+    }
+
+
+
+  }
+
+  sUniformDetails
+    GlCreateUniformDetail(std::string_view name, enConstBufferElem type)
+  {
+    sUniformDetails result;
+    result.name = name;
+    result.element = type;
+
+    return result;
+  }
+
+#endif // OPEN_GL
+/*****************/
+  
 }
+
 
 
