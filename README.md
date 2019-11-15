@@ -21,3 +21,7 @@ This repository will house a graphics framework that can chose between 2 api's o
 ## Environment variable
  - DEVLIBS : `C:\c++libs\`
     - aka it in the same place where i keep my libs 
+## submodule 
+     - This project contains 2 submodules 
+	- DxShaders : https://github.com/y1z/DxShaders
+	- GlShaders : https://github.com/y1z/GlShaders   
