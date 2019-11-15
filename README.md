@@ -22,6 +22,8 @@ This repository will house a graphics framework that can chose between 2 api's o
  - DEVLIBS : `C:\c++libs\`
     - aka it in the same place where i keep my libs 
 ## submodule 
-     - This project contains 2 submodules 
-	- DxShaders : https://github.com/y1z/DxShaders
-	- GlShaders : https://github.com/y1z/GlShaders   
+	- This project contains 2 submodules 
+		- DxShaders : https://github.com/y1z/DxShaders
+		- GlShaders : https://github.com/y1z/GlShaders   
+## clone process 
+just clone the project then run the `updateSubmodule.bat` located in scripts
