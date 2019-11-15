@@ -413,8 +413,7 @@ namespace helper
       deviceContext.UpdateSubresource(reinterpret_cast< cBuffer* >(resizeChange),
                                       &ChangeOnProjectionChange);
     }
-  //#elif OPEN_GL 
-  //#endif // DIRECTX
+
 
   }
 
@@ -496,6 +495,7 @@ namespace helper
     }
 
     else if (pressedKey == (WPARAM)'O')
+   
     {
       switch (chosenAxis)
       {

@@ -217,10 +217,6 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
       // TODO : update when using a different struct
       const GlChangeEveryFrame *worldMatrix = reinterpret_cast< const GlChangeEveryFrame* >(originOfData);
 
-      GlChangeEveryFrame debugTemp;
-      debugTemp.world = glm::mat4(1.0f);
-      debugTemp.color = { 0.0f,0.0f,0.1,1.0f };
-
       // how big is the data i what to pass over 
       int32 uniformBlockSize = 0;
       glGetActiveUniformBlockiv(*cApiComponents::getShaderProgram(), constBuffer->getID(),
@@ -240,10 +236,10 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
 
       //std::memcpy(DataBuffer, worldMatrix, sizeof(GlChangeEveryFrame));
 
-      std::memcpy(DataBuffer + offsets[0], &debugTemp.world,
+      std::memcpy(DataBuffer + offsets[0], &worldMatrix->world,
                   sizeof(glm::mat4));
 
-      std::memcpy(DataBuffer + offsets[1], &debugTemp.color,// worldMatrix->color,
+      std::memcpy(DataBuffer + offsets[1], &worldMatrix->color,// worldMatrix->color,
                   sizeof(sColorf));
 
       glBindBuffer(GL_UNIFORM_BUFFER, constBuffer->getGlUniformBlockID());
@@ -266,57 +262,30 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
     //     {"c_LightPos"}, {"c_LightDir"},
     //    {"c_LightIntensity"},{"c_LightAmbientIntensity"}
     //  };
-    //   TODO; : update when using a different struct
       const sLightData* LightData = reinterpret_cast< const sLightData* >(originOfData);
       std::vector<sUniformDetails>* refToContainer = constBuffer->getGlUniforms();
 
-      refToContainer->at(3).ptr_data = reinterpret_cast<const void*>(&LightData->dir.vector4);
+      //update the necessary uniforms  
+      for (sUniformDetails & uni : *refToContainer)
+      {
+        if (!uni.name.compare("uAmbientColor"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->ambientColor); }
 
-      helper::GlUpdateUniform(refToContainer->at(3));
+        else if (!uni.name.compare("uLightColor"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->lightColor); }
 
-    //   how big is the data i what to pass over 
-    //  int32 uniformBlockSize = 0;
-    //  glGetActiveUniformBlockiv(*cApiComponents::getShaderProgram(), constBuffer->getID(),
-    //                            GL_UNIFORM_BLOCK_DATA_SIZE, &uniformBlockSize);
+        else if (!uni.name.compare("uLightPos"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->pos); }
 
-    //  uByte *DataBuffer = static_cast< uByte* > (alloca(uniformBlockSize));
+        else if (!uni.name.compare("uLightDir"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->dir); }
 
-    //  std::memcpy(DataBuffer, LightData, uniformBlockSize );
+        if (uni.ptr_data != nullptr && uni.id != -1)
+        {
+          helper::GlUpdateUniform(uni);
+        }
 
-
-    //  uint32 *ptr_program = cApiComponents::getShaderProgram();
-    //std::memset(DataBuffer, 0, uniformBlockSize);
-
-    //  //TODO: update with the struct bing used 
-    //  uint32 indices[4];
-    //  glGetUniformIndices(*cApiComponents::getShaderProgram(), 4,
-    //                      uniformBlockVarNameLight, indices);
-
-    //   TODO: update with the struct bing used 
-    //  int32  offsets[4];
-    //  glGetActiveUniformsiv(*cApiComponents::getShaderProgram(), 4, indices,
-    //                        GL_UNIFORM_OFFSET, offsets);
-    //   ***
-    //  std::memcpy(DataBuffer + offsets[0], &LightData->ambientColor,
-    //              sizeof(sColorf));
-
-    //  std::memcpy(DataBuffer + offsets[1], &LightData->lightColor,
-    //              sizeof(sColorf));
-
-    //  std::memcpy(DataBuffer + offsets[2], &LightData->pos,
-    //              sizeof(sVector4));
-
-    //  std::memcpy(DataBuffer + (offsets[3]), &LightData->dir,
-    //              sizeof(sVector3));
-
-    //  glBindBuffer(GL_UNIFORM_BUFFER, constBuffer->getGlUniformBlockID()); // constBuffer->getID());
-    //  glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, //uniformBlockSize
-    //               DataBuffer, GL_STATIC_DRAW);
-
-    //  glBindBufferBase(GL_UNIFORM_BUFFER, constBuffer->getID(), constBuffer->getGlUniformBlockID());
-
-    //  glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+      }// end for 
 
     }
   }
@@ -362,7 +331,7 @@ cDeviceContext::ClearRenderTargetView(cRenderTargetView & renderTargetView, sCol
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif // DIRECTX 
-}
+  }
 
 void
 cDeviceContext::ClearDepthStencilView(cDepthStencilView & depthStencilView, bool ClearStencil,
@@ -435,7 +404,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
                                              numResources,
                                              ShaderPtrArr);
 
-}
+  }
   else
   {
     EN_LOG_ERROR_WITH_CODE(enErrorCode::UnClassified);
@@ -463,7 +432,7 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
   }
 
 #endif // DIRECTX
-  }
+}
 
 void cDeviceContext::PSSetShaderResources(cMesh & ShaderResources, uint32_t Slot)
 {
@@ -482,7 +451,7 @@ void cDeviceContext::PSSetConstantBuffers(cConstBuffer & Buffer, uint32_t Slots)
     mptr_deviceContext->PSSetConstantBuffers(Slots,
                                              1,
                                              Buffer.getBufferRef());
-}
+  }
   else
   {
     assert(("Error setting PSSetConstantBuffer ", Slots <= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - 1));

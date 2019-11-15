@@ -370,11 +370,11 @@ in some function in some file in some line
 does not indicate the error only where it possibly
 happen */
 #define EN_LOG_ERROR enError::ENTROPY_log_error(__func__,__LINE__,__FILE__);
-
-
 #define EN_LOG_ERROR_WITH_CODE(ErrorCode) enError::ENTROPY_log_error_code(__func__,__LINE__,__FILE__,ErrorCode);
+#define EN_LOG_DB(message) std::cerr << #message << '\n';
 #else
 // does nothing 
 #define EN_LOG_ERROR
 #define EN_LOG_ERROR_WITH_CODE (ErrorCode)  ErrorCode ;
+#define EN_LOG_DB(message);
 #endif // !NDEBUG

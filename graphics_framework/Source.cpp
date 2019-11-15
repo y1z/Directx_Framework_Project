@@ -351,7 +351,7 @@ InitDevice()
 
   my_deviceContext.RSSetViewports(&my_viewport);
 
-  std::filesystem::path shaderPath(g_initPath);
+  std::filesystem::path shaderPath(g_initPath.parent_path());
 
 #if DIRECTX
   shaderPath += L"\\DxShaders\\";
@@ -368,6 +368,9 @@ InitDevice()
 #endif // DIRECTX
 
   shaderPath += selectedVertexShader;
+
+  std::cout << "path to the vertex shader [" << shaderPath << "]\n";
+
   isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str(), "vs_4_0",
                                       "VS", my_vertexShader);
 
@@ -397,7 +400,7 @@ InitDevice()
   my_deviceContext.IASetInputLayout(my_vertexInputLayout);
 
 
-  shaderPath = g_initPath;
+  shaderPath = g_initPath.parent_path();
 #if DIRECTX
   const wchar_t *selectedPixelhader = L"Tutorial_lambert.hlsl";
   shaderPath += L"//DxShaders//";
@@ -410,6 +413,8 @@ InitDevice()
 #endif // DIRECTX
 
   shaderPath += selectedPixelhader;
+
+  std::cout << "path to pixel/fragment shader [" << shaderPath << "]\n" << std::endl ;
 
   isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str(), "ps_4_0",
                                       "PS", my_pixelShader);
@@ -734,6 +739,7 @@ void Render()
 /************************************************************************************************************/
 
   //ptr_toModel->DrawMeshes(my_deviceContext, bufferArray, purple);
+  my_actor->update(my_deviceContext);
   my_actor->DrawAllComponents(my_deviceContext, bufferArray);
 
   my_timer.EndTiming();
