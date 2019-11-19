@@ -233,13 +233,6 @@ wWinMain(HINSTANCE hInstance,
   /* the actor now owns the model */
   my_actor->AddComponents(new cModel());
 
-  //static sVertexPosTex Pos0;
-  //Pos0.pos = glm::vec4(-1.0, -1.0, 0.0, 1.0);
-  //static sVertexPosTex Pos1;
-  //Pos1.pos = glm::vec4(1.0, -1.0, 0.0, 1.0);
-  //static sVertexPosTex Pos2;
-  //Pos2.pos = glm::vec4(-1.0, 1.0, 0.0, 1.0);
-
   if (FAILED(InitDevice()))
   {
     return -1;
@@ -371,8 +364,7 @@ InitDevice()
 
   std::cout << "path to the vertex shader [" << shaderPath << "]\n";
 
-  isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str(), "vs_4_0",
-                                      "VS", my_vertexShader);
+  isSuccesful = my_vertexShader.compileShader(shaderPath.generic_string(), "VS", "vs_4_0");
 
   // Compile the vertex shader
   if (isSuccesful == false)
@@ -414,10 +406,9 @@ InitDevice()
 
   shaderPath += selectedPixelhader;
 
-  std::cout << "path to pixel/fragment shader [" << shaderPath << "]\n" << std::endl ;
+  std::cout << "path to pixel/fragment shader [" << shaderPath << "]\n" << std::endl;
 
-  isSuccesful = helper::CompileShader(shaderPath.generic_wstring().c_str(), "ps_4_0",
-                                      "PS", my_pixelShader);
+  isSuccesful = my_pixelShader.compileShader(shaderPath.generic_string(), "PS", "ps_4_0");
 
   if (isSuccesful == false)
   {
@@ -490,7 +481,7 @@ InitDevice()
   // Load the Texture
    //TODO : move all this code inside the shader resource view 
 #if DIRECTX
-  const wchar_t *SelectedTextureFile = L"//base_albedo.jpg";
+  const wchar_t *SelectedTextureFile = L"\\base_albedo.jpg";
   std::filesystem::path PathToResoure(g_initPath);
   PathToResoure += SelectedTextureFile;
 
@@ -615,10 +606,16 @@ void Render()
     t = (dwTimeCur - dwTimeStart) / 1000.0f;
   }
 
-  static cShaderResourceView* shaderResources[2] =
+  //static cShaderResourceView* shaderResources[2] =
+  //{
+  //  &my_shaderResourceView,
+  //   my_shaderTarget->getShaderResourceViewPtr(),
+  //};
+
+  static std::vector<cShaderResourceView*> shaderResources =
   {
     &my_shaderResourceView,
-    &my_shaderTarget->getShaderResourceView(),
+    my_shaderTarget->getShaderResourceViewPtr(),
   };
 
 /******** SET TARGET **********/
@@ -657,7 +654,7 @@ void Render()
   /*setting values for the pixel shader */
   my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
   my_deviceContext.PSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
-  my_deviceContext.PSSetShaderResources(*shaderResources, 2);
+  my_deviceContext.PSSetShaderResources(shaderResources);
   my_deviceContext.PSSetSamplers(&my_sampler);
 
 
@@ -703,9 +700,11 @@ void Render()
 
   /*setting values for the pixel shader */
   my_deviceContext.PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
-  //my_deviceContext.PSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
+  my_deviceContext.PSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
   //my_deviceContext.PSSetShaderResources(&my_shaderTarget->getShaderResourceView());
-  my_deviceContext.PSSetShaderResources(*shaderResources, 2);
+  //my_deviceContext.PSSetShaderResources(*shaderResources, 2);
+
+  my_deviceContext.PSSetShaderResources(shaderResources);
   my_deviceContext.PSSetSamplers(&my_sampler);
 
   ///my_deviceContext.ClearRenderTargetView(my_shaderTarget->getRenderTargetView());
@@ -721,10 +720,11 @@ void Render()
                                      &Proj.matrix);
 //***
   sLightData LightData;
-  std::memset(&LightData, 0, sizeof(LightData));
+  //std::memset(&LightData, 0, sizeof(LightData));
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector4 = { cosf(-t),sinf(t),0.f ,1.0f };
-  LightData.lightColor = { sinf(50), 0.9f,0.0f,1.0f };
+  LightData.dir.vector4 = { cosf(-t), sinf(t) ,0.f ,1.0f };
+  LightData.lightColor = { 0.0f, 0.5f, fabsf(sinf(t)), 1.0f };
+
 
   LightData.ambientColor = { 0.7f,cosf(50),0.0f,1.0f };
 
@@ -747,7 +747,7 @@ void Render()
   g_trackedTime = deltaTime;
 
   my_gui.beginFrame("Data");
-  my_gui.addImage(my_shaderTarget->getShaderResourceView());
+  //my_gui.addImage(my_shaderTarget->getShaderResourceView());
   my_gui.addButton("load new model", g_loadNewModel);
   my_gui.beginChildWithFpsCount(deltaTime);
   my_gui.addItemCountToChild("Mesh count ", "Mesh", ptr_toModel->getMeshCount());

@@ -131,89 +131,6 @@ namespace helper
   } // end function
 
   /*************/
-  bool
-    CompileShader(const wchar_t * FileName, const char * shaderModel,
-                  const char * entryPoint, cShaderBase & shader)
-  {
-  #ifdef DIRECTX
-    HRESULT hr = S_FALSE;
-    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-  #if defined( DEBUG ) || defined( _DEBUG )
-    // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-    // Setting this flag improves the shader debugging experience, but still allows 
-    // the shaders to be optimized and to run exactly the way they will run in 
-    // the release configuration of this program.
-    dwShaderFlags |= D3DCOMPILE_DEBUG;
-  #endif
-
-    ID3DBlob* pErrorBlob = nullptr;
-    hr = D3DCompileFromFile(FileName, NULL,
-                            NULL, entryPoint,
-                            shaderModel, dwShaderFlags,
-                            0, shader.getInfoRef(), &pErrorBlob);
-
-    if (FAILED(hr))
-    {
-      if (pErrorBlob != NULL)
-        OutputDebugStringA(( char* )pErrorBlob->GetBufferPointer());
-      if (pErrorBlob) pErrorBlob->Release();
-      return  false;
-    }
-    if (pErrorBlob) pErrorBlob->Release();
-
-    return true;
-  #elif OPEN_GL
-    GlRemoveAllErrors();
-    unsigned int * shaderProgram = cApiComponents::getShaderProgram();
-    shader.setShader(helper::loadFileToString(FileName));
-    uint32_t shaderType{ 0u };
-
-    if (dynamic_cast< cVertexShader* >(&shader))
-    {
-      shaderType = GL_VERTEX_SHADER;
-    }
-    else if (dynamic_cast< cPixelShader* >(&shader))
-    {
-      shaderType = GL_FRAGMENT_SHADER;
-    }
-    uint32_t TempID = glCreateShader(shaderType);
-
-    if (GlCheckForError())
-    {
-      EN_LOG_ERROR
-        return false;
-    }
-
-    shader.setID(TempID);
-    const std::string *shaderSource = shader.getShader();
-
-    const char * refToSource = shaderSource->c_str();
-    glShaderSource(shader.getID(), 1, &refToSource, nullptr);
-    glCompileShader(shader.getID());
-
-    int Result;
-    glGetShaderiv(shader.getID(), GL_COMPILE_STATUS, &Result);
-    // how long is the error message 
-    if (Result == GL_FALSE)
-    {
-      int MessageSize;
-      glGetShaderiv(shader.getID(), GL_INFO_LOG_LENGTH, &MessageSize);
-
-      char *ptr_message = new char[MessageSize + 1];
-      glGetShaderInfoLog(shader.getID(), 2048, &MessageSize, ptr_message);
-
-      std::cerr << ptr_message << std::endl;
-      delete[] ptr_message;
-      return false;
-    }
-
-
-    return true;
-  #endif // DIRECTX
-    return false;
-  }
-
-  /*************/
   float
     radiansToDegrees(float radians)
   {
@@ -495,7 +412,7 @@ namespace helper
     }
 
     else if (pressedKey == (WPARAM)'O')
-   
+
     {
       switch (chosenAxis)
       {
@@ -593,12 +510,22 @@ namespace helper
     for (const wchar_t wideChar : wideString)
     {
       length = wcrtomb(&Result[i], wideChar, &mbs);
-      //wcrtomb_s(&retValue, &Result[i], sizeof(char), wideChar, &mbs);
+      //wcrtomb_s(&retValue, &Result[i], sizeof(char), ansiChar, &mbs);
 
       if (length == 0 || length > MB_CUR_MAX)
       { break; }
       i++;
     }
+
+    return Result;
+  }
+
+  std::wstring
+    convertStringToWString(std::string_view string)
+  {
+    std::wstring Result(string.length(), '\0');
+
+    mbstowcs(Result.data(), string.data(), Result.length());
 
     return Result;
   }
@@ -740,8 +667,6 @@ namespace helper
 
     }
 
-
-
     return true;
   }
 /*****************/
@@ -778,7 +703,7 @@ namespace helper
     else if (details.element == enConstBufferElem::vec2)
     {
       glUniform2fv(details.id, 1, static_cast< const  GLfloat* > (details.ptr_data));
-    }
+  }
 
     else if (details.element == enConstBufferElem::single_float)
     {
@@ -787,7 +712,7 @@ namespace helper
 
 
 
-  }
+}
 
   sUniformDetails
     GlCreateUniformDetail(std::string_view name, enConstBufferElem type)
@@ -801,7 +726,7 @@ namespace helper
 
 #endif // OPEN_GL
 /*****************/
-  
+
 }
 
 

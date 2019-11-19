@@ -2,6 +2,7 @@
 #include "utility/enGraphics.h"
 #include "utility/enDefs.h"
 #include <string_view>
+#include <vector>
 
 class cDevice;
 class cDeviceContext;
@@ -102,7 +103,7 @@ private:
   uint8 * mptr_resourceData = nullptr;
 #if DIRECTX
 
-  ID3D11ShaderResourceView *mptr_shaderResource;
+  ID3D11ShaderResourceView *mptr_shaderResource = nullptr;
 #elif OPEN_GL
 
   uint32_t m_resourceID{ 0u };

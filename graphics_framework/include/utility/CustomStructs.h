@@ -123,11 +123,10 @@ struct alignas(16) sLightData
   sColorf ambientColor;
   sColorf lightColor = { 0.0f,0.7f,0.7f,1.0f };
   sVector4 pos;
-
   sVector4 dir;
 
-  //float lightIntensity{0.5f};
-  // float ambientIntensity{0.5f};
+  float lightIntensity{ 0.5f };
+  float ambientIntensity{ 0.5f };
 };
 
 struct alignas(16)GlChangeEveryFrame

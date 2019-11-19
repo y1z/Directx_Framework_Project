@@ -29,7 +29,10 @@ public:
     getRenderTargetView();
 
   cShaderResourceView&
-    getShaderResourceView();
+  getShaderResourceView();
+
+  cShaderResourceView *
+  getShaderResourceViewPtr();
 
 private:
   cDepthStencilView m_depthStencilView;

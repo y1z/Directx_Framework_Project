@@ -1,6 +1,7 @@
 #pragma once 
 #include "utility/enGraphics.h"
 #include "../include/utility/enDefs.h"
+#include "cShaderResourceView.h"
 // std includes 
 #include <cstdint>
 // Forward decelerations 
@@ -121,6 +122,9 @@ public:// functions
 
   void/*! set's the resources for the pixel shader (can set multiple)*/
     PSSetShaderResources(cShaderResourceView  ShaderResources[], uint32_t numResources = 1, uint32_t Slots = 0);
+
+  void
+    PSSetShaderResources(std::vector<cShaderResourceView*> &shaderResources, uint32_t Slot = 0);
 
   void/*! set's the resources for the pixel shader (can only set one) */
     PSSetShaderResources(cMesh &ShaderResources, uint32_t Slot = 0);

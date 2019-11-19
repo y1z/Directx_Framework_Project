@@ -40,7 +40,7 @@ public:
   //\param type the default value is equivalent to D3D11_RTV_DIMENSION_TEXTURE2D aka a 2D texture
   void
     init(uint32_t width, uint32_t height,
-         int Format, int Type = 4);
+         int Format, int Type = 4, uint32 BindFlags=(uint32 )enBufferUse::backBuffer);
   /*! to interface with my own functions */
   cTexture2D 
     &getTexture();

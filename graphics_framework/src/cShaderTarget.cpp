@@ -2,6 +2,7 @@
 #include "cDevice.h"
 #include "utility/HelperFuncs.h"
 #include <cassert>
+#include <WICTextureLoader.h>
 
 cShaderTarget::cShaderTarget()
 {}
@@ -13,7 +14,6 @@ bool
 cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
 {
 #if DIRECTX
-
   bool isSucceful = false;
 
   sTextureDescriptor  textureDesc = helper::createDepthStencilDesc(screenSize.width, screenSize.height);
@@ -21,14 +21,17 @@ cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
   textureDesc.Usage = 0;
   textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
+  m_renderTarget.init(screenSize.width,
+                      screenSize.height,
+                      textureDesc.texFormat,
+                      textureDesc.BindFlags);
+
   isSucceful = device.CreateTexture2D(textureDesc, m_renderTarget.getTexture());
   if (isSucceful == false)
   {
     EN_LOG_ERROR;
     return false;
   }
-
-  m_renderTarget.init(screenSize.width, screenSize.height, textureDesc.texFormat);
 
   isSucceful = device.CreateRenderTargetView(m_renderTarget.getTexture(), m_renderTargetView);
 
@@ -41,17 +44,18 @@ cShaderTarget::init(const sWindowSize & screenSize, cDevice &device)
   // D3D_SRV_DIMENSION 
   // D3D11_SRV_DIMENSION_TEXTURE2D
   //D3D11_RESOURCE_DIMENSION_TEXTURE2D
-  m_ResourceView.init(static_cast< enFormats >(textureDesc.texFormat),
-                      1, 0
-                      , D3D11_SRV_DIMENSION_TEXTURE2D);
+  m_ResourceView.init(static_cast< enFormats >(textureDesc.texFormat), 1,
+                        0, D3D11_SRV_DIMENSION_TEXTURE2D);
 
 
   auto ResourceViewDesc = m_ResourceView.getDxDescriptor();
  // ResourceViewDesc.Texture2D.MipLevels = 1;
+ 
 
   HRESULT hr = device.getDevice()->CreateShaderResourceView(m_renderTarget.getTexture().getTexture(),
                                                             &ResourceViewDesc,
                                                             m_ResourceView.getShaderResourceRef());
+
 
   if (FAILED(hr))
   {
@@ -106,5 +110,11 @@ cShaderTarget::getRenderTargetView()
 cShaderResourceView &
 cShaderTarget::getShaderResourceView()
 {
-  return m_ResourceView;
+  return std::ref(m_ResourceView).get();
+}
+
+cShaderResourceView *
+cShaderTarget::getShaderResourceViewPtr()
+{
+  return &m_ResourceView;
 }

@@ -5,7 +5,9 @@ cVertexShader::cVertexShader()
 #if DIRECTX
   :mptr_vertexShader(nullptr)
 #endif // DIRECTX 
-{}
+{
+  m_shaderType = enShaderTypes::vertex;
+}
 
 cVertexShader::~cVertexShader()
 {

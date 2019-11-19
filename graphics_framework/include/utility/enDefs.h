@@ -47,7 +47,7 @@ enum class enErrorCode :Byte4
   Sucessful = 0b000'0000'0000'0000'0000'0000'0000'0000, //!<  indicates that no error occurred  
   UnClassified = 0b000'0000'0000'0000'0000'0000'0000'0001,//!<  indicates that there is no-know name for the error 
   NotReady = 0b000'0000'0000'0000'0000'0000'0000'0010, //!<  means that the function/class/object needed more set up before it's ready to be used  
-  InvalidPath = 0b000'0000'0000'0000'0000'0000'0000'0100,//!< means that a provided path 
+  InvalidPath = 0b000'0000'0000'0000'0000'0000'0000'0100,//!< means that a provided path is invalid 
   ShaderComplieError = 0b000'0000'0000'0000'0000'0000'0000'1000,//!< means that an error occurred with compiling the shader
   ShaderLinkError = 0b000'0000'0000'0000'0000'0000'0001'0000, //!< means that a provided path 
   ActorComponentError = 0b000'0000'0000'0000'0000'0000'0010'0000//!< means that a provided path 
@@ -148,11 +148,14 @@ enum enBufferType
 #if DIRECTX
   Vertex = D3D11_BIND_VERTEX_BUFFER,
   Index = D3D11_BIND_INDEX_BUFFER,
-  Const = D3D11_BIND_CONSTANT_BUFFER
+  Const = D3D11_BIND_CONSTANT_BUFFER,
+  ShaderResource = D3D11_BIND_SHADER_RESOURCE
+
 #else
-  Vertex = 0b00'00'00'00'01,
-  Index = 0b00'00'00'00'10,
-  Const = 0b00'00'00'01'00,
+  Vertex = 0b00'00'0000'0001,
+  Index = 0b00'00'0000'0010,
+  Const = 0b00'00'0000'0100,
+  ShaderResource = 0b00'00'0000'1000,
 #endif // DIRECTX
 };
 
@@ -162,9 +165,11 @@ enum enBufferType
 enum class enBufferUse
 {
 #if DIRECTX
+  shaderInput = DXGI_USAGE_SHADER_INPUT, 
   renderTragetOut = DXGI_USAGE_RENDER_TARGET_OUTPUT,
   backBuffer = DXGI_USAGE_BACK_BUFFER,
 #else
+shaderInput 
   renderTragetOut,
   backBuffer,
 #endif // DIRECTX
@@ -291,6 +296,16 @@ ivec2,
 
 single_int,
 
+};
+
+/*!
+*@brief used to determine which shader is being used
+*/
+enum class enShaderTypes
+{
+  NONE = -1,
+  vertex,
+  pixel
 };
 
 

@@ -1,11 +1,12 @@
-
 #include "../include/cPixelShader.h"
 
 cPixelShader::cPixelShader()
 #if DIRECTX
   :mptr_pixelShader(nullptr)
 #endif // DIRECTX
-{}
+{
+  m_shaderType = enShaderTypes::pixel;
+}
 
 cPixelShader::~cPixelShader()
 {
@@ -19,13 +20,16 @@ cPixelShader::~cPixelShader()
 }
 
 #if DIRECTX
-ID3D11PixelShader * cPixelShader::getPixelShader()
+ID3D11PixelShader * 
+cPixelShader::getPixelShader()
 {
   return mptr_pixelShader;
 }
 
-ID3D11PixelShader ** cPixelShader::getPixelShaderRef()
+ID3D11PixelShader ** 
+cPixelShader::getPixelShaderRef()
 {
   return &mptr_pixelShader;
 } 
+
 #endif // DIRECTX

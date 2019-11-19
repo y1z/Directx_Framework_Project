@@ -24,6 +24,7 @@
 #include "glm/gtc/type_ptr.hpp" // for glm::value_ptr
 // std includes 
 #include <cassert>
+#include <vector>
 // limits for setting objects 
 static constexpr const uint8_t c_MaxRenderTargets = 8;
 static constexpr const uint8_t c_MaxViewPorts = 8;
@@ -280,6 +281,12 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
         else if (!uni.name.compare("uLightDir"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->dir); }
 
+        else if (!uni.name.compare("uLightIntensity"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->lightIntensity); }
+
+        else if (!uni.name.compare("uAmbientIntensity"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->ambientIntensity); }
+
         if (uni.ptr_data != nullptr && uni.id != -1)
         {
           helper::GlUpdateUniform(uni);
@@ -331,7 +338,7 @@ cDeviceContext::ClearRenderTargetView(cRenderTargetView & renderTargetView, sCol
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif // DIRECTX 
-  }
+}
 
 void
 cDeviceContext::ClearDepthStencilView(cDepthStencilView & depthStencilView, bool ClearStencil,
@@ -386,7 +393,8 @@ void cDeviceContext::PSSetShader(cPixelShader & pixelShader)
 #endif // DIRECTX
 }
 
-void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[], uint32_t numResources, uint32_t Slots)
+void
+cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[], uint32_t numResources, uint32_t Slots)
 {
 #if DIRECTX
   // make sure i don't use too many slots 
@@ -432,6 +440,58 @@ void cDeviceContext::PSSetShaderResources(cShaderResourceView shaderResources[],
   }
 
 #endif // DIRECTX
+}
+
+void
+cDeviceContext::PSSetShaderResources(std::vector<cShaderResourceView*>& shaderResources, uint32_t Slots)
+{
+#if DIRECTX
+
+  // make sure i don't use too many slots 
+  if (Slots <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1 &&
+      shaderResources.size() <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1)
+  {
+
+    ID3D11ShaderResourceView* ShaderPtrArr[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{ 0 };
+    uint32_t i = 0;
+    for (cShaderResourceView * Resource : shaderResources)
+    {
+      ShaderPtrArr[i] = Resource->getShaderResource();
+      ++i;
+    }
+
+    mptr_deviceContext->PSSetShaderResources(Slots,
+                                             shaderResources.size() - 1,
+                                             ShaderPtrArr);
+
+  }
+  else
+  {
+    EN_LOG_ERROR_WITH_CODE(enErrorCode::UnClassified);
+    assert(("Error asking for too many slots", Slots <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1));
+  }
+#elif OPEN_GL
+  GlRemoveAllErrors();
+  // should be the index for shader program 
+  glUseProgram(*cApiComponents::getShaderProgram());
+
+  auto Location = glGetUniformLocation(*cApiComponents::getShaderProgram(), "uTextureSampler");
+
+  int32_t Count;
+  glGetIntegerv(GL_ACTIVE_TEXTURE, &Count);
+
+  glActiveTexture(shaderResources[0].getTextureID());//+ shaderResources->getResourceID());// + shaderResources->getResourceID());
+
+  glBindTexture(GL_TEXTURE_2D, shaderResources[0].getResourceID());
+  // NEEDS TO BE ONE OR EVERYTHING GOES TO SHIT 
+  glUniform1i(Location, 0);
+
+  if (GlCheckForError())
+  {
+    assert(true == false, "Error with Texture Sample");
+  }
+#endif // DIRECTX
+
 }
 
 void cDeviceContext::PSSetShaderResources(cMesh & ShaderResources, uint32_t Slot)

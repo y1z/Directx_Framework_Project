@@ -29,11 +29,13 @@ cRenderTarget::getDiscriptor()
   std::memset(&result, 0, sizeof(result));
   result.Format = static_cast< DXGI_FORMAT >(this->m_desc.format);//DXGI_USAGE_RENDER_TARGET_OUTPUT
   result.ViewDimension = static_cast< D3D11_RTV_DIMENSION >(m_desc.dimension);
+
+  //D3D11_RENDER_TARGET_BLEND_DESC
   return  result;
 }
 #elif OPEN_GL
 
-sRenderTarget 
+sRenderTarget
 cRenderTarget::getDiscriptor() const
 {
   return  m_desc;
@@ -43,12 +45,12 @@ cRenderTarget::getDiscriptor() const
 
 void
 cRenderTarget::init(uint32_t width, uint32_t height,
-                              int Format, int Type)
+                    int Format, int Type ,uint32 bindFlags)
 {
   m_desc.format = Format;
   m_desc.dimension = Type;
 
-  m_target.init(width, height, Format, 0, 0x40);
+  m_target.init(width, height, Format, 0, bindFlags);
 }
 
 cTexture2D &

@@ -10,6 +10,7 @@
 //#endif // STB_IMAGE_IMPLEMENTATION
 //#endif // STBI_INCLUDE_STB_IMAGE_H   
 
+
 #if OPEN_GL
 static uint32 GlTextureTacker = GL_TEXTURE0;
 #elif DIRECTX
@@ -28,6 +29,7 @@ cShaderResourceView::~cShaderResourceView()
   if (mptr_shaderResource)
   {
     mptr_shaderResource->Release();
+    mptr_shaderResource = nullptr;
   }
 #endif // DIRECTX
 }

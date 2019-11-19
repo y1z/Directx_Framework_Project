@@ -1,5 +1,6 @@
 #pragma once 
 #include "utility/enGraphics.h"
+#include "utility/enDefs.h"
 #include <string>
 
 /*!\brief this is the base class for all shader classes */
@@ -34,6 +35,11 @@ shader/error etc..*/
  void
    setShader(std::string_view newShader);
 
+ bool 
+ compileShader(std::string_view shaderPath,
+               std::string_view EntryPoint,
+               std::string_view shaderVersion);
+
 private:
 #if DIRECTX
   /*! this contains information ,errors , type of shader etc..*/
@@ -44,5 +50,10 @@ private:
 protected:
   //! contains the shader 
   std::string m_shader;
+ //! keeps track of the entry point of the shader  
+  std::string m_entryPoint;
+//! keeps track of which version of the shader I'm using 
+  std::string m_shaderModel;
 
+  enShaderTypes m_shaderType = enShaderTypes::NONE;
 };

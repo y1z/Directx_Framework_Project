@@ -31,10 +31,6 @@ namespace helper
                              cSwapChain &swapChian, cWindow &window,
                              cApiComponents &ApiComponent);
 
-  /*! used to compile a shader */
-  bool
-    CompileShader(const wchar_t *FileName, const char*shaderModel,
-                  const char*entryPoint, cShaderBase &shader);
 
   /*!converts radians to degrees*/
   float
@@ -86,6 +82,9 @@ namespace helper
   to a std::string */
   std::string
     convertWStringToString(std::wstring_view wideString);
+
+  std::wstring
+    convertStringToWString(std::string_view string);
 
   /*! this arranges the matrices to be column/row depending on the api
   */
