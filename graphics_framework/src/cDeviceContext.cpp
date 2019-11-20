@@ -480,9 +480,9 @@ cDeviceContext::PSSetShaderResources(std::vector<cShaderResourceView*>& shaderRe
   int32_t Count;
   glGetIntegerv(GL_ACTIVE_TEXTURE, &Count);
 
-  glActiveTexture(shaderResources[0].getTextureID());//+ shaderResources->getResourceID());// + shaderResources->getResourceID());
+  glActiveTexture(shaderResources[0]->getTextureID());//+ shaderResources->getResourceID());// + shaderResources->getResourceID());
 
-  glBindTexture(GL_TEXTURE_2D, shaderResources[0].getResourceID());
+  glBindTexture(GL_TEXTURE_2D, shaderResources[0]->getResourceID());
   // NEEDS TO BE ONE OR EVERYTHING GOES TO SHIT 
   glUniform1i(Location, 0);
 

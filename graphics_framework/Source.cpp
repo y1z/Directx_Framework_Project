@@ -353,7 +353,7 @@ InitDevice()
 #endif // DIRECTX
 
 #if DIRECTX
-  const wchar_t *selectedVertexShader = L"Tutorial_lambert.hlsl";
+  const wchar_t *selectedVertexShader = L"lighting.hlsl";
 #elif OPEN_GL
   const wchar_t *selectedVertexShader = L"tutorial_lambert.vert";
 #else 
@@ -394,7 +394,7 @@ InitDevice()
 
   shaderPath = g_initPath.parent_path();
 #if DIRECTX
-  const wchar_t *selectedPixelhader = L"Tutorial_lambert.hlsl";
+  const wchar_t *selectedPixelhader = L"lighting.hlsl";
   shaderPath += L"//DxShaders//";
 #elif OPEN_GL
   const wchar_t *selectedPixelhader = L"tutorial.frag";
@@ -747,7 +747,7 @@ void Render()
   g_trackedTime = deltaTime;
 
   my_gui.beginFrame("Data");
-  //my_gui.addImage(my_shaderTarget->getShaderResourceView());
+  my_gui.addImage(my_shaderTarget->getShaderResourceView());
   my_gui.addButton("load new model", g_loadNewModel);
   my_gui.beginChildWithFpsCount(deltaTime);
   my_gui.addItemCountToChild("Mesh count ", "Mesh", ptr_toModel->getMeshCount());

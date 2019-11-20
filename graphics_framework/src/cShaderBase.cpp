@@ -88,11 +88,6 @@ cShaderBase::compileShader(std::string_view shaderPath,
   m_shaderModel = (shaderVersion);
 
   ID3DBlob* pErrorBlob = nullptr;
- //D3DCompileFromFile(FilePath.c_str(), NULL,
- //                    NULL, EntryPoint.data(),
- //                    shaderVersion.data(), dwShaderFlags,
- //                    0, this->getInfoRef(),
- //                    &pErrorBlob);
 
   HRESULT hr = D3DCompile(m_shader.c_str(), m_shader.length(),
                           nullptr, nullptr,

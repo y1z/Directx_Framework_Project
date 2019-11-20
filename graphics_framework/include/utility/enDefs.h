@@ -165,11 +165,11 @@ enum enBufferType
 enum class enBufferUse
 {
 #if DIRECTX
-  shaderInput = DXGI_USAGE_SHADER_INPUT, 
+  shaderInput = DXGI_USAGE_SHADER_INPUT,
   renderTragetOut = DXGI_USAGE_RENDER_TARGET_OUTPUT,
   backBuffer = DXGI_USAGE_BACK_BUFFER,
 #else
-shaderInput 
+  shaderInput,
   renderTragetOut,
   backBuffer,
 #endif // DIRECTX
@@ -220,10 +220,10 @@ enum class enFilter
   MinMagMip_MagMip_Linear,
   MinMagMip_Linear,
     /**************************************/
-  Anisotropic,
-  Anisotropic_Comperasion,
-  Anisotropic_Minimum,
-  Anisotropic_Maximum,
+    Anisotropic,
+    Anisotropic_Comperasion,
+    Anisotropic_Minimum,
+    Anisotropic_Maximum,
   #endif // DIRECTX
 };
 
@@ -249,7 +249,7 @@ enum class enTopology
 /**
 *@brief tells the a.p.i how to use the x,y,z(aka u,v,w) of a given texture
 */
-enum class enTextureAddress : int32_t 
+enum class enTextureAddress : int32_t
 {
 #if DIRECTX
   Wrap = D3D11_TEXTURE_ADDRESS_WRAP,
@@ -278,23 +278,23 @@ enum class enTextureAddress : int32_t
 enum class enConstBufferElem :int32
 {
   NONE = 0,
-mat4x4,
-mat3x3,
+  mat4x4,
+  mat3x3,
 
-vec4,
-vec3,
-vec2,
+  vec4,
+  vec3,
+  vec2,
 
-single_float,
-// integer types  
-imat4x4,
-imat3x3,
+  single_float,
+  // integer types  
+  imat4x4,
+  imat3x3,
 
-ivec4,
-ivec3,
-ivec2,
+  ivec4,
+  ivec3,
+  ivec2,
 
-single_int,
+  single_int,
 
 };
 
