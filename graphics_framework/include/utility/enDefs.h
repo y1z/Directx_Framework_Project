@@ -50,10 +50,11 @@ enum class enErrorCode :Byte4
   InvalidPath = 0b000'0000'0000'0000'0000'0000'0000'0100,//!< means that a provided path is invalid 
   ShaderComplieError = 0b000'0000'0000'0000'0000'0000'0000'1000,//!< means that an error occurred with compiling the shader
   ShaderLinkError = 0b000'0000'0000'0000'0000'0000'0001'0000, //!< means that a provided path 
-  ActorComponentError = 0b000'0000'0000'0000'0000'0000'0010'0000//!< means that a provided path 
+  ActorComponentError = 0b000'0000'0000'0000'0000'0000'0010'0000,//!< means that a provided path 
+  FailedCreation = 0b000'0000'0000'0000'0000'0000'0100'0000,//!<means that something was not created correctly.
 };
 
-/* tells the a.p.i how the information is
+/** tells the a.p.i how the information is
 formated
 */
 enum enFormats
@@ -308,8 +309,6 @@ enum class enShaderTypes
   pixel
 };
 
-
-
 /*++++++++++++++++++++++++++++++++++++*/
 /* Logger functions */
 /*++++++++++++++++++++++++++++++++++++*/
@@ -364,6 +363,12 @@ namespace enError
     messageFormat(FunctionName, "Component is one of the following \n"
                   " ==> 1) does not exist in the current actor \n"
                   " ==> 2) the component needed more set-up in order to do it's job ");
+    break;
+    case enErrorCode::FailedCreation:
+    messageFormat(FunctionName,
+                  R"(the creation of some resource has failed, check if more setup is needed
+or if the setup wrong.)");
+
     break;
     default:
     messageFormat(FunctionName, "No error massage set");

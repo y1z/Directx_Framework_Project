@@ -38,10 +38,10 @@ cWindow::init(LRESULT(CALLBACK*ptr_proc)(HWND, UINT, WPARAM, LPARAM)
   if (windowName == nullptr)
   { m_name = defualName; }
 
-  if (className == nullptr)
+ if (className == nullptr)
   { m_className = defualClassName; }
 
-#ifndef OPEN_GL 
+#if !OPEN_GL 
   this->mptr_proc = ptr_proc;
   this->m_instance = *instance;
   // Register class W
@@ -109,7 +109,7 @@ cWindow::init(LRESULT(CALLBACK*ptr_proc)(HWND, UINT, WPARAM, LPARAM)
   return false;
 }
 
-#ifndef OPEN_GL
+#if !OPEN_GL
 HWND
 cWindow::getHandle() const
 {

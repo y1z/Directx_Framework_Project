@@ -6,7 +6,7 @@
 /*! this define is used to select the directx api */
 #define DIRECTX 1
 
-//#define OPEN_GL 1
+#define OPEN_GL 0
 
 //#ifdef OPEN_GL
 //#undef DIRECTX

@@ -9,7 +9,7 @@
 #include <string_view>
 /*******************************/
 #include"imgui/imgui.h"
-#ifdef DIRECTX
+#if DIRECTX
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
 #elif OPEN_GL
@@ -54,7 +54,7 @@ imGuiManager::~imGuiManager()
   if (is_initialized)
   {
 
-  #ifdef DIRECTX
+  #if DIRECTX
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
   #elif OPEN_GL
@@ -77,10 +77,10 @@ imGuiManager::Init(cDevice & Device, cDeviceContext & DeviceContext, cWindow &wi
     //this can be used to enable or disable opciones
     ImGuiIO& GuiIo = ImGui::GetIO();
     // check for possible error 
-  #ifdef DIRECTX
+  #if DIRECTX
     isSuccesful = ImGui_ImplWin32_Init(window.getHandle());
     isSuccesful = ImGui_ImplDX11_Init(Device.getDevice(), DeviceContext.getDeviceContext());
-  #elif OPEN_GL
+  #elif OPEN_GL == 1
     // TODO: REMOVE COMMIT WHEN READY 
     isSuccesful = ImGui_ImplGlfw_InitForOpenGL(window.getHandle(), true);
     isSuccesful = ImGui_ImplOpenGL3_Init(GlslVersion);
@@ -249,7 +249,7 @@ imGuiManager::endFrame()
   ImGui::End();
   ImGui::Render();
 
-#ifdef DIRECTX
+#if DIRECTX
   ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 #elif OPEN_GL
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

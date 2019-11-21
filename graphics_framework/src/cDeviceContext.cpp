@@ -44,6 +44,7 @@ cDeviceContext::~cDeviceContext()
   if (mptr_deviceContext)
   {
     mptr_deviceContext->Release();
+    mptr_deviceContext = nullptr;
   }
 
 #endif // DIRECTX

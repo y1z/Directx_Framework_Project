@@ -31,6 +31,7 @@ cDevice::~cDevice()
   if (mptr_device != nullptr)
   {
     mptr_device->Release();
+    mptr_device = nullptr;
   }
 #endif // DIRECTX
 }
@@ -112,7 +113,7 @@ bool cDevice::CreateRenderTargetView(cRenderTarget & renderTarget, cRenderTarget
 bool
 cDevice::CreateTexture2D(sTextureDescriptor & Description, cTexture2D & Texture)
 {
-#ifdef DIRECTX
+#if DIRECTX
   HRESULT hr;
   D3D11_TEXTURE2D_DESC descDepth;
   std::memset(&descDepth, 0, sizeof(descDepth));
@@ -588,7 +589,7 @@ bool cDevice::CreateSamplerState(cSampler & sampler)
 }
 
 
-#ifdef DIRECTX
+#if DIRECTX
 ID3D11Device * cDevice::getDevice()
 {
   return mptr_device;

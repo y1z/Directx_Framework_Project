@@ -23,7 +23,7 @@ public:
          const HMODULE *Instance,
          const char *windowName = nullptr,
          const char *className = nullptr);
-#ifndef OPEN_GL
+#if !OPEN_GL
   /*! returns  the window handle */
   HWND
     getHandle()const;
@@ -61,7 +61,7 @@ private:
   /*! a pointer for the wndProc function */
   WNDCLASSEX m_descriptor;
   LRESULT(CALLBACK *mptr_proc) (HWND, UINT, WPARAM, LPARAM);
-#ifndef OPEN_GL 
+#if !OPEN_GL 
   HWND m_handle;
 #elif OPEN_GL
   GLFWwindow* m_handle;

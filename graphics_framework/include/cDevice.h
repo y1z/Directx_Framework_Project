@@ -64,7 +64,7 @@ public:
  //! Creates a sampler 
  bool CreateSamplerState(cSampler &sampler);
 
-#ifdef DIRECTX
+#if DIRECTX
  /*! returns a point directX device */
   ID3D11Device *
     getDevice();

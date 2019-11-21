@@ -502,19 +502,15 @@ namespace helper
     mbstate_t mbs;
     std::memset(&mbs, 0, sizeof(mbs));
 
-    std::string Result(wideString.length(), '\0');
+    std::string Result(wideString.length() + 1, '\0');
 
-    uint64 length = 0;
-    size_t i = 0;
-    //size_t retValue = 0;
-    for (const wchar_t wideChar : wideString)
+    // converts a wide string to a char/multi-byte string
+    std::size_t checkForError = std::wcstombs(Result.data(), wideString.data(), wideString.length());
+
+    // how to check for errors  https://en.cppreference.com/w/cpp/string/multibyte/wcstombs
+    if (checkForError == static_cast< std::size_t >(-1))
     {
-      length = wcrtomb(&Result[i], wideChar, &mbs);
-      //wcrtomb_s(&retValue, &Result[i], sizeof(char), ansiChar, &mbs);
-
-      if (length == 0 || length > MB_CUR_MAX)
-      { break; }
-      i++;
+      assert(checkForError != static_cast< std::size_t >(-1) && "invalid string conversion");
     }
 
     return Result;
@@ -523,9 +519,14 @@ namespace helper
   std::wstring
     convertStringToWString(std::string_view string)
   {
-    std::wstring Result(string.length(), '\0');
+    std::wstring Result(string.length() + 1, '\0');
 
-    mbstowcs(Result.data(), string.data(), Result.length());
+    std::size_t checkForError = std::mbstowcs(Result.data(), string.data(),string.length());
+
+    if (checkForError == static_cast< std::size_t >(-1))
+    {
+      assert(checkForError != static_cast< std::size_t >(-1) && "invalid string conversion");
+    }
 
     return Result;
   }
@@ -703,7 +704,7 @@ namespace helper
     else if (details.element == enConstBufferElem::vec2)
     {
       glUniform2fv(details.id, 1, static_cast< const  GLfloat* > (details.ptr_data));
-  }
+    }
 
     else if (details.element == enConstBufferElem::single_float)
     {
@@ -712,7 +713,7 @@ namespace helper
 
 
 
-}
+  }
 
   sUniformDetails
     GlCreateUniformDetail(std::string_view name, enConstBufferElem type)

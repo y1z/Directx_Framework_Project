@@ -211,9 +211,11 @@
     <ClInclude Include="include\cInputLayout.h" />
     <ClInclude Include="include\cMesh.h" />
     <ClInclude Include="include\cModel.h" />
+    <ClInclude Include="include\cPass.h" />
     <ClInclude Include="include\cPixelShader.h" />
     <ClInclude Include="include\cRenderTarget.h" />
     <ClInclude Include="include\cRenderTargetView.h" />
+    <ClInclude Include="include\cResourceManager.h" />
     <ClInclude Include="include\cSampler.h" />
     <ClInclude Include="include\cShaderBase.h" />
     <ClInclude Include="include\cShaderResourceView.h" />
@@ -267,9 +269,11 @@
     <ClCompile Include="src\cInputLayout.cpp" />
     <ClCompile Include="src\cMesh.cpp" />
     <ClCompile Include="src\cModel.cpp" />
+    <ClCompile Include="src\cPass.cpp" />
     <ClCompile Include="src\cPixelShader.cpp" />
     <ClCompile Include="src\cRenderTarget.cpp" />
     <ClCompile Include="src\cRenderTargetView.cpp" />
+    <ClCompile Include="src\cResourceManager.cpp" />
     <ClCompile Include="src\cSampler.cpp" />
     <ClCompile Include="src\cShaderBase.cpp" />
     <ClCompile Include="src\cShaderResourceView.cpp" />
