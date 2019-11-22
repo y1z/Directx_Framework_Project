@@ -273,8 +273,11 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
         if (!uni.name.compare("uAmbientColor"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->ambientColor); }
 
-        else if (!uni.name.compare("uLightColor"))
+        else if (!uni.name.compare("uDiffuseColor"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->lightColor); }
+
+        else if (!uni.name.compare("uSpecularColor"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->specularColor);}
 
         else if (!uni.name.compare("uLightPos"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->pos); }
@@ -282,11 +285,14 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
         else if (!uni.name.compare("uLightDir"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->dir); }
 
-        else if (!uni.name.compare("uLightIntensity"))
+        else if (!uni.name.compare("uDiffuseIntensity"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->lightIntensity); }
 
         else if (!uni.name.compare("uAmbientIntensity"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->ambientIntensity); }
+
+        else if (!uni.name.compare("uSpecularIntensity"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->specularIntensity); }
 
         if (uni.ptr_data != nullptr && uni.id != -1)
         {

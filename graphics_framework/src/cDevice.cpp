@@ -535,11 +535,14 @@ bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
   {
     auto refToContainer = constBuffer.getGlUniforms();
     refToContainer->push_back(helper::GlCreateUniformDetail("uAmbientColor", enConstBufferElem::vec4));
-    refToContainer->push_back(helper::GlCreateUniformDetail("uLightColor", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uDiffuseColor", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uSpecularColor", enConstBufferElem::vec4));
     refToContainer->push_back(helper::GlCreateUniformDetail("uLightPos", enConstBufferElem::vec4));
-    refToContainer->push_back(helper::GlCreateUniformDetail("uLightDir", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uLightDir", enConstBufferElem::vec3));
     refToContainer->push_back(helper::GlCreateUniformDetail("uLightIntensity", enConstBufferElem::single_float));
     refToContainer->push_back(helper::GlCreateUniformDetail("uAmbientIntensity", enConstBufferElem::single_float));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uSpecularIntensity", enConstBufferElem::single_float));
+
 
     for (sUniformDetails &uni : *refToContainer)
     {
@@ -593,7 +596,7 @@ bool cDevice::CreateSamplerState(cSampler & sampler)
 ID3D11Device * cDevice::getDevice()
 {
   return mptr_device;
-  }
+}
 
 ID3D11Device ** cDevice::getDeviceRef()
 {
