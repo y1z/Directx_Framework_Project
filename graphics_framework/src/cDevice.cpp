@@ -527,8 +527,6 @@ bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
     glBindBuffer(GL_UNIFORM_BUFFER, constBuffer.getGlUniformBlockID());
 
     //constBuffer.setData(glMapBuffer(GL_UNIFORM_BUFFER, GL_READ_WRITE));
-
-     //glUniformBlockBinding()
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
   }
   else if (constBuffer.getIndex() == 3)
