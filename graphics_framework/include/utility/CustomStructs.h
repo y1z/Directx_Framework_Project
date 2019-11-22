@@ -28,7 +28,7 @@ struct sVertexPosTex
 */
 struct sVector4
 {
-  glm::vec4 vector4;
+  glm::vec4 vector4{ 0.0f,0.0f,0.0f,1.0f };
 };
 
 struct sColorf
@@ -122,10 +122,13 @@ struct alignas(16) sLightData
 {
   sColorf ambientColor;
   sColorf lightColor = { 0.0f,0.7f,0.7f,1.0f };
+  sColorf specularColor = { 0.5f,0.5f,0.5f,0.5f };
+
   sVector4 pos;
-  sVector4 dir;
+  sVector3 dir;
 
   float lightIntensity{ 0.5f };
+  float specularIntensity{ 0.5f };
   float ambientIntensity{ 0.5f };
 };
 

@@ -77,7 +77,7 @@ public:// functions
   /*! just passes the argument to the render-target*/
   void
     setRenderTarget(uint32 width, uint32 height, enFormats format);
-  
+
 #if OPEN_GL
           /*! set the window for the glfwSwapBuffers function */
   void
@@ -127,7 +127,7 @@ private:
   /*! this is so the swap-chain can use
   the glSwapBuffer functions */
   GLFWwindow *mptr_window = nullptr;
-  uint32 *mptr_backBuffer{nullptr};
+  uint32 *mptr_backBuffer{ nullptr };
   uint32 *mptr_depthStencilView{ nullptr };
 #endif // DIRECTX
   sSwapDesc m_desc;

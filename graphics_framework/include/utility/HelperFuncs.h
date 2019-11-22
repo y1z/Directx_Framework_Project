@@ -24,14 +24,6 @@ struct sTextureDescriptor;
 
 namespace helper
 {
-
-  /*! Create and unite the swap-chain device */
-  bool
-    CreateDeviceAndSwapchain(cDevice &device, cDeviceContext &deviceContext,
-                             cSwapChain &swapChian, cWindow &window,
-                             cApiComponents &ApiComponent);
-
-
   /*!converts radians to degrees*/
   float
     radiansToDegrees(float radians);

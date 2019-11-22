@@ -7,7 +7,6 @@
 #define DIRECTX 1
 
 #define OPEN_GL 0
-
 //#ifdef OPEN_GL
 //#undef DIRECTX
 

@@ -13,11 +13,6 @@ cMesh::cMesh()
   glm::vec4 DefaultPosition(0.1f, 0.1f, 0.1f, 1.0f);
 
   m_transform *= DefaultPosition;
-#if DIRECTX
- //dx::XMVECTOR defualtPos = dx::XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f);
- // m_transform.matrix = dx::XMMatrixTranslationFromVector(defualtPos);
-#elif OPEN_GL
-#endif // DIRECTX
 }
 
 cMesh::cMesh(cMesh && mesh)

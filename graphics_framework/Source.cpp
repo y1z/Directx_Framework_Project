@@ -53,9 +53,6 @@
 
 #endif // STBI_INCLUDE_STB_IMAGE_H  
 /*****************************************************/
-#if DIRECTX
-#include "../include/directx_structs.h"
-#endif // DIRECTX
 /*****************************************************/
 #include "utility/HelperFuncs.h"
 #include "utility/enHelperTemplates.h" 
@@ -89,11 +86,7 @@ Timer my_timer;
 /*****************************************************/
 cWindow my_window;
 std::unique_ptr <cActor> my_actor = std::make_unique<cActor>();
-std::unique_ptr <cActor> my_XArrow = std::make_unique<cActor>();
-std::unique_ptr <cActor> my_YArrow = std::make_unique<cActor>();
-std::unique_ptr <cActor> my_ZArrow = std::make_unique<cActor>();
 std::unique_ptr<cCameraManager> my_cameraManager = std::make_unique<cCameraManager>();
-std::unique_ptr <cActor> my_tornado = std::make_unique<cActor>();
 std::unique_ptr<cShaderTarget> my_shaderTarget = std::make_unique<cShaderTarget>();
 /**********************************************************/
 cApiComponents my_apiComponent;
@@ -110,6 +103,7 @@ sMatrix4x4 g_World;
 sMatrix4x4 g_View;
 sMatrix4x4 g_Projection;
 sWindowSize g_windowSizeTracker;
+
 bool g_isInit(false);
 bool g_isRunnig(true);
 //! this is the path local to the solution of the program
@@ -131,8 +125,6 @@ HRESULT InitDevice();
 void DestroyAllComponentsFromActor(cActor &actor);
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-//std::string ModelSelectMenu(cWindow &window);
 
 void
 Update();
@@ -211,10 +203,6 @@ wWinMain(HINSTANCE hInstance,
 
   SetCallBackFunctions(my_window);
 #endif // OPEN_GL
-
-  //my_XArrow->AddComponents(new cModel());
-  //my_YArrow->AddComponents(new cModel());
-  //my_ZArrow->AddComponents(new cModel());
 
  /* init a console **/
   FILE *standardOutStream = nullptr;
@@ -300,9 +288,6 @@ wWinMain(HINSTANCE hInstance,
 HRESULT
 InitDevice()
 {
-  //helper::CreateDeviceAndSwapchain(my_device, my_deviceContext,
-  //                                 my_swapChain, my_window,
-  //                                 my_apiComponent);
   bool isSuccesful = true;
 
   isSuccesful = my_resourceManager->init(my_swapChain,
@@ -315,8 +300,8 @@ InitDevice()
     return S_FALSE;
   }
 
-  std::shared_ptr<cDevice> myp_device = my_resourceManager->getPtrDevice();
-  std::shared_ptr<cDeviceContext> myp_deviceContext = my_resourceManager->getPtrDeviceContext();
+  std::shared_ptr<cDevice> ptr_device = my_resourceManager->getPtrDevice();
+  std::shared_ptr<cDeviceContext> ptr_deviceContext = my_resourceManager->getPtrDeviceContext();
 
 
   HRESULT hr = S_FALSE;
@@ -327,38 +312,38 @@ InitDevice()
 
   my_swapChain.setDepthStencilView(enFormats::depthStencil_format);
   isSuccesful = my_swapChain.InitBuffer();
-  //  isSuccesful = my_swapChain.GetBuffer(my_renderTarget.getTexture(), 0);
+
   assert(("Error with swap-chain getting a buffer " &&  isSuccesful == true));
 
   // Create a render target view
-  isSuccesful = myp_device->CreateRenderTargetView(my_swapChain.getRenderTarget().getTexture(), my_swapChain.getRenderTargetView());
+  isSuccesful = ptr_device->CreateRenderTargetView(my_swapChain.getRenderTarget().getTexture(), my_swapChain.getRenderTargetView());
   assert((isSuccesful == true && "Error with render-target creation"));
-  // Create depth stencil texture
 
+  // Create depth stencil texture
   sTextureDescriptor TextureDesc = helper::createDepthStencilDesc(windowSize.width, windowSize.height);
-  isSuccesful = myp_device->CreateTexture2D(TextureDesc, my_swapChain.getDepthStencil());
+  isSuccesful = ptr_device->CreateTexture2D(TextureDesc, my_swapChain.getDepthStencil());
   assert(isSuccesful == true && "Error with Texture 2d creation ");
 
   /**********************************************************/
 
-  isSuccesful = my_gui.Init(*myp_device, *myp_deviceContext, my_window);
+  isSuccesful = my_gui.Init(*ptr_device, *ptr_deviceContext, my_window);
   assert(isSuccesful == true && "problem with initializing  imGui");
 
  /**********************************************************/
    // set depth-stencil-view
   my_swapChain.setDepthStencilView(enFormats::depthStencil_format);
 
-  isSuccesful = myp_device->CreateDepthStencilView(my_swapChain.getDepthStencilView());
+  isSuccesful = ptr_device->CreateDepthStencilView(my_swapChain.getDepthStencilView());
   assert(isSuccesful == true && "Error with depth-stencil creation");
 
-  myp_deviceContext->OMSetRenderTargets(&my_swapChain.getRenderTargetView(),
+  ptr_deviceContext->OMSetRenderTargets(&my_swapChain.getRenderTargetView(),
                                         my_swapChain.getDepthStencilView());
 
     // Setup the viewport
   my_viewport.setViewport(windowSize.width, windowSize.height,
                           0.0f, 1.0f);
 
-  myp_deviceContext->RSSetViewports(&my_viewport);
+  ptr_deviceContext->RSSetViewports(&my_viewport);
 
   std::filesystem::path shaderPath(g_initPath.parent_path());
 
@@ -393,19 +378,19 @@ InitDevice()
   }
 
   // Create the vertex shader
-  isSuccesful = myp_device->CreateVertexShader(my_vertexShader);
+  isSuccesful = ptr_device->CreateVertexShader(my_vertexShader);
   assert(isSuccesful == true && "Error creating vertex shader");
 
   isSuccesful = my_vertexInputLayout.ReadShaderData(my_vertexShader);
   assert(isSuccesful == true && "Error reading the vertex-shader data");
 
   // Create the input layout
-  isSuccesful = myp_device->CreateInputLayout(my_vertexInputLayout,
+  isSuccesful = ptr_device->CreateInputLayout(my_vertexInputLayout,
                                               my_vertexShader);
   assert(isSuccesful == true && "Error creating Input layout ");
 
   // Set the input layout
-  myp_deviceContext->IASetInputLayout(my_vertexInputLayout);
+  ptr_deviceContext->IASetInputLayout(my_vertexInputLayout);
 
   shaderPath = g_initPath.parent_path();
 #if DIRECTX
@@ -415,7 +400,6 @@ InitDevice()
   const wchar_t *selectedPixelhader = L"tutorial.frag";
   shaderPath += L"\\GlShaders\\";
 #else 
-
   const wchar_t * selectedPixelhader = L"no shader";
 #endif // DIRECTX
 
@@ -436,24 +420,20 @@ InitDevice()
   }
 
   // Create the pixel shader
-  isSuccesful = myp_device->CreatePixelShader(my_pixelShader);
+  isSuccesful = ptr_device->CreatePixelShader(my_pixelShader);
   assert((isSuccesful == true && "Error creating the pixel shader"));
-
-  //const char *ModelPath = "resources/media/3d models/obj/drakefire_pistol_low.obj";
-  //const char *TexPath = "resources/media/3d models/textures/drakefire_tex/base_albedo.jpg";
 
   cModel* ptr_toModel = helper::findModelComponent(*my_actor);
   assert(ptr_toModel != nullptr && "Error component 'model' does NOT exist in current actor");
 
   ptr_toModel->setModelPath(helper::openFile(my_window));
 
-  isSuccesful = ptr_toModel->LoadModelFromFile(*myp_device);
+  isSuccesful = ptr_toModel->LoadModelFromFile(*ptr_device);
 
   assert(("Error with loading model file" && isSuccesful == true));
 
 
-  myp_deviceContext->SetShaders(my_vertexShader, my_pixelShader);
-  // Set primitive topology
+  ptr_deviceContext->SetShaders(my_vertexShader, my_pixelShader);
   my_constViewMatrix.init(sizeof(ViewMatrix),
                           1,
                           0);
@@ -461,12 +441,8 @@ InitDevice()
   my_constViewMatrix.setIndex(0);
 
 
-  isSuccesful = myp_device->CreateConstBuffer(my_constViewMatrix);
+  isSuccesful = ptr_device->CreateConstBuffer(my_constViewMatrix);
   assert(isSuccesful == true && "Error Creating constant buffer");
-
-  //hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
-  //if (FAILED(hr))
-  //  return hr;
 
   my_constProjectionMatrix.init(sizeof(ProjectionMatrix),
                                 1,
@@ -474,7 +450,7 @@ InitDevice()
 
   my_constProjectionMatrix.setIndex(1);
 
-  isSuccesful = myp_device->CreateConstBuffer(my_constProjectionMatrix);
+  isSuccesful = ptr_device->CreateConstBuffer(my_constProjectionMatrix);
   assert(isSuccesful == true && "Error Creating constant buffer");
 
   my_constChangesEveryFrame.init(sizeof(GlChangeEveryFrame),
@@ -484,35 +460,26 @@ InitDevice()
   my_constChangesEveryFrame.setIndex(2);
 
 
-  isSuccesful = myp_device->CreateConstBuffer(my_constChangesEveryFrame);
+  isSuccesful = ptr_device->CreateConstBuffer(my_constChangesEveryFrame);
   assert(isSuccesful == true && "Error Creating constant buffer");
 //***
   my_constLightData.init(sizeof(sLightData), 1, 0);
 
   my_constLightData.setIndex(3);
 
-  isSuccesful = myp_device->CreateConstBuffer(my_constLightData);
+  isSuccesful = ptr_device->CreateConstBuffer(my_constLightData);
   assert(isSuccesful == true && "Error Creating constant buffer");
+
   // Load the Texture
-   //TODO : move all this code inside the shader resource view 
-#if DIRECTX
   const wchar_t *SelectedTextureFile = L"\\base_albedo.jpg";
   std::filesystem::path PathToResoure(g_initPath);
   PathToResoure += SelectedTextureFile;
 
-  hr = dx::CreateWICTextureFromFile(myp_device->getDevice(),
-                                    PathToResoure.generic_wstring().c_str(),
-                                    nullptr,
-                                    my_shaderResourceView.getShaderResourceRef());
+  isSuccesful = my_shaderResourceView.createShaderResourceFromFile(PathToResoure.generic_string(),
+                                                                   *ptr_device,
+                                                                   *ptr_deviceContext);
 
-  assert((!FAILED(hr) && "Error loading file"));
-#else
-
-  std::filesystem::path resourcePath(g_initPath);
-  resourcePath += "//base_albedo.jpg";// "//base_albedo.jpg";
-  my_shaderResourceView.createShaderResourceFromFile(resourcePath.generic_string(), *myp_device, *myp_deviceContext);
-
-#endif // DIRECTX
+  assert(isSuccesful == true && "error with resource creation");
 
   my_sampler.setDescirption(static_cast< int >(enFilter::Anisotropic),
                             static_cast< int >(enTextureAddress::Wrap), //equivalent to D3D11_TEXTURE_ADDRESS_WRAP
@@ -521,7 +488,7 @@ InitDevice()
                             static_cast< int >(enComparison::Never),//equivalent to D3D11_COMPARISON_NEVER
                             10);
 
-  isSuccesful = myp_device->CreateSamplerState(my_sampler);
+  isSuccesful = ptr_device->CreateSamplerState(my_sampler);
   assert(isSuccesful == true && "Error with creating sampler state");
 
   // Initialize the world matrices
@@ -543,39 +510,35 @@ InitDevice()
   ViewMatrix cbNeverChanges;
   cbNeverChanges.matrix = my_cameraManager->getViewMatrix().matrix;
 
-  myp_deviceContext->UpdateSubresource(&my_constViewMatrix,
+  ptr_deviceContext->UpdateSubresource(&my_constViewMatrix,
                                        &cbNeverChanges);
 
     // Initialize the projection matrix
   ProjectionMatrix cbChangesOnResize;
   cbChangesOnResize.matrix = my_cameraManager->getProjectionMatrix().matrix;
 
-  myp_deviceContext->UpdateSubresource(&my_constProjectionMatrix,
+  ptr_deviceContext->UpdateSubresource(&my_constProjectionMatrix,
                                        &cbChangesOnResize);
 
   GlChangeEveryFrame cbEveryFrame;
   cbEveryFrame.world = glm::mat4(1.0f);
   cbEveryFrame.color = sColorf{ 0.0f,0.f,0.5f,1.0f };
 
-  myp_deviceContext->UpdateSubresource(&my_constChangesEveryFrame,
+  ptr_deviceContext->UpdateSubresource(&my_constChangesEveryFrame,
                                        &cbEveryFrame);
   //***
   sLightData LightData;
   //std::memset(&LightData, 0, sizeof(LightData));
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector4 = { 1.0f,0.f,0.f,1.0f };
+  LightData.dir.vector3 = { 1.0f,0.f,0.f};
 
   LightData.ambientColor = { 0.7f,0.0f,0.0f };
 
   //LightData.lightIntensity = 0.5f;
   //LightData.ambientIntensity = 0.5f;
 
-  myp_deviceContext->UpdateSubresource(&my_constLightData,
+  ptr_deviceContext->UpdateSubresource(&my_constLightData,
                                        &LightData);
-
-    //std::filesystem::path arrowModelPath(g_initPath);
-
-    //arrowModelPath += "\\resources\\media\\3d models\\fbx\\Arrow.fbx";
 
   g_isInit = true;
 
@@ -601,11 +564,6 @@ void Render()
   cModel* ptr_toModel = helper::findModelComponent(*my_actor);
   std::shared_ptr<cDeviceContext> ptr_deviceContext = my_resourceManager->getPtrDeviceContext();
 
-  //cModel *ptr_toTornado = helper::findComponent<cModel>(*my_tornado);
-  //cModel* ptr_toXArrow = helper::findModelComponent(*my_XArrow);
-  //cModel* ptr_toYArrow = helper::findModelComponent(*my_YArrow);
-  //cModel* ptr_toZArrow = helper::findModelComponent(*my_ZArrow);
-
 #if DIRECTX
   if (my_apiComponent.getHardwareVersion() == D3D_DRIVER_TYPE_REFERENCE)
   {
@@ -621,12 +579,6 @@ void Render()
       dwTimeStart = dwTimeCur;
     t = (dwTimeCur - dwTimeStart) / 1000.0f;
   }
-
-  //static cShaderResourceView* shaderResources[2] =
-  //{
-  //  &my_shaderResourceView,
-  //   my_shaderTarget->getShaderResourceViewPtr(),
-  //};
 
   static std::vector<cShaderResourceView*> shaderResources =
   {
@@ -648,7 +600,7 @@ void Render()
   ptr_deviceContext->ClearDepthStencilView(my_swapChain.getDepthStencilView());
 
 
-/******** Change camera **********/
+    /******** Change camera **********/
   my_cameraManager->switchCamera(1);
   ViewMatrix neverChange = my_cameraManager->getViewMatrix();
   ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
@@ -686,8 +638,6 @@ void Render()
 
   /**************************************************************************************************************/
 
-  //my_deviceContext.ClearDepthStencilView(my_swapChain.getDepthStencilView());
-
   static std::vector<cConstBuffer *> bufferArray =
   {
     &my_constChangesEveryFrame,
@@ -717,14 +667,9 @@ void Render()
   /*setting values for the pixel shader */
   ptr_deviceContext->PSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
   ptr_deviceContext->PSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
-  //my_deviceContext.PSSetShaderResources(&my_shaderTarget->getShaderResourceView());
-  //my_deviceContext.PSSetShaderResources(*shaderResources, 2);
 
   ptr_deviceContext->PSSetShaderResources(shaderResources);
   ptr_deviceContext->PSSetSamplers(&my_sampler);
-
-  ///my_deviceContext.ClearRenderTargetView(my_shaderTarget->getRenderTargetView());
-
 
   my_cameraManager->switchCamera(0);
   neverChange = my_cameraManager->getViewMatrix();
@@ -736,10 +681,9 @@ void Render()
                                        &Proj.matrix);
   //***
   sLightData LightData;
-  //std::memset(&LightData, 0, sizeof(LightData));
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector4 = { cosf(-t), sinf(t) ,0.f ,1.0f };
-  LightData.lightColor = { 0.0f, 0.5f, fabsf(sinf(t)), 1.0f };
+  LightData.dir.vector3 = { cosf(-t), sinf(t) ,0.f };
+  LightData.lightColor = { 0.5f, 0.5f, 0.5f/* fabsf(sinf(t))*/, 1.0f };
 
 
   LightData.ambientColor = { 0.7f,cosf(50),0.0f,1.0f };
@@ -754,7 +698,6 @@ void Render()
     //DARW TWO
   /************************************************************************************************************/
 
-    //ptr_toModel->DrawMeshes(my_deviceContext, bufferArray, purple);
   my_actor->update(*ptr_deviceContext);
   my_actor->DrawAllComponents(*ptr_deviceContext, bufferArray);
 
@@ -779,7 +722,6 @@ void Render()
 
   my_gui.endAllChildren();
   my_gui.endFrame();
-
 
   // Present our back buffer to our front buffer
   my_swapChain.Present(0, 0);
@@ -838,8 +780,6 @@ void Update()
 //--------------------------------------------------------------------------------------
 // Called every time the application receives a message
 //--------------------------------------------------------------------------------------
-
-
 #if DIRECTX
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -1011,10 +951,8 @@ GLMoveMouse(GLFWwindow * window, double xPos, double yPos)
 
     ViewMatrix ChangeWithViewMatrix;
     ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
-    //my_deviceContext.UpdateSubresource(&my_constViewMatrix,
-    //                                   &ChangeWithViewMatrix);
-    my_resourceManager->getPtrDeviceContext()->UpdateSubresource(&my_constViewMatrix, &ChangeWithViewMatrix);
 
+    my_resourceManager->getPtrDeviceContext()->UpdateSubresource(&my_constViewMatrix, &ChangeWithViewMatrix);
   }
 }
 
@@ -1024,7 +962,6 @@ GlCloseWindow(GLFWwindow * window)
   g_isRunnig = false;
 
   glfwSetWindowShouldClose(window, GLFW_TRUE);
-
 }
 
 void

@@ -2,6 +2,7 @@
 #include "cDevice.h"
 #include "cDeviceContext.h"
 #include "utility/enErrorHandling.h"
+#include "utility/HelperFuncs.h"
 
 //#ifndef  STB_IMAGE_IMPLEMENTATION 
 //#define STB_IMAGE_IMPLEMENTATION 
@@ -10,6 +11,14 @@
 //#endif // STB_IMAGE_IMPLEMENTATION
 //#endif // STBI_INCLUDE_STB_IMAGE_H   
 
+#if DIRECTX
+
+#include "WICTextureLoader.h"
+#include "DDSTextureLoader.h"
+
+#endif // DIRECTX
+
+#include <iostream>
 
 #if OPEN_GL
 static uint32 GlTextureTacker = GL_TEXTURE0;
@@ -21,7 +30,24 @@ cShaderResourceView::cShaderResourceView()
 #if DIRECTX
   :mptr_shaderResource(nullptr)
 #endif // DIRECTX
-{}
+{
+  mptr_resourceData = nullptr;
+}
+
+cShaderResourceView::cShaderResourceView(const cShaderResourceView & other)
+{
+  this->m_height = other.m_height;
+  this->m_witdth = other.m_witdth;
+  this->m_channelCount = other.m_channelCount;
+  this->m_desc = other.m_desc;
+  this->mptr_resourceData = other.mptr_resourceData;
+#if DIRECTX
+  this->mptr_shaderResource = other.mptr_shaderResource;
+#elif OPEN_GL
+  this->m_imageID = other.m_imageID;
+  this->m_resourceID = other.m_resourceID;
+#endif // DIRECTX
+}
 
 cShaderResourceView::~cShaderResourceView()
 {
@@ -76,12 +102,12 @@ cShaderResourceView::getDxDescriptor()
 #endif // DIRECTX
 
 bool
-cShaderResourceView::createShaderResourceFromFile(std::string_view file,
+cShaderResourceView::createShaderResourceFromFile(std::string_view filePath,
                                                   cDevice & device,
                                                   cDeviceContext & deviceContext)
 {
 #if OPEN_GL
-  mptr_resourceData = stbi_load(file.data(), &m_witdth, &m_height, &m_channalCount, 4);
+  mptr_resourceData = stbi_load(filePath.data(), &m_witdth, &m_height, &m_channelCount, 4);
   if (mptr_resourceData == nullptr)
   {
     return false;
@@ -95,12 +121,12 @@ cShaderResourceView::createShaderResourceFromFile(std::string_view file,
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  float color[] = { 1.00f, 1.0f, 0.0f, 1.0f };
+  float color[] = { 0.50f, 0.5f, 0.5f, 1.0f };
   glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
   if (mptr_resourceData != nullptr)
   {
-    glTexImage2D(GL_TEXTURE_2D, 0, 
+    glTexImage2D(GL_TEXTURE_2D, 0,
                  GL_RGBA, m_witdth,
                  m_height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE,
@@ -123,7 +149,18 @@ cShaderResourceView::createShaderResourceFromFile(std::string_view file,
   {
     return false;
   }
+#elif DIRECTX
+  HRESULT hr = S_FALSE;
+  hr = dx::CreateWICTextureFromFile(device.getDevice(),
+                                    helper::convertStringToWString(filePath).c_str(),
+                                    nullptr,
+                                    this->getShaderResourceRef());
 
+  if (FAILED(hr))
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
 #endif // OPEN_GL
   // TODO : implement for DIRECTX
   return true;
@@ -148,13 +185,13 @@ cShaderResourceView::getTextureID() const
   return m_imageID;
 }
 
-uint32_t * 
+uint32_t *
 cShaderResourceView::getResourceIDPtr()
 {
   return &m_resourceID;
 }
 
-uint32_t * 
+uint32_t *
 cShaderResourceView::getTextureIDPtr()
 {
   return &m_imageID;
@@ -177,12 +214,12 @@ cShaderResourceView::getHeight() const
 int32_t
 cShaderResourceView::getChannelCount() const
 {
-  return m_channalCount;
+  return m_channelCount;
 }
 
 void
-cShaderResourceView::init(enFormats format,uint32 MipsLevel,
-                          uint32 BestMipsLevel , int32 viewDim) 
+cShaderResourceView::init(enFormats format, uint32 MipsLevel,
+                          uint32 BestMipsLevel, int32 viewDim)
 {
   this->m_desc.format = format;
   this->m_desc.resource.mipsLevel = MipsLevel;

@@ -3,6 +3,8 @@
 #include "utility/enDefs.h"
 #include <string_view>
 #include <vector>
+#include <memory>
+// dependencies includes 
 
 class cDevice;
 class cDeviceContext;
@@ -37,6 +39,7 @@ class
 {
 public:
   cShaderResourceView();
+  cShaderResourceView(const cShaderResourceView& other);
 
   ~cShaderResourceView();
 public:
@@ -57,7 +60,7 @@ public:
 
   /*! loads an images from a file to create a shader resource*/
   bool
-    createShaderResourceFromFile(std::string_view file, cDevice &device, cDeviceContext &deviceContext);
+    createShaderResourceFromFile(std::string_view filePath, cDevice &device, cDeviceContext &deviceContext);
 
   /*! returns a pointer to the data of the resource*/
   uint8 *
@@ -102,7 +105,7 @@ private:
 
   uint8 * mptr_resourceData = nullptr;
 #if DIRECTX
-
+  //! used to interface with the directx api.
   ID3D11ShaderResourceView *mptr_shaderResource = nullptr;
 #elif OPEN_GL
 
@@ -115,5 +118,7 @@ private:
 
   int32_t m_height = 0;
 
-  int32_t m_channalCount = 0;
+  int32_t m_channelCount = 0;
+
+  bool is_owner = false;
 };

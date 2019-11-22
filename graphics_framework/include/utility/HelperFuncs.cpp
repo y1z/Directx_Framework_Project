@@ -14,6 +14,7 @@
 #include "../include/cCameraManager.h"
 /***************************/
 #include <cstdio>
+#include <cstdlib>
 #include <fstream> // for ifstream
 #include <sstream>
 #include <map>
@@ -23,114 +24,7 @@
 namespace helper
 {
 
-  bool
-    CreateDeviceAndSwapchain(cDevice & device, cDeviceContext & deviceContext,
-                             cSwapChain &swapChain, cWindow & window,
-                             cApiComponents &apiComponent)
-  {
-  #if DIRECTX
-    HRESULT hr = S_OK;
-
-    RECT rc;
-    GetClientRect(window.getHandle(), &rc);
-    UINT width = rc.right - rc.left;
-    UINT height = rc.bottom - rc.top;
-
-    UINT createDeviceFlags = 0;
-  #ifdef _DEBUG
-    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-  #endif
-    D3D_DRIVER_TYPE  driverType;
-
-    D3D_FEATURE_LEVEL  featureLevel;
-
-    D3D_DRIVER_TYPE driverTypes[] =
-    {
-        D3D_DRIVER_TYPE_HARDWARE,
-        D3D_DRIVER_TYPE_WARP,
-        D3D_DRIVER_TYPE_REFERENCE,
-    };
-    UINT numDriverTypes = ARRAYSIZE(driverTypes);
-
-    D3D_FEATURE_LEVEL featureLevels[] =
-    {
-      D3D_FEATURE_LEVEL_12_0	,
-      D3D_FEATURE_LEVEL_11_1,
-      D3D_FEATURE_LEVEL_11_0,
-      D3D_FEATURE_LEVEL_10_1,
-      D3D_FEATURE_LEVEL_10_0,
-      D3D_FEATURE_LEVEL_9_3	,
-      D3D_FEATURE_LEVEL_9_2,
-      D3D_FEATURE_LEVEL_9_1	,
-    };
-    UINT numFeatureLevels = ARRAYSIZE(featureLevels);
-
-    swapChain.setSwapChain(width, height, enFormats::R8G8B8A8_uniform_norm,//equivalent to DXGI_FORMAT_R8G8B8A8_UNORM
-                           static_cast< int >(enBufferUse::renderTragetOut),/*equivalent to DXGI_USAGE_RENDER_TARGET_OUTPUT*/ window);
-
-
-    for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
-    {
-      driverType = driverTypes[driverTypeIndex];
-      hr = D3D11CreateDeviceAndSwapChain(NULL, driverType,
-                                         NULL, createDeviceFlags,
-                                         featureLevels, numFeatureLevels,
-                                         D3D11_SDK_VERSION, &swapChain.getSwapChainDesc(),
-                                         swapChain.getSwapChainRef(), device.getDeviceRef(),
-                                         &featureLevel, deviceContext.getDeviceContextRef());
-      if (SUCCEEDED(hr))
-      {
-        apiComponent.setSupportedVersion(static_cast< int >(featureLevel));
-        apiComponent.setHardwareVersion(static_cast< int > (driverType));
-        return true;
-      }
-    }
-  #elif OPEN_GL
-    GlRemoveAllErrors();
-
-    swapChain.setGlWindow(window.getHandle());
-
-    int32 majorVersion{ 0 };
-    int32 minorVersion{ 0 };
-
-    glfwGetVersion(&majorVersion, &minorVersion, NULL);
-
-    const unsigned char * OpenglVersion = glGetString(GL_VERSION);
-    const unsigned char *GlslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
-    const unsigned char *OpenglRenderer = glGetString(GL_RENDERER);
-
-    std::cout << "GLFW version : " << "Major [" << majorVersion << "] Minor [" << minorVersion << "]\n"
-      << "Open_gl version : " << OpenglVersion << '\n'
-      << "Glsl  Shader version : " << GlslVersion << '\n'
-      << "Open_gl renderer : " << OpenglRenderer << '\n' <<
-      "alignment of sLightData : " << alignof(sLightData) << '\n' <<
-      " size of sLightData : " << sizeof(sLightData) << std::endl;
-
-    apiComponent.setSupportedVersion(majorVersion, minorVersion);
-
-    uint32* ptr_vertexArrayObject = cApiComponents::getvertexArrayObject();
-
-    glGenVertexArrays(1, ptr_vertexArrayObject);
-    glBindVertexArray(*ptr_vertexArrayObject);
-
-    glfwSwapInterval(1);
-
-    uint32* ptr_ShaderProgram = cApiComponents::getShaderProgram();
-
-    *(ptr_ShaderProgram) = glCreateProgram();
-
-    if (GlCheckForError())
-    {
-      EN_LOG_ERROR
-        return false;
-    }
-
-    return true;
-  #endif // DIRECTX
-    return false;
-  } // end function
-
-  /*************/
+   /*************/
   float
     radiansToDegrees(float radians)
   {
@@ -212,7 +106,8 @@ namespace helper
   }
 
   /*************/
-  std::string loadFileToString(std::string_view filePath)
+  std::string 
+    loadFileToString(std::string_view filePath)
   {
     std::string Result{ "Error" };
     std::ifstream File(filePath);
@@ -233,7 +128,8 @@ namespace helper
   }
   /*************/
 
-  std::string loadFileToString(std::wstring_view filePath)
+  std::string 
+    loadFileToString(std::wstring_view filePath)
   {
     std::string Result{ "Error" };
     std::ifstream File(filePath);
@@ -499,9 +395,6 @@ namespace helper
   std::string
     convertWStringToString(std::wstring_view wideString)
   {
-    mbstate_t mbs;
-    std::memset(&mbs, 0, sizeof(mbs));
-
     std::string Result(wideString.length() + 1, '\0');
 
     // converts a wide string to a char/multi-byte string
