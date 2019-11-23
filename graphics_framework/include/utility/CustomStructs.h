@@ -93,11 +93,17 @@ struct sMatrix4x4
   glm::mat4x4 matrix{ 1.0f };
 };
 
+struct alignas(16) ViewMatrix
+{
+  glm::mat4x4 matrix;
+  glm::vec3 viewDir;
+};
+
 ////////////////////////////////////////////////
 // type defs of sMatrix4x4 
 ////////////////////////////////////////////////
 
-using ViewMatrix = sMatrix4x4;
+//using ViewMatrix = sMatrix4x4;
 using ProjectionMatrix = sMatrix4x4;
 
 /******************************/
@@ -136,6 +142,7 @@ struct alignas(16)GlChangeEveryFrame
 {
   glm::mat4 world;
   sColorf color;
+  sVector3 viewDir;
 };
 
 /*!

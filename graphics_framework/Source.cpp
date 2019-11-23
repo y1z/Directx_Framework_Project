@@ -354,9 +354,9 @@ InitDevice()
 #endif // DIRECTX
 
 #if DIRECTX
-  const wchar_t *selectedVertexShader = L"Tutorial_lambert.hlsl";
+  const wchar_t *selectedVertexShader = L"lighting.hlsl";
 #elif OPEN_GL
-  const wchar_t *selectedVertexShader = L"tutorial_lambert.vert";
+  const wchar_t *selectedVertexShader = L"lighting.vert";
 #else 
   const wchar_t *selectedVertexShader = L"tutorial_imporved.vert";
 #endif // DIRECTX
@@ -394,10 +394,10 @@ InitDevice()
 
   shaderPath = g_initPath.parent_path();
 #if DIRECTX
-  const wchar_t *selectedPixelhader = L"Tutorial_lambert.hlsl";
+  const wchar_t *selectedPixelhader = L"lighting.hlsl";
   shaderPath += L"//DxShaders//";
 #elif OPEN_GL
-  const wchar_t *selectedPixelhader = L"tutorial.frag";
+  const wchar_t *selectedPixelhader = L"lighting.frag";
   shaderPath += L"\\GlShaders\\";
 #else 
   const wchar_t * selectedPixelhader = L"no shader";
@@ -602,7 +602,8 @@ void Render()
 
     /******** Change camera **********/
   my_cameraManager->switchCamera(1);
-  ViewMatrix neverChange = my_cameraManager->getViewMatrix();
+  ViewMatrix neverChange;
+ neverChange.matrix = my_cameraManager->getViewMatrix().matrix;
   ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
                                        &neverChange.matrix);
 
@@ -672,7 +673,7 @@ void Render()
   ptr_deviceContext->PSSetSamplers(&my_sampler);
 
   my_cameraManager->switchCamera(0);
-  neverChange = my_cameraManager->getViewMatrix();
+  neverChange.matrix = my_cameraManager->getViewMatrix().matrix;
   ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
                                        &neverChange.matrix);
 
@@ -683,13 +684,12 @@ void Render()
   sLightData LightData;
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
   LightData.dir.vector3 = { cosf(-t), sinf(t) ,0.f };
-  LightData.lightColor = { 0.5f, 0.5f, 0.5f/* fabsf(sinf(t))*/, 1.0f };
+  LightData.lightColor = { 0.5f, 0.8f, 0.5f/* fabsf(sinf(t))*/, 1.0f };
 
-
-  LightData.ambientColor = { 0.7f,cosf(50),0.0f,1.0f };
-
+  //  https://rgbcolorcode.com/color/99001A 
+  LightData.ambientColor = { 0.6f,0.0f,0.1f,1.0f };
   //LightData.lightIntensity = 0.5f;
-  //LightData.ambientIntensity = 0.5f;
+  LightData.ambientIntensity = 0.2f;
 
   ptr_deviceContext->UpdateSubresource(&my_constLightData,
                                        &LightData);

@@ -1,7 +1,9 @@
 #pragma once 
 #include "utility/enGraphics.h"
 #include "utility/enDefs.h"
+
 #include <string>
+#include <vector>
 
 /*!\brief this is the base class for all shader classes */
 class cShaderBase
@@ -49,11 +51,13 @@ private:
 #endif // DIRECTX
 protected:
   //! contains the shader 
-  std::string m_shader;
+  std::string m_originalShader;
  //! keeps track of the entry point of the shader  
   std::string m_entryPoint;
-//! keeps track of which version of the shader I'm using 
+  //! keeps track of which version of the shader I'm using 
   std::string m_shaderModel;
+  //! holds alternate versions of a shader 
+  std::vector<std::string> m_alteredShaders;
 
   enShaderTypes m_shaderType = enShaderTypes::NONE;
 };

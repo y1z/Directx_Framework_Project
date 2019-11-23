@@ -9,7 +9,7 @@ cShaderBase::cShaderBase()
   :m_shaderID(0)
 #endif // DIRECTX
 {
-  m_shader = { "" };
+  m_originalShader = { "" };
   m_shaderType = enShaderTypes::NONE;
 }
 
@@ -19,6 +19,7 @@ cShaderBase::~cShaderBase()
   if (mptr_infoBlob != nullptr)
   {
     mptr_infoBlob->Release();
+    mptr_infoBlob = nullptr;
   }
 
 #endif // DIRECTX
@@ -51,13 +52,13 @@ void cShaderBase::setID(uint32_t newID)
 const std::string *
 cShaderBase::getShader()
 {
-  return &m_shader;
+  return &m_originalShader;
 }
 
 void
 cShaderBase::setShader(std::string_view newShader)
 {
-  m_shader = newShader;
+  m_originalShader = newShader;
 }
 
 bool
@@ -77,8 +78,8 @@ cShaderBase::compileShader(std::string_view shaderPath,
 
   std::wstring FilePath(helper::convertStringToWString(shaderPath));
 
-  m_shader = (helper::loadFileToString(shaderPath));
-  if (!m_shader.compare("Error"))
+  m_originalShader = (helper::loadFileToString(shaderPath));
+  if (!m_originalShader.compare("Error"))
   {
     EN_LOG_DB(did not managed to load the shader);
     return false;
@@ -89,7 +90,7 @@ cShaderBase::compileShader(std::string_view shaderPath,
 
   ID3DBlob* pErrorBlob = nullptr;
 
-  HRESULT hr = D3DCompile(m_shader.c_str(), m_shader.length(),
+  HRESULT hr = D3DCompile(m_originalShader.c_str(), m_originalShader.length(),
                           nullptr, nullptr,
                           nullptr, m_entryPoint.c_str(),
                           m_shaderModel.c_str(), dwShaderFlags,
@@ -130,7 +131,7 @@ cShaderBase::compileShader(std::string_view shaderPath,
 
   this->setID(TempID);
 
-  const char * refToSource = m_shader.c_str();
+  const char * refToSource = m_originalShader.c_str();
   glShaderSource(this->getID(), 1, &refToSource, nullptr);
   glCompileShader(this->getID());
 
