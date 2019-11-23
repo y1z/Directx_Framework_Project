@@ -24,6 +24,24 @@ cCameraManager::getProjectionMatrix() const
   return this->m_cameras[m_currentCamera].getProjection();
 }
 
+sVector4 
+cCameraManager::getEye() const
+{
+  return m_cameras[m_currentCamera].getEye();
+}
+
+sVector4 
+cCameraManager::getAt() const
+{
+  return m_cameras[m_currentCamera].getAt();
+}
+
+sVector4 
+cCameraManager::getUp() const
+{
+  return  m_cameras[m_currentCamera].getUp();
+}
+
 void 
 cCameraManager::switchCamera(uint8 chosenCamera)
 {

@@ -530,7 +530,7 @@ InitDevice()
   sLightData LightData;
   //std::memset(&LightData, 0, sizeof(LightData));
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector3 = { 1.0f,0.f,0.f};
+  LightData.dir.vector3 = { 1.0f,0.f,0.f };
 
   LightData.ambientColor = { 0.7f,0.0f,0.0f };
 
@@ -603,7 +603,8 @@ void Render()
     /******** Change camera **********/
   my_cameraManager->switchCamera(1);
   ViewMatrix neverChange;
- neverChange.matrix = my_cameraManager->getViewMatrix().matrix;
+  neverChange.matrix = my_cameraManager->getViewMatrix().matrix;
+  neverChange.viewDir = my_cameraManager->getAt().vector4;
   ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
                                        &neverChange.matrix);
 
@@ -683,11 +684,11 @@ void Render()
   //***
   sLightData LightData;
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector3 = { cosf(-t), sinf(t) ,0.f };
-  LightData.lightColor = { 0.5f, 0.8f, 0.5f/* fabsf(sinf(t))*/, 1.0f };
-
+  LightData.dir.vector3 = { 1.0f, 0.0f ,0.f };
+  LightData.lightColor = { 0.1f, 0.8f, 0.1f/* fabsf(sinf(t))*/, 1.0f };
+  LightData.specularColor = { 0.0f,0.0f,1.0f,1.0f };
   //  https://rgbcolorcode.com/color/99001A 
-  LightData.ambientColor = { 0.6f,0.0f,0.1f,1.0f };
+  LightData.ambientColor = { 0.8f,0.0f,0.1f,1.0f };
   //LightData.lightIntensity = 0.5f;
   LightData.ambientIntensity = 0.2f;
 

@@ -43,6 +43,16 @@ public://functions
   /*! returns the current cameras projection matrix */
   sMatrix4x4
     getProjectionMatrix()const;
+
+  sVector4
+    getEye()const;
+
+  sVector4
+    getAt()const;
+
+  sVector4
+    getUp()const;
+
   /*! set the 'eye' of the current camera */
   void
     setEye(float x, float y, float z, float w = 1.0f);
@@ -52,6 +62,7 @@ public://functions
   /*! set the 'up' direction of the current camera */
   void
     setUp(float x, float y, float z, float w = 1.0f);
+
   /*! adds a camera to the last index */
   bool
     pushBackCamera(const cCamera& newCamera);
