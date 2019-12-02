@@ -22,9 +22,12 @@ cMesh::cMesh(cMesh && mesh)
 {
   mesh.mptr_indexBuffer = nullptr;
   mesh.mptr_vertexBuffer = nullptr;
-// transferring  ownership
-  this->mptr_indiceData = std::move(mesh.mptr_indiceData);
-  this->mptr_vertexData = std::move(mesh.mptr_vertexData);
+
+  //transfer all data related with the vertex
+  this->mptr_vertexDataContainer = std::move(mesh.mptr_vertexDataContainer);
+
+  //transfer all data related with the indices 
+  this->mptr_indexDataContainer = std::move(mesh.mptr_indexDataContainer);
 
   mptr_Texture = mesh.mptr_Texture;
 }
@@ -48,8 +51,8 @@ cMesh & cMesh::operator=(cMesh && mesh)
   this->mptr_Texture = mesh.mptr_Texture;
 
 // transferring  ownership
-  this->mptr_indiceData = std::move(mesh.mptr_indiceData);
-  this->mptr_vertexData = std::move(mesh.mptr_vertexData);
+  this->mptr_indexDataContainer = std::move(mesh.mptr_indexDataContainer);
+  this->mptr_vertexDataContainer = std::move(mesh.mptr_vertexDataContainer);
 
   mesh.mptr_indexBuffer = nullptr;
   mesh.mptr_vertexBuffer = nullptr;
@@ -58,22 +61,23 @@ cMesh & cMesh::operator=(cMesh && mesh)
 
 void cMesh::initIndexBuffer(std::unique_ptr<std::vector<uint16>> & indeces)
 {
-  mptr_indiceData = std::move(indeces);
-  mptr_indexBuffer->init(sizeof(uint16), mptr_indiceData->size(), 0);
-  mptr_indexBuffer->setData(mptr_indiceData->data());
+  mptr_indexDataContainer = std::move(indeces);
+  mptr_indexBuffer->init(sizeof(uint16), mptr_indexDataContainer->size(), 0);
+  mptr_indexBuffer->setData(mptr_indexDataContainer->data());
 }
 
-void cMesh::initVertexBuffer(std::unique_ptr<std::vector<sVertexPosNormTex>> & vertexes)
+void cMesh::initVertexBuffer(std::unique_ptr<std::vector<VERTEX_T>> & vertexes)
 {
-  mptr_vertexData = std::move(vertexes);
-  if ( mptr_vertexData->empty() == false)
+  mptr_vertexDataContainer = std::move(vertexes);
+  if ( mptr_vertexDataContainer->empty() == false)
   {
-    uint32 singleElementSize = sizeof(mptr_vertexData->at(0));
-    mptr_vertexBuffer->init(sizeof(sVertexPosNormTex), mptr_vertexData->size(), 0);
+    uint32 singleElementSize = sizeof(mptr_vertexDataContainer->at(0));
+    mptr_vertexBuffer->init(sizeof(VERTEX_T), mptr_vertexDataContainer->size(), 0);
   }
 
-  mptr_vertexBuffer->setData(mptr_vertexData->data());
+  mptr_vertexBuffer->setData(mptr_vertexDataContainer->data());
 }
+
 
 bool cMesh::createVertexBuffer(cDevice & device)
 {
@@ -121,16 +125,16 @@ cMesh::getIndexBuffer()
   return  *this->mptr_indexBuffer;
 }
 
-const std::vector<sVertexPosNormTex>*
+const std::vector< VERTEX_T>*
 cMesh::getVertexData() const
 {
-  return mptr_vertexData.get();
+  return mptr_vertexDataContainer.get();
 }
 
 const std::vector<uint16>*
 cMesh::getIndiceData() const
 {
-  return mptr_indiceData.get();
+  return mptr_indexDataContainer.get();
 }
 
 void cMesh::setTransform(glm::mat4 & transform)

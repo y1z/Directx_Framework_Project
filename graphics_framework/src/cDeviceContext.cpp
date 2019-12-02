@@ -202,7 +202,7 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
   {
     if (constBuffer->getIndex() == 0)
     {
-      auto *ViewMatrixTemp = reinterpret_cast< const ViewMatrix* >(originOfData);
+      auto *ViewMatrixTemp = reinterpret_cast< const CameraData* >(originOfData);
 
       glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ViewMatrixTemp->matrix));
 
@@ -364,10 +364,11 @@ cDeviceContext::ClearDepthStencilView(cDepthStencilView & depthStencilView, bool
 #endif // DIRECTX
 }
 
-void cDeviceContext::VSSetShader(cVertexShader & vertexShader)
+void cDeviceContext::VSSetShader(cVertexShader & vertexShaderPath)
 {
 #if DIRECTX
-  mptr_deviceContext->VSSetShader(vertexShader.getVertexShader(), nullptr,
+  mptr_deviceContext->VSSetShader(vertexShaderPath.getVertexShader(),
+                                  nullptr,
                                   0);
 #elif OPEN_GL
 
@@ -394,7 +395,9 @@ void cDeviceContext::VSSetConstantBuffers(cConstBuffer & Buffer, uint8_t Slot)
 void cDeviceContext::PSSetShader(cPixelShader & pixelShader)
 {
 #if DIRECTX
-  mptr_deviceContext->PSSetShader(pixelShader.getPixelShader(), nullptr, 0);
+  mptr_deviceContext->PSSetShader(pixelShader.getPixelShader(),
+                                  nullptr,
+                                  0);
 #elif OPEN_GL
 
 #endif // DIRECTX
@@ -567,18 +570,18 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
 
   glEnableVertexAttribArray(0);// position 
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
-  uint32 OffSetOfFirst = offsetof(sVertexPosNormTex, pos);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTex), reinterpret_cast< const void* >(OffSetOfFirst));
+  uint32 OffSetOfFirst = offsetof(sVertexPosNormTexEEE, pos);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTexEEE), reinterpret_cast< const void* >(OffSetOfFirst));
 
   glEnableVertexAttribArray(1);// normals 
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
-  uint32 OffSetOfSecond = offsetof(sVertexPosNormTex, norm);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTex), reinterpret_cast< const void * >(OffSetOfSecond));
+  uint32 OffSetOfSecond = offsetof(sVertexPosNormTexEEE, norm);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTexEEE), reinterpret_cast< const void * >(OffSetOfSecond));
 
   glEnableVertexAttribArray(2);// textures
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
-  uint32 OffSetOfThird = offsetof(sVertexPosNormTex, tex);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTex), reinterpret_cast< const void * > (OffSetOfThird));
+  uint32 OffSetOfThird = offsetof(sVertexPosNormTexEEE, tex);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTexEEEE), reinterpret_cast< const void * > (OffSetOfThird));
 
   if (GlCheckForError())
   {
@@ -607,7 +610,8 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
 #endif // DIRECTX
 }
 
-bool cDeviceContext::SetShaders(cVertexShader & vertexShader, cPixelShader & pixelShader)
+bool 
+cDeviceContext::SetShaders(cVertexShader & vertexShader, cPixelShader & pixelShader)
 {
 #if DIRECTX
   this->VSSetShader(vertexShader);
@@ -615,6 +619,7 @@ bool cDeviceContext::SetShaders(cVertexShader & vertexShader, cPixelShader & pix
 
   return true;
 #elif OPEN_GL
+  /*TODO : make this function detach the current shader and attach the new ones*/
   uint32 * ShaderProgram = cApiComponents::getShaderProgram();
   glLinkProgram(*(ShaderProgram));
   glValidateProgram(*(ShaderProgram));

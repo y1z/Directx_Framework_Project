@@ -22,6 +22,7 @@ namespace ig = ImGui;
 using namespace std::string_literals;
 
 static constexpr uint32_t c_fpsSamplesCount = 360;
+static constexpr uint32_t c_buttonCount = 0;
 //! this variable is for ImGui_ImplOpenGL3_Init
 static constexpr const char *GlslVersion = "#version 430 core";
 //----------------------------------------
@@ -42,10 +43,12 @@ static constexpr const char *GlslVersion = "#version 430 core";
 //  ES 3.0    300       "#version 300 es"   = WebGL 2.0
 //----------------------------------------
 
+
 imGuiManager::imGuiManager()
   :m_childCount(0),
   mptr_FileFunc(nullptr),
-  is_initialized(false)
+  is_initialized(false),
+  m_windowCount(0)
 {}
 
 /*!  Highly  Important to free the memory*/
@@ -53,7 +56,6 @@ imGuiManager::~imGuiManager()
 {
   if (is_initialized)
   {
-
   #if DIRECTX
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -61,7 +63,6 @@ imGuiManager::~imGuiManager()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
   #endif // USING_DIRECTX
-
     ImGui::DestroyContext();
   }
 }
@@ -169,6 +170,13 @@ imGuiManager::beginFrame(const char * windowName)
 }
 
 void
+imGuiManager::beginExtraWindow(const char * windowName)
+{
+  ig::Begin(windowName);
+  m_windowCount++;
+}
+
+void
 imGuiManager::addItemCountToChild(const char* childId, std::string_view itemName, uint32 itemCount)
 {
 
@@ -198,15 +206,24 @@ imGuiManager::addButton(std::string_view buttonUse, bool & buttonCondtion)
     {
       buttonCondtion = false;
     }
-
   }
-
 }
 
 void
 imGuiManager::addText(std::string_view message, sColorf TextColor)
 {
   ig::TextColored(ImVec4(TextColor.red, TextColor.green, TextColor.blue, TextColor.alpha), message.data());
+}
+
+void
+imGuiManager::addMultipleText(const std::vector<std::string>& strings)
+{
+  for (const std::string &singleString : strings)
+  {
+    ig::Text("\n===================================================\n");
+    ig::Text(singleString.c_str());
+    ig::Text("\n===================================================\n");
+  }
 
 }
 
@@ -226,6 +243,91 @@ void imGuiManager::addSliderFloat(std::string_view NameOfValue, float & Value, f
 }
 
 void
+imGuiManager::addCounter(int32_t& CounterValue, std::string_view nameOfValue)
+{
+  // making room to add the strings "increase" and later "decrease" 
+  std::string Message(nameOfValue.length() + 11, '\0');
+
+  Message = ("Increase "s += nameOfValue);
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue++;
+  }
+
+  ig::Text("%d", CounterValue);
+  // replace "increase" with "decrease"
+  Message.replace(0, 2, "De");
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue--;
+  }
+
+}
+
+void 
+imGuiManager::addCounter(uint32_t & CounterValue, std::string_view nameOfValue)
+{
+  // making room to add the strings "increase" and later "decrease" 
+  std::string Message(nameOfValue.length() + 11, '\0');
+
+  Message = ("Increase "s += nameOfValue);
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue++;
+  }
+
+  ig::Text("%d", CounterValue);
+  // replace "increase" with "decrease"
+  Message.replace(0, 2, "De");
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue--;
+  }
+
+}
+
+void 
+imGuiManager::addCounter(int64_t & CounterValue, std::string_view nameOfValue)
+{
+  // making room to add the strings "increase" and later "decrease" 
+  std::string Message(nameOfValue.length() + 11, '\0');
+
+  Message = ("Increase "s += nameOfValue);
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue++;
+  }
+
+  ig::Text("%d", CounterValue);
+  // replace "increase" with "decrease"
+  Message.replace(0, 2, "De");
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue--;
+  }
+}
+
+void imGuiManager::addCounter(uint64_t & CounterValue, std::string_view nameOfValue)
+{
+  // making room to add the strings "increase" and later "decrease" 
+  std::string Message(nameOfValue.length() + 11, '\0');
+
+  Message = ("Increase "s += nameOfValue);
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue++;
+  }
+
+  ig::Text("%d", CounterValue);
+  // replace "increase" with "decrease"
+  Message.replace(0, 2, "De");
+  if (ig::Button(Message.c_str()))
+  {
+    CounterValue--;
+  }
+}
+
+void
 imGuiManager::beginChild(const char * childID)
 {
   m_childCount++;
@@ -241,6 +343,23 @@ imGuiManager::endAllChildren()
   }
 
   m_childCount = 0;
+}
+
+void
+imGuiManager::endAllExtraWindows()
+{
+  for (uint32 i = 0; i < m_windowCount; ++i)
+  {
+    ig::End();
+  }
+  m_windowCount = 0;
+}
+
+void
+imGuiManager::endExtraWindow()
+{
+  ig::End();
+  --m_windowCount;
 }
 
 void

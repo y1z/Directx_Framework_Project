@@ -18,7 +18,10 @@
 #include <iostream>
 #include <memory>
 
+#if DIRECTX
 #include <WICTextureLoader.h>
+
+#endif // DIRECTX
 
 namespace fs = std::filesystem;
 
@@ -217,7 +220,8 @@ cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device,
                     const aiScene*scene, std::vector<std::string> &texturePaths)
 {
   std::unique_ptr<std::vector<uint16>> ptr_indices = std::make_unique<std::vector<uint16>>();
-  std::unique_ptr<std::vector<sVertexPosNormTex>> ptr_vertices = std::make_unique<std::vector< sVertexPosNormTex >>();
+  std::unique_ptr<std::vector< VERTEX_T >> ptr_vertices = std::make_unique<std::vector< VERTEX_T >>();
+
 
   ptr_indices->reserve(assimpMesh->mNumFaces * 3);
   ptr_vertices->reserve(assimpMesh->mNumVertices);
@@ -238,23 +242,11 @@ cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device,
   // get the vertices of the model
   for (uint32_t i = 0; i < assimpMesh->mNumVertices; ++i)
   {
-    sVertexPosNormTex vertex;
+    VERTEX_T vertex;
     vertex.pos.x = assimpMesh->mVertices[i].x;
     vertex.pos.y = assimpMesh->mVertices[i].y;
     vertex.pos.z = assimpMesh->mVertices[i].z;
     vertex.pos.w = 1.0f;
-
-    // get the texture coords 
-    if (assimpMesh->HasTextureCoords(0))
-    {
-      vertex.tex.x = static_cast< float >(assimpMesh->mTextureCoords[0][i].x);
-      vertex.tex.y = static_cast< float >(assimpMesh->mTextureCoords[0][i].y);
-    }
-    else
-    {
-      vertex.tex.x = 0.0f;
-      vertex.tex.y = 0.0f;
-    }
 
     // get the normals 
     if (assimpMesh->HasNormals())
@@ -269,6 +261,31 @@ cModel::ExtractMesh(const aiMesh * assimpMesh, cDevice &device,
       vertex.norm.y = 0.0f;
       vertex.norm.z = 0.0f;
     }
+
+    if (assimpMesh->HasTangentsAndBitangents())
+    {
+      vertex.tan.x = assimpMesh->mTangents[i].x;
+      vertex.tan.y = assimpMesh->mTangents[i].y;
+      vertex.tan.z = assimpMesh->mTangents[i].z;
+    }
+    else
+    {
+      vertex.tan.x = 0.0f;
+      vertex.tan.y = 0.0f;
+      vertex.tan.z = 0.0f;
+    }
+    // get the texture coords 
+    if (assimpMesh->HasTextureCoords(0))
+    {
+      vertex.tex.x = static_cast< float >(assimpMesh->mTextureCoords[0][i].x);
+      vertex.tex.y = static_cast< float >(assimpMesh->mTextureCoords[0][i].y);
+    }
+    else
+    {
+      vertex.tex.x = 0.0f;
+      vertex.tex.y = 0.0f;
+    }
+
 
     ptr_vertices->emplace_back(vertex);
   }

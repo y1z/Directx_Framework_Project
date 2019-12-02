@@ -311,6 +311,24 @@ enum class enShaderTypes
   pixel
 };
 
+/*!
+*@brief to determine which version or combination of the shader going to compile
+*/
+enum class enShaderSelected : uint64
+{
+  VertexLight = (1 << 0),
+  PixelLight = (1 << 1),
+
+  Blig = (1 << 2),
+  Phong = (1 << 3),
+  PointLight = (1 << 4),
+  ConeLight = (1 << 5),
+
+
+
+  ALL_SHADERS = 0xffffffffffffffffu,
+};
+
 /*++++++++++++++++++++++++++++++++++++*/
 /* Logger functions */
 /*++++++++++++++++++++++++++++++++++++*/

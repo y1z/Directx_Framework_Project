@@ -35,7 +35,11 @@
 #include "cCameraManager.h"
 #include "actor/cActor.h"
 #include "cShaderTarget.h"
+
+/*****************************************************/
 #include "cResourceManager.h"
+#include "cShaderManager.h"
+
 
 /*****************************************************/
 #include "glm/gtc/matrix_transform.hpp"
@@ -46,13 +50,12 @@
 #include <wrl.h>
 #include "WICTextureLoader.h"
 #include "DDSTextureLoader.h"
+
 #else 
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "utility/stb_image.h"
-
 #endif // STBI_INCLUDE_STB_IMAGE_H  
-/*****************************************************/
 /*****************************************************/
 #include "utility/HelperFuncs.h"
 #include "utility/enHelperTemplates.h" 
@@ -61,19 +64,16 @@
 #include <filesystem>
 
 /*****************************************************/
-cDevice my_device;
-cDeviceContext my_deviceContext;
-/*****************************************************/
 cDepthStencilView my_depthStencilView;
 /*****************************************************/
-cVertexShader my_vertexShader;
-cPixelShader my_pixelShader;
+
 cInputLayout my_vertexInputLayout;
 /*****************************************************/
 
-cVertexBuffer my_vertexBuffer;
-cIndexBuffer my_indexBuffer;
-cConstBuffer my_constViewMatrix;
+//cVertexBuffer my_vertexBuffer;
+//cIndexBuffer my_indexBuffer;
+
+cConstBuffer my_constCameraData;
 cConstBuffer my_constProjectionMatrix;
 cConstBuffer my_constChangesEveryFrame;
 cConstBuffer my_constLightData;
@@ -92,6 +92,7 @@ std::unique_ptr<cShaderTarget> my_shaderTarget = std::make_unique<cShaderTarget>
 cApiComponents my_apiComponent;
 
 std::unique_ptr <cResourceManager> my_resourceManager = std::make_unique<cResourceManager>();
+std::unique_ptr <cShaderManager> my_shaderManager = std::make_unique<cShaderManager>();
 /*****************************************************/
 #include <cassert>
 #include <iostream>
@@ -99,19 +100,18 @@ std::unique_ptr <cResourceManager> my_resourceManager = std::make_unique<cResour
 // Global Variables
 //--------------------------------------------------------------------------------------
 
-sMatrix4x4 g_World;
-sMatrix4x4 g_View;
-sMatrix4x4 g_Projection;
 sWindowSize g_windowSizeTracker;
 
 bool g_isInit(false);
 bool g_isRunnig(true);
+
 //! this is the path local to the solution of the program
 const std::filesystem::path g_initPath = std::filesystem::current_path();
 sColorf g_vMeshColor;
 
 float g_TransformAmount = 1.0f;
 static float g_trackedTime = 0.0f;
+static size_t g_selectedShader = 0;
 static bool g_ControlMouse(false);
 static bool g_loadNewModel(false);
 /********************************************************/
@@ -119,12 +119,15 @@ static bool g_loadNewModel(false);
 // Forward declarations
 //--------------------------------------------------------------------------------------
 
-HRESULT InitDevice();
+HRESULT
+InitDevice();
 /*!this function only exits so i can keep track of when i destroy all obj in
  the actor */
-void DestroyAllComponentsFromActor(cActor &actor);
+void
+DestroyAllComponentsFromActor(cActor &actor);
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT
+CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 void
 Update();
@@ -179,7 +182,6 @@ wWinMain(HINSTANCE hInstance,
   if (glfwInit() != GLFW_TRUE)
   {
     OutputDebugStringA("Error initializing glfw");
-
     return -1;
   }
 #endif // DIRECTX
@@ -347,6 +349,7 @@ InitDevice()
 
   std::filesystem::path shaderPath(g_initPath.parent_path());
 
+
 #if DIRECTX
   shaderPath += L"\\DxShaders\\";
 #elif  OPEN_GL
@@ -364,33 +367,31 @@ InitDevice()
   shaderPath += selectedVertexShader;
 
   std::cout << "path to the vertex shader [" << shaderPath << "]\n";
-
-  isSuccesful = my_vertexShader.compileShader(shaderPath.generic_string(), "VS", "vs_4_0");
+ // isSuccesful = my_vertexShader.compileShader(shaderPath.generic_string(), "VS", "vs_4_0");
 
   // Compile the vertex shader
   if (isSuccesful == false)
   {
   #if WIND_OS
     MessageBoxW(NULL,
-                L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+                L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.",
+                L"Error",
+                MB_OK);
     return hr;
   #endif // WIND_OS
   }
 
-  // Create the vertex shader
-  isSuccesful = ptr_device->CreateVertexShader(my_vertexShader);
-  assert(isSuccesful == true && "Error creating vertex shader");
+  /*********************/
 
-  isSuccesful = my_vertexInputLayout.ReadShaderData(my_vertexShader);
-  assert(isSuccesful == true && "Error reading the vertex-shader data");
+  sShadersManagerDesc managerResource;
+  managerResource.vertexShaderVersion = "vs_4_0";
+  managerResource.pixelShaderVersion = "ps_4_0";
 
-  // Create the input layout
-  isSuccesful = ptr_device->CreateInputLayout(my_vertexInputLayout,
-                                              my_vertexShader);
-  assert(isSuccesful == true && "Error creating Input layout ");
+  managerResource.vertexEntry = "VS";
+  managerResource.pixelEntry = "PS";
 
-  // Set the input layout
-  ptr_deviceContext->IASetInputLayout(my_vertexInputLayout);
+  managerResource.vertexShaderPath = shaderPath.generic_string();
+
 
   shaderPath = g_initPath.parent_path();
 #if DIRECTX
@@ -405,23 +406,39 @@ InitDevice()
 
   shaderPath += selectedPixelhader;
 
-  std::cout << "path to pixel/fragment shader [" << shaderPath << "]\n" << std::endl;
+  managerResource.pixelShader = shaderPath.generic_string();
 
-  isSuccesful = my_pixelShader.compileShader(shaderPath.generic_string(), "PS", "ps_4_0");
+  isSuccesful = my_shaderManager->init(*ptr_device,
+                                       managerResource);
+
+  cPixelShader* ptr_pixelShader = my_shaderManager->getPixelShaderPtr();
+  cVertexShader* ptr_vertexShader = my_shaderManager->getVertexShaderPtr();
+
+  ptr_deviceContext->SetShaders(*ptr_vertexShader, *ptr_pixelShader);
+
+  isSuccesful = my_vertexInputLayout.ReadShaderData(*ptr_vertexShader);
+  assert(isSuccesful == true && "Error reading the vertex-shader data");
+
+  // Create the input layout
+  isSuccesful = ptr_device->CreateInputLayout(my_vertexInputLayout,
+                                              *ptr_vertexShader);
+  assert(isSuccesful == true && "Error creating Input layout ");
+
+  // Set the input layout
+  ptr_deviceContext->IASetInputLayout(my_vertexInputLayout);
 
   if (isSuccesful == false)
   {
   #if WIND_OS
     MessageBoxW(NULL,
-                L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+                L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.",
+                L"Error",
+                MB_OK);
+
     hr = S_FALSE;
     return hr;
   #endif // WIND_OS
   }
-
-  // Create the pixel shader
-  isSuccesful = ptr_device->CreatePixelShader(my_pixelShader);
-  assert((isSuccesful == true && "Error creating the pixel shader"));
 
   cModel* ptr_toModel = helper::findModelComponent(*my_actor);
   assert(ptr_toModel != nullptr && "Error component 'model' does NOT exist in current actor");
@@ -432,16 +449,14 @@ InitDevice()
 
   assert(("Error with loading model file" && isSuccesful == true));
 
-
-  ptr_deviceContext->SetShaders(my_vertexShader, my_pixelShader);
-  my_constViewMatrix.init(sizeof(ViewMatrix),
+  my_constCameraData.init(sizeof(CameraData),
                           1,
                           0);
 
-  my_constViewMatrix.setIndex(0);
+  my_constCameraData.setIndex(0);
 
 
-  isSuccesful = ptr_device->CreateConstBuffer(my_constViewMatrix);
+  isSuccesful = ptr_device->CreateConstBuffer(my_constCameraData);
   assert(isSuccesful == true && "Error Creating constant buffer");
 
   my_constProjectionMatrix.init(sizeof(ProjectionMatrix),
@@ -491,9 +506,6 @@ InitDevice()
   isSuccesful = ptr_device->CreateSamplerState(my_sampler);
   assert(isSuccesful == true && "Error with creating sampler state");
 
-  // Initialize the world matrices
-  g_World.matrix = glm::identity<glm::mat4>();
-
   cCamera CameraSecurity;
   CameraSecurity.setEye(0.0f, 10.0f, 20.0f);
   CameraSecurity.setAt(0.0f, 0.0f, 0.0f);
@@ -507,11 +519,14 @@ InitDevice()
   my_cameraManager->pushBackCamera(perspectiveCamera);
   my_cameraManager->pushBackCamera(CameraSecurity);
 
-  ViewMatrix cbNeverChanges;
-  cbNeverChanges.matrix = my_cameraManager->getViewMatrix().matrix;
+  CameraData cameraDataBuffer;
+  cameraDataBuffer.matrix = my_cameraManager->getViewMatrix().matrix;
+  cameraDataBuffer.cameraPos = my_cameraManager->getEye().vector4;
+  cameraDataBuffer.viewDir = my_cameraManager->getAt().vector4;
 
-  ptr_deviceContext->UpdateSubresource(&my_constViewMatrix,
-                                       &cbNeverChanges);
+
+  ptr_deviceContext->UpdateSubresource(&my_constCameraData,
+                                       &cameraDataBuffer);
 
     // Initialize the projection matrix
   ProjectionMatrix cbChangesOnResize;
@@ -602,11 +617,12 @@ void Render()
 
     /******** Change camera **********/
   my_cameraManager->switchCamera(1);
-  ViewMatrix neverChange;
-  neverChange.matrix = my_cameraManager->getViewMatrix().matrix;
-  neverChange.viewDir = my_cameraManager->getAt().vector4;
-  ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
-                                       &neverChange.matrix);
+  CameraData cameraData;
+  cameraData.matrix = my_cameraManager->getViewMatrix().matrix;
+  cameraData.viewDir = my_cameraManager->getAt().vector4;
+  cameraData.cameraPos = my_cameraManager->getEye().vector4;
+  ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constCameraData),
+                                       &cameraData.matrix);
 
   ProjectionMatrix Proj;
   Proj.matrix = my_cameraManager->getProjectionMatrix().matrix;;
@@ -616,7 +632,7 @@ void Render()
      /************************************************************************************************************************/
 
     /*setting values for the vertex shader*/
-  ptr_deviceContext->VSSetConstantBuffers(my_constViewMatrix, my_constViewMatrix.getIndex());
+  ptr_deviceContext->VSSetConstantBuffers(my_constCameraData, my_constCameraData.getIndex());
   ptr_deviceContext->VSSetConstantBuffers(my_constProjectionMatrix, my_constProjectionMatrix.getIndex());
   ptr_deviceContext->VSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
   ptr_deviceContext->VSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
@@ -626,10 +642,6 @@ void Render()
   ptr_deviceContext->PSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
   ptr_deviceContext->PSSetShaderResources(shaderResources);
   ptr_deviceContext->PSSetSamplers(&my_sampler);
-
-
-   // Rotate cube around the origin
-  g_World.matrix = glm::rotate(g_World.matrix, t, glm::vec3(0, 1.0f, 0));
 
   // Modify the color
   g_vMeshColor.red = (sinf(t * 1.0f) + 1.0f) * 0.5f;
@@ -644,7 +656,7 @@ void Render()
   {
     &my_constChangesEveryFrame,
     &my_constProjectionMatrix,
-    &my_constViewMatrix
+    &my_constCameraData
   };
 
   /************************************************************************************************************/
@@ -661,7 +673,7 @@ void Render()
   ptr_deviceContext->ClearDepthStencilView(my_swapChain.getDepthStencilView());
 
   /*setting values for the vertex shader*/
-  ptr_deviceContext->VSSetConstantBuffers(my_constViewMatrix, my_constViewMatrix.getIndex());
+  ptr_deviceContext->VSSetConstantBuffers(my_constCameraData, my_constCameraData.getIndex());
   ptr_deviceContext->VSSetConstantBuffers(my_constProjectionMatrix, my_constProjectionMatrix.getIndex());
   ptr_deviceContext->VSSetConstantBuffers(my_constChangesEveryFrame, my_constChangesEveryFrame.getIndex());
   ptr_deviceContext->VSSetConstantBuffers(my_constLightData, my_constLightData.getIndex());
@@ -674,9 +686,15 @@ void Render()
   ptr_deviceContext->PSSetSamplers(&my_sampler);
 
   my_cameraManager->switchCamera(0);
-  neverChange.matrix = my_cameraManager->getViewMatrix().matrix;
-  ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constViewMatrix),
-                                       &neverChange.matrix);
+
+  cameraData.matrix = my_cameraManager->getViewMatrix().matrix;
+  cameraData.viewDir = my_cameraManager->getAt().vector4;
+  cameraData.cameraPos = my_cameraManager->getEye().vector4;
+  ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constCameraData),
+                                       &cameraData.matrix);
+
+  ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constCameraData),
+                                       &cameraData.matrix);
 
   Proj.matrix = my_cameraManager->getProjectionMatrix().matrix;
   ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constProjectionMatrix),
@@ -684,11 +702,13 @@ void Render()
   //***
   sLightData LightData;
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector3 = { 1.0f, 0.0f ,0.f };
-  LightData.lightColor = { 0.1f, 0.8f, 0.1f/* fabsf(sinf(t))*/, 1.0f };
-  LightData.specularColor = { 0.0f,0.0f,1.0f,1.0f };
-  //  https://rgbcolorcode.com/color/99001A 
-  LightData.ambientColor = { 0.8f,0.0f,0.1f,1.0f };
+  LightData.dir.vector3 = { 1.0f,cosf(t) ,0.0f };
+
+  LightData.lightColor = { 0.2f , 0.3f,.5f/* fabsf(sinf(t))*/, 1.0f };
+  LightData.specularColor = { 0.0f,0.0f,0.5f };
+  LightData.specularIntensity = fabsf(cosf(t));
+  // https://rgbcolorcode.com/color/550080
+  LightData.ambientColor = { 0.52f,0.00f,0.86f,1.0f };
   //LightData.lightIntensity = 0.5f;
   LightData.ambientIntensity = 0.2f;
 
@@ -701,6 +721,9 @@ void Render()
 
   my_actor->update(*ptr_deviceContext);
   my_actor->DrawAllComponents(*ptr_deviceContext, bufferArray);
+
+  my_shaderManager->swichShader(g_selectedShader);
+  my_shaderManager->setShader(*ptr_deviceContext); 
 
   my_timer.EndTiming();
   float deltaTime = my_timer.GetResultSeconds();
@@ -720,17 +743,22 @@ void Render()
                  "use the 'o' and 'p' keys to apply reflection Transform \n"
                  "use the 't' ,'g' , 'h' ,'f' ,'v' and 'n' \n"
                  "keys to apply a translation Transform \n");
-
   my_gui.endAllChildren();
-  my_gui.endFrame();
 
+  my_gui.beginExtraWindow("Shader Switcher");
+  my_gui.addCounter(g_selectedShader, "Shader Index");
+
+  my_gui.endAllExtraWindows();
+  my_gui.endFrame();
   // Present our back buffer to our front buffer
   my_swapChain.Present(0, 0);
-
   Update();
 }
 
-void Update()
+
+
+void
+Update()
 {
   g_windowSizeTracker.height = my_window.getHeight();
   g_windowSizeTracker.width = my_window.getWidth();
@@ -748,7 +776,8 @@ void Update()
 
     ptr_deviceContext->OMSetRenderTargets(&my_swapChain.getRenderTargetView(), my_swapChain.getDepthStencilView());
 
-    my_cameraManager->getCurrentCamera()->calculateAndSetPerpective(my_window, my_cameraManager->getCurrentCamera()->getFovDeg(),
+    my_cameraManager->getCurrentCamera()->calculateAndSetPerpective(my_window,
+                                                                    my_cameraManager->getCurrentCamera()->getFovDeg(),
                                                                     my_cameraManager->getCurrentCamera()->getFar(),
                                                                     my_cameraManager->getCurrentCamera()->getNear());
 
@@ -759,7 +788,10 @@ void Update()
     ptr_deviceContext->UpdateSubresource(&my_constProjectionMatrix,
                                          &newProjection);
 
-    my_viewport.setViewport(my_window.getWidth(), my_window.getHeight(), 0.0f, 1.0f/*std::numeric_limits<float>::max()*/);
+    my_viewport.setViewport(my_window.getWidth(),
+                            my_window.getHeight(),
+                            0.0f,
+                            1.0f);
 
     ptr_deviceContext->RSSetViewports(&my_viewport);
   }
@@ -814,7 +846,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // going forwards 
     helper::handelCameraKeyInput(wParam, *my_cameraManager,
                                  my_window, *my_resourceManager->getPtrDeviceContext(),
-                                 &my_constViewMatrix, &my_constProjectionMatrix
+                                 &my_constCameraData, &my_constProjectionMatrix
                                  , g_trackedTime);
 
     helper::handelActorTransforms(*my_actor, chosenAxis, wParam, g_TransformAmount);
@@ -838,7 +870,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     if (wParam & MK_SHIFT)
     {
-      ViewMatrix ChangeWithViewMatrix;
+      CameraData ChangeWithViewMatrix;
       POINT newPoint;
       GetCursorPos(&newPoint);
 
@@ -856,7 +888,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       my_cameraManager->rotateCamera(rotation, my_window);
       ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
       //my_deviceContext.UpdateSubresource(
-      my_resourceManager->getPtrDeviceContext()->UpdateSubresource(&my_constViewMatrix, &ChangeWithViewMatrix);
+      my_resourceManager->getPtrDeviceContext()->UpdateSubresource(&my_constCameraData, &ChangeWithViewMatrix);
     }
   }
   if (message == WM_DESTROY)
@@ -903,7 +935,7 @@ GLkeycallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 
   helper::handelCameraKeyInput(key, *my_cameraManager,
                                my_window, *my_resourceManager->getPtrDeviceContext(),
-                               &my_constViewMatrix, &my_constProjectionMatrix
+                               &my_constCameraData, &my_constProjectionMatrix
                                , g_trackedTime);
 
   helper::handelActorTransforms(*my_actor, chosenAxis, key, g_TransformAmount);
@@ -950,10 +982,10 @@ GLMoveMouse(GLFWwindow * window, double xPos, double yPos)
 
     my_cameraManager->rotateCamera(result, my_window);
 
-    ViewMatrix ChangeWithViewMatrix;
+    CameraData ChangeWithViewMatrix;
     ChangeWithViewMatrix.matrix = my_cameraManager->getViewMatrix().matrix;
 
-    my_resourceManager->getPtrDeviceContext()->UpdateSubresource(&my_constViewMatrix, &ChangeWithViewMatrix);
+    my_resourceManager->getPtrDeviceContext()->UpdateSubresource(&my_constCameraData, &ChangeWithViewMatrix);
   }
 }
 

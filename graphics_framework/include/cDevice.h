@@ -39,9 +39,9 @@ public:
  //!  Creates a depth view using a texture as the buffer 
  bool CreateDepthStencilView(cDepthStencilView &Depth);
 //! creates a vertex shader 
- bool CreateVertexShader(cVertexShader &vertexShader);
+ bool CreateVertexShader(cVertexShader &vertexShaderPath);
 //! creates a pixel shader 
- bool CreatePixelShader(cPixelShader &vertexShader);
+ bool CreatePixelShader(cPixelShader &vertexShaderPath);
 /*!Creates an input layout ( meant for when making the input layout manually)
 \param inputLayout contains the input layout 
 \param NumDesc how many arguments the input layout will take 
@@ -50,10 +50,10 @@ public:
  bool CreateInputLayout(cInputLayout &inputLayout
                         ,uint32_t NumDesc
                         , sInputDescriptor Desc[]
-                        ,cVertexShader &vertexShader);
+                        ,cVertexShader &vertexShaderPath);
 /*!  */ 
  bool CreateInputLayout(cInputLayout &inputLayout, 
-                        cVertexShader &vertexShader);
+                        cVertexShader &vertexShaderPath);
 
 //! Creates a vertex buffer 
  bool CreateVertexBuffer(cVertexBuffer &VertexBuffer);

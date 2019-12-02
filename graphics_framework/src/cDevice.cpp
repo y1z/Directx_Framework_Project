@@ -199,14 +199,14 @@ cDevice::CreateDepthStencilView(cDepthStencilView & DepthView)
 }
 
 bool
-cDevice::CreateVertexShader(cVertexShader & vertexShader)
+cDevice::CreateVertexShader(cVertexShader & vertexShaderPath)
 {
 #if DIRECTX
   HRESULT hr;
-  hr = mptr_device->CreateVertexShader(vertexShader.getInfo()->GetBufferPointer(),
-                                       vertexShader.getInfo()->GetBufferSize(),
+  hr = mptr_device->CreateVertexShader(vertexShaderPath.getInfo()->GetBufferPointer(),
+                                       vertexShaderPath.getInfo()->GetBufferSize(),
                                        NULL,
-                                       vertexShader.getVertexShaderRef());
+                                       vertexShaderPath.getVertexShaderRef());
 
   if (SUCCEEDED(hr))
   {
@@ -214,7 +214,7 @@ cDevice::CreateVertexShader(cVertexShader & vertexShader)
   }
 #elif OPEN_GL
   GlRemoveAllErrors();
-  glAttachShader(*cApiComponents::getShaderProgram(), vertexShader.getID());
+  glAttachShader(*cApiComponents::getShaderProgram(), vertexShaderPath.getID());
   glLinkProgram(*cApiComponents::getShaderProgram());
   glValidateProgram(*cApiComponents::getShaderProgram());
 
@@ -276,7 +276,7 @@ bool cDevice::CreatePixelShader(cPixelShader & pixelShader)
 bool cDevice::CreateInputLayout(cInputLayout &inputLayout
                                 , uint32_t NumElements,
                                 sInputDescriptor intermediateDesc[],
-                                cVertexShader &vertexShader)
+                                cVertexShader &vertexShaderPath)
 {
 #if DIRECTX
   HRESULT hr;
@@ -295,8 +295,8 @@ bool cDevice::CreateInputLayout(cInputLayout &inputLayout
   }
   hr = mptr_device->CreateInputLayout(&ElementDesc[0],
                                       NumElements,
-                                      vertexShader.getInfo()->GetBufferPointer(),
-                                      vertexShader.getInfo()->GetBufferSize(),
+                                      vertexShaderPath.getInfo()->GetBufferPointer(),
+                                      vertexShaderPath.getInfo()->GetBufferSize(),
                                       inputLayout.getInputLayoutRef());
   if (SUCCEEDED(hr))
   {
@@ -321,7 +321,7 @@ bool cDevice::CreateInputLayout(cInputLayout &inputLayout
   return false;
 }
 
-bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vertexShader)
+bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vertexShaderPath)
 {
 #if DIRECTX
   //directX native input layout struct 
@@ -345,8 +345,8 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
 
   HRESULT  hr = mptr_device->CreateInputLayout(&directxInputLayout[0],
                                                intermidateLayout.size(),
-                                               vertexShader.getInfo()->GetBufferPointer(),
-                                               vertexShader.getInfo()->GetBufferSize(),
+                                               vertexShaderPath.getInfo()->GetBufferPointer(),
+                                               vertexShaderPath.getInfo()->GetBufferSize(),
                                                inputLayout.getInputLayoutRef());
   if (SUCCEEDED(hr))
   {

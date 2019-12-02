@@ -1,6 +1,6 @@
 #include "utility/enGraphics.h"
-#include "utility/enDefs.h"
 #include "HelperFuncs.h"
+
 #include "cDevice.h"
 #include "cDeviceContext.h"
 #include "cSwapChain.h"
@@ -19,7 +19,10 @@
 #include <sstream>
 #include <map>
 /////////////////////// MICROSOFT HEADERS 
+
+#if WIND_OS
 #include <commdlg.h> // for the open file function 
+#endif // WIND_OS
 
 namespace helper
 {
@@ -106,7 +109,7 @@ namespace helper
   }
 
   /*************/
-  std::string 
+  std::string
     loadFileToString(std::string_view filePath)
   {
     std::string Result{ "Error" };
@@ -128,7 +131,7 @@ namespace helper
   }
   /*************/
 
-  std::string 
+  std::string
     loadFileToString(std::wstring_view filePath)
   {
     std::string Result{ "Error" };
@@ -157,7 +160,7 @@ namespace helper
                          float deltaTime)
   {
     // used to alter the view matrix 
-    ViewMatrix ChangeWithViewMatrix;
+    CameraData ChangeWithViewMatrix;
     ProjectionMatrix  ChangeOnProjectionChange;
     // going forwards 
     if (pressedKey == (WPARAM)'W')
@@ -414,7 +417,7 @@ namespace helper
   {
     std::wstring Result(string.length() + 1, '\0');
 
-    std::size_t checkForError = std::mbstowcs(Result.data(), string.data(),string.length());
+    std::size_t checkForError = std::mbstowcs(Result.data(), string.data(), string.length());
 
     if (checkForError == static_cast< std::size_t >(-1))
     {
@@ -458,7 +461,9 @@ namespace helper
     return originalValue;
   }
 
-/*****************/
+  //TODO : repair function later 
+#if 0
+        /*****************/
   cModel *
     createHelicoid(float lowerMultiplier, float upperMultiplier,
                    float lowerAngle, float upperAngle,
@@ -472,7 +477,7 @@ namespace helper
     float currentAngle = lowerAngle;
     float currentMultiplier = lowerMultiplier;
 
-    std::unique_ptr<std::vector<sVertexPosNormTex  >>vertexes = std::make_unique<std::vector<sVertexPosNormTex>>(); // std::vector<sVertexPosTex> vertexes; 
+    std::unique_ptr<std::vector<VERTEX_T >>vertexes = std::make_unique<std::vector<VERTEX_T >>(); // std::vector<sVertexPosTex> vertexes; 
     std::unique_ptr<std::vector< uint16 >>indices = std::make_unique<std::vector<uint16>>(); // std::vector<sVertexPosTex> vertexes; 
 
     auto calculateQuad = [](glm::vec3 &bottomRight, uint32_t Iteration)->sQuad
@@ -517,9 +522,10 @@ namespace helper
           indices->emplace_back(currentQuad.triangles[k].indices[1]);
           indices->emplace_back(currentQuad.triangles[k].indices[2]);
           //fill the vertex 
-          sVertexPosNormTex Pos0{ glm::vec4(currentQuad.triangles[k].positions[0],1.0f),glm::vec3(1.0,0.0,0.0),  glm::vec2(0.5f,0.5f) };
-          sVertexPosNormTex Pos1{ glm::vec4(currentQuad.triangles[k].positions[1],1.0f),glm::vec3(1.0,0.0,0.0) , glm::vec2(0.5f,0.5f) };
-          sVertexPosNormTex Pos2{ glm::vec4(currentQuad.triangles[k].positions[2],1.0f), glm::vec3(1.0,0.0,0.0),glm::vec2(0.5f,0.5f) };
+          VERTEX_T  Pos0{ glm::vec4(currentQuad.triangles[k].positions[0],1.0f),glm::vec3(1.0,0.0,0.0),  glm::vec2(0.5f,0.5f) };
+
+          VERTEX_T   Pos1{ glm::vec4(currentQuad.triangles[k].positions[1],1.0f),glm::vec3(1.0,0.0,0.0) , glm::vec2(0.5f,0.5f) };
+          VERTEX_T   Pos2{ glm::vec4(currentQuad.triangles[k].positions[2],1.0f), glm::vec3(1.0,0.0,0.0),glm::vec2(0.5f,0.5f) };
           //get the vertexes 
           vertexes->emplace_back(Pos0);
           vertexes->emplace_back(Pos1);
@@ -540,6 +546,8 @@ namespace helper
     return result;
   }
   /*****************/
+
+#endif // 0
 
   bool
     loadNewActorModelFromFile(cActor & actor, cWindow &windowToOpen, cDevice &device)
@@ -620,6 +628,38 @@ namespace helper
 
 #endif // OPEN_GL
 /*****************/
+
+  void
+    addDefinesToShaders(cShaderBase & originalShader)
+  {
+
+    static std::vector<std::string> defineStatements =
+    {
+      {"BLIN 1"},
+      {"VERTEX_LIGHT 1"},
+      {"DIR_LIGHT 1"}
+    };
+
+    originalShader.addDefines(defineStatements);
+    originalShader.printOriginalShader();
+
+  //DEFINE_ENUM_FLAG_OPERATORS
+  }
+
+/*****************/
+
+  size_t
+    findIndexAfterFirstNewLine(const std::string_view String)
+  {
+    for (size_t i = 0; i < String.size() - 1; ++i)
+    {
+      if (String[i] == '\n' || String[i] == '\r')
+      {
+        return ++i;
+      }
+    }
+    return size_t(-1);
+  }
 
 }
 

@@ -112,7 +112,7 @@ public:// functions
                           float DepthClearValue = 1.0f);
 
   void /*!sets the vertex shader */
-    VSSetShader(cVertexShader &vertexShader);
+    VSSetShader(cVertexShader &vertexShaderPath);
 
   void /*! set's the constant buffers */
     VSSetConstantBuffers(cConstBuffer &Buffer, uint8_t Slot);
@@ -143,7 +143,7 @@ public:// functions
 
   /**/
   bool
-    SetShaders(cVertexShader &vertexShader, cPixelShader &pixelShader);
+    SetShaders(cVertexShader &vertexShaderPath, cPixelShader &pixelShader);
 private:
 #if DIRECTX
   ID3D11DeviceContext* mptr_deviceContext = nullptr;

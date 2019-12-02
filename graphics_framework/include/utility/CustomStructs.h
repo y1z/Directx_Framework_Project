@@ -10,6 +10,17 @@
 // Vector type struct's 
 /******************************/
 
+/*! this is used to determine which of all the vertex types are being used*/
+#define VERTEX_T sVertexPosNormTanTex
+
+struct sVertexPosNormTanTex
+{
+  glm::vec4 pos;
+  glm::vec3 norm;
+  glm::vec3 tan;
+  glm::vec2 tex;
+};
+
 struct sVertexPosNormTex
 {
   glm::vec4 pos;
@@ -93,17 +104,11 @@ struct sMatrix4x4
   glm::mat4x4 matrix{ 1.0f };
 };
 
-struct alignas(16) ViewMatrix
-{
-  glm::mat4x4 matrix;
-  glm::vec3 viewDir;
-};
-
 ////////////////////////////////////////////////
 // type defs of sMatrix4x4 
 ////////////////////////////////////////////////
 
-//using ViewMatrix = sMatrix4x4;
+using ViewMatrix = sMatrix4x4;
 using ProjectionMatrix = sMatrix4x4;
 
 /******************************/
@@ -144,6 +149,15 @@ struct alignas(16)GlChangeEveryFrame
   sColorf color;
   sVector3 viewDir;
 };
+
+
+struct alignas(16) CameraData
+{
+  glm::mat4x4 matrix;
+  glm::vec4 cameraPos;
+  glm::vec3 viewDir;
+};
+
 
 /*!
 * @brief used to keep track of the necessary data used in a uniform

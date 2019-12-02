@@ -2,6 +2,7 @@
 #include "enDefs.h"
 #include "CustomStructs.h"
 #include "enErrorHandling.h"
+// std includes 
 #include <string>
 // forward Declaration
 class cDevice;
@@ -106,7 +107,7 @@ namespace helper
   *@param actor [in][out]  the actor with a new model
   */
   [[nodiscard]] bool
-    loadNewActorModelFromFile(cActor &actor, cWindow &windowToOpen,cDevice &device);
+    loadNewActorModelFromFile(cActor &actor, cWindow &windowToOpen, cDevice &device);
 
   /**
   *@brief updates a uniform using the data provided
@@ -115,11 +116,19 @@ namespace helper
   void
     GlUpdateUniform(sUniformDetails &details);
 
-  sUniformDetails 
-  GlCreateUniformDetail(std::string_view name, enConstBufferElem type);
+  sUniformDetails
+    GlCreateUniformDetail(std::string_view name, enConstBufferElem type);
 
 #endif // OPEN_GL
 
+  void
+    addDefinesToShaders(cShaderBase & shader);
+
+  size_t
+    findIndexAfterFirstNewLine(const std::string_view String);
 }
+
+
+
 
 
