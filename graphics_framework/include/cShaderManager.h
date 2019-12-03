@@ -9,12 +9,15 @@ class cDevice;
 class cDeviceContext;
 
 
+/*!
+*@brief give the shader manager all the necessary
+*/
 struct sShadersManagerDesc
 {
   std::string vertexShaderPath{ "" };
   std::string vertexEntry{ "" };
 
-  std::string pixelShader{ "" };
+  std::string pixelShaderPath{ "" };
   std::string pixelEntry{ "" };
 
   std::string vertexShaderVersion{ "" };
@@ -29,7 +32,8 @@ struct sShadersPairs
 };
 
 /**
-*@brief helps with keeping track of which shader is selected to be set,
+*@brief holds all the shaders and create every possible version
+* using the '#define' statements
 */
 class cShaderManager
 {
@@ -44,45 +48,71 @@ public: // functions
     init(cDevice &resourceManager,
          sShadersManagerDesc &descriptor);
 
-
   //! make sure the selected index is valid then change it to the give index 
   bool
     swichShader(size_t index);
 
-    /*!@returns the total amount of shader that the manager contains */
+  /*!@returns the total amount of shader that the manager contains */
   size_t
     getShaderCount()const;
 
-    //@returns a reference to a cVertexShader determined by the class variable 'm_selectedShaders'
+  //!@returns a reference to a cVertexShader determined by the class variable 'm_selectedShaders'
   cVertexShader&
     getVertexShaderRef();
 
-
-    //@returns a reference to a cPixelShader determined by the class variable 'm_selectedShaders'
+  //!@returns a reference to a cPixelShader determined by the class variable 'm_selectedShaders'
   cPixelShader&
     getPixelShaderRef();
 
-    //@returns a pointer to a cVertexShader determined by the class variable 'm_selectedShaders'
+  //!@returns a pointer to a cVertexShader determined by the class variable 'm_selectedShaders'
   cVertexShader*
     getVertexShaderPtr();
 
-    //@returns a pointer to a cPixelShader determined by the class variable 'm_selectedShaders'
+  //!@returns a pointer to a cPixelShader determined by the class variable 'm_selectedShaders'
   cPixelShader*
     getPixelShaderPtr();
 
+  //
   void
     setShader(cDeviceContext &deviceContext);
 
 private:
 
-  /*! create all the version of the shaders with defines*/
+  /*! adds defines that are only found on one version of the shader*/
   std::vector<std::string>
-    addDefinesToShaders(const std::string &originalShader,
-                        std::vector<std::string> &defineStaments);
+    addUniqueDefines(const std::string &originalShader);
+
+  /*!doubles the amount of shader, each one with a different version of the same define
+  *@param containerOfShaders[in][out] used to contain the shader
+  *@param  globalDefines[in] contain all the defines that should be in every shader
+  */
+  std::vector<std::string>
+    createShaderWithGlobalDefines(std::vector<std::string >  &containerOfShaders,
+                                  std::vector< std::string> &globalDefines);
+
+  /*! will add "#define " and finish with a '\n' if the current define does not have one or both.*/
+  void
+    makeDefineValid(std::string &define);
+
+  /**
+  *@brief will change the value of a define(if it's 0 then it will become 1 and vice-versa)
+  * this function expects a shader and the position of the define
+  *@param shader [in][out] the shader that contain the define expected to be changed 
+  *@param definePos [in] the position of the define in the shader
+  */
+  void
+    changeValueOfDefine(std::string &shader,
+                        size_t definePos);
+
 
 private:// variables 
+  //! the final container of the shader
   std::deque<sShadersPairs> m_shaders;
+
+  //! used to contain all the defines for the shaders
   std::vector<std::string> m_defineOptions;
+
+  //!used to keep track of the currently selected shaders
   size_t m_selectedShaders{ 0 };
 };
 

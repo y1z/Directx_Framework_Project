@@ -12,11 +12,10 @@ cShaderManager::cShaderManager()
   m_defineOptions =
   {
     {"BLIN 1"},
-    {"PIXEL_LIGHT 1"},
-    {"VERTEX_LIGHT 1"},
     {"DIR_LIGHT 1"},
     {"CONE_LIGHT 1"},
-    {"POINT_LIGHT 1"}
+    {"POINT_LIGHT 1"},
+    {"ALL_SHADER 1"},
   };
 }
 
@@ -30,24 +29,30 @@ cShaderManager::init(cDevice &device,
                      sShadersManagerDesc &descriptor)
 
 {
-
-  static std::vector<std::string> defineStatements =
+  static std::vector<std::string> globalDefines =
   {
-    {"BLIN 1"},
     {"PIXEL_LIGHT 1"},
-    {"VERTEX_LIGHT 1"},
-    {"DIR_LIGHT 1"},
-    {"CONE_LIGHT 1"},
-    {"POINT_LIGHT 1"}
   };
 
-  //std::shared_ptr<cDevice> device = resourceManager.getPtrDevice();
+  std::vector<std::string> vertexShaderStr = addUniqueDefines(helper::loadFileToString(descriptor.vertexShaderPath));
+  if (vertexShaderStr.empty())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
 
-  std::vector<std::string> vertexShaderStr = addDefinesToShaders(helper::loadFileToString(descriptor.vertexShaderPath),
-                                                                 defineStatements);
+  vertexShaderStr = createShaderWithGlobalDefines(vertexShaderStr, globalDefines);
 
-  std::vector<std::string> pixelShaderStr = addDefinesToShaders(helper::loadFileToString(descriptor.pixelShader),
-                                                                defineStatements);
+
+  std::vector<std::string> pixelShaderStr = addUniqueDefines(helper::loadFileToString(descriptor.pixelShaderPath));
+  if (pixelShaderStr.empty())
+  {
+    EN_LOG_ERROR;
+    return false;
+  }
+
+  pixelShaderStr = createShaderWithGlobalDefines(pixelShaderStr, globalDefines);
+
 
   bool isSucceful = false;
   for (size_t i = 0; i < pixelShaderStr.size() - 1; ++i)
@@ -147,8 +152,7 @@ cShaderManager::setShader(cDeviceContext & deviceContext)
 }
 
 std::vector<std::string>
-cShaderManager::addDefinesToShaders(const std::string & originalShader,
-                                    std::vector<std::string> &defineStatements)
+cShaderManager::addUniqueDefines(const std::string & originalShader)
 {
   size_t indexAfterNewLine = helper::findIndexAfterFirstNewLine(originalShader);
 
@@ -159,21 +163,11 @@ cShaderManager::addDefinesToShaders(const std::string & originalShader,
 
   // make sure the first shader does NOT have any defines 
   std::vector<std::string> result{ originalShader };
-  for (std::string &define : defineStatements)
+  for (std::string &define : m_defineOptions)
   {
     std::string newShader = originalShader;
 
-    //make sure there is a #define in the define statement
-    if (define.find("#define ") == std::string::npos)
-    {
-      define.insert(0, "#define ");
-    }
-
-    // make sure there is a new line char in the define
-    if (define.find("\n") == std::string::npos)
-    {
-      define += "\n";
-    }
+    this->makeDefineValid(define);
 
     newShader.insert(indexAfterNewLine, define);
 
@@ -181,6 +175,78 @@ cShaderManager::addDefinesToShaders(const std::string & originalShader,
   }
 
   return result;
+}
+
+
+std::vector<std::string>
+cShaderManager::createShaderWithGlobalDefines(std::vector<std::string>& containerOfShaders,
+                                              std::vector< std::string> &globalDefines)
+{
+  std::vector<std::string> result;
+
+  for (std::string& shader : containerOfShaders)
+  {
+    size_t indexAfterNewLine = helper::findIndexAfterFirstNewLine(shader);
+
+    for (std::string& define : globalDefines)
+    {
+      //make sure that the define is valid
+      this->makeDefineValid(define);
+      // insert the respective defines 
+      shader.insert(indexAfterNewLine, define);
+      result.emplace_back(shader);
+      // change the value of the define(if it's 1 then it becomes 0 and vice-versa)
+      this->changeValueOfDefine(shader, indexAfterNewLine);
+      result.emplace_back(shader);
+    }
+  }
+
+  return result;
+}
+
+void
+cShaderManager::makeDefineValid(std::string & define)
+{
+  //make sure that the "#define " statement is in the define
+  if (define.find("#define ") == std::string::npos)
+  {
+    define.insert(0, "#define ");
+  }
+  //make sure the define ends in a 1 or 0
+  bool hasNumericValue = false;
+  for (const char& character : define)
+  {
+    if (character == '0' || character == '1')
+    { hasNumericValue = true; }
+  }
+
+  if (!hasNumericValue)
+  {
+    define.append(" 1");
+  }
+
+ //make sure that the define end in a newline
+  if (define[define.size() - 1] != '\n')
+  {
+    define.append("\n");
+  }
+
+}
+
+void
+cShaderManager::changeValueOfDefine(std::string & shader, size_t definePos)
+{
+  while (shader.size() > definePos)
+  {
+    // find the value then replace them with the appropriate counter part
+    if (shader[definePos] == '0' || shader[definePos] == '1')
+    {
+      (shader[definePos] == '0') ? shader[definePos] = '1' : shader[definePos] = '0';
+      break;
+    }
+    ++definePos;
+  }
+
 }
 
 

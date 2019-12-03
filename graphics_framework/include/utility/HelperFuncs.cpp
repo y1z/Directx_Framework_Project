@@ -413,11 +413,11 @@ namespace helper
   }
 
   std::wstring
-    convertStringToWString(std::string_view string)
+    convertStringToWString(std::string_view String)
   {
-    std::wstring Result(string.length() + 1, '\0');
+    std::wstring Result(String.length() + 1, '\0');
 
-    std::size_t checkForError = std::mbstowcs(Result.data(), string.data(), string.length());
+    std::size_t checkForError = std::mbstowcs(Result.data(), String.data(), String.length());
 
     if (checkForError == static_cast< std::size_t >(-1))
     {
@@ -630,7 +630,7 @@ namespace helper
 /*****************/
 
   void
-    addDefinesToShaders(cShaderBase & originalShader)
+    addUniqueDefines(cShaderBase & originalShader)
   {
 
     static std::vector<std::string> defineStatements =

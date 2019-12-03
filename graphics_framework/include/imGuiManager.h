@@ -58,7 +58,7 @@ public:
   \param [in] itemName this is the name the user give the item
   \param [in] itemCount how many instances of a certain item exist*/
   void
-    addItemCountToChild(const char* childId, std::string_view itemName, uint32 itemCount);
+    addItemCount( std::string_view itemName, uint32 itemCount);
 
   void
     addButton(std::string_view buttonUse, bool &buttonCondtion);

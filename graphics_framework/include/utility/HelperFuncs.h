@@ -76,6 +76,8 @@ namespace helper
   std::string
     convertWStringToString(std::wstring_view wideString);
 
+  /*! take a std::wstring/wchar_t and converts it
+  to a std::string */
   std::wstring
     convertStringToWString(std::string_view string);
 
@@ -122,7 +124,7 @@ namespace helper
 #endif // OPEN_GL
 
   void
-    addDefinesToShaders(cShaderBase & shader);
+    addUniqueDefines(cShaderBase & shader);
 
   size_t
     findIndexAfterFirstNewLine(const std::string_view String);

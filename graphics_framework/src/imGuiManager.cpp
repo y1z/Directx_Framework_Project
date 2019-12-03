@@ -177,7 +177,7 @@ imGuiManager::beginExtraWindow(const char * windowName)
 }
 
 void
-imGuiManager::addItemCountToChild(const char* childId, std::string_view itemName, uint32 itemCount)
+imGuiManager::addItemCount(std::string_view itemName, uint32 itemCount)
 {
 
   static std::string messageStr = "Item Name : ";
@@ -276,7 +276,7 @@ imGuiManager::addCounter(uint32_t & CounterValue, std::string_view nameOfValue)
     CounterValue++;
   }
 
-  ig::Text("%d", CounterValue);
+  ig::Text("%u", CounterValue);
   // replace "increase" with "decrease"
   Message.replace(0, 2, "De");
   if (ig::Button(Message.c_str()))
@@ -318,7 +318,7 @@ void imGuiManager::addCounter(uint64_t & CounterValue, std::string_view nameOfVa
     CounterValue++;
   }
 
-  ig::Text("%d", CounterValue);
+  ig::Text("%u", CounterValue);
   // replace "increase" with "decrease"
   Message.replace(0, 2, "De");
   if (ig::Button(Message.c_str()))

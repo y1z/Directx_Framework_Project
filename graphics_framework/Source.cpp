@@ -392,7 +392,6 @@ InitDevice()
 
   managerResource.vertexShaderPath = shaderPath.generic_string();
 
-
   shaderPath = g_initPath.parent_path();
 #if DIRECTX
   const wchar_t *selectedPixelhader = L"lighting.hlsl";
@@ -406,10 +405,12 @@ InitDevice()
 
   shaderPath += selectedPixelhader;
 
-  managerResource.pixelShader = shaderPath.generic_string();
+  managerResource.pixelShaderPath = shaderPath.generic_string();
 
   isSuccesful = my_shaderManager->init(*ptr_device,
                                        managerResource);
+  
+  assert(isSuccesful == true && "Error with initializing the cShaderManager");
 
   cPixelShader* ptr_pixelShader = my_shaderManager->getPixelShaderPtr();
   cVertexShader* ptr_vertexShader = my_shaderManager->getVertexShaderPtr();
@@ -723,7 +724,7 @@ void Render()
   my_actor->DrawAllComponents(*ptr_deviceContext, bufferArray);
 
   my_shaderManager->swichShader(g_selectedShader);
-  my_shaderManager->setShader(*ptr_deviceContext); 
+  my_shaderManager->setShader(*ptr_deviceContext);
 
   my_timer.EndTiming();
   float deltaTime = my_timer.GetResultSeconds();
@@ -733,8 +734,8 @@ void Render()
   my_gui.addImage(my_shaderTarget->getShaderResourceView());
   my_gui.addButton("load new model", g_loadNewModel);
   my_gui.beginChildWithFpsCount(deltaTime);
-  my_gui.addItemCountToChild("Mesh count ", "Mesh", ptr_toModel->getMeshCount());
-  my_gui.addItemCountToChild("vertices count ", "vertices", ptr_toModel->getVertexCount());
+  my_gui.addItemCount("Mesh", ptr_toModel->getMeshCount());
+  my_gui.addItemCount("vertices", ptr_toModel->getVertexCount());
   my_gui.addSliderFloat("Transform amount", g_TransformAmount, -7.0f, 7.0f);
   my_gui.addText("\nControls \n"
                  "chose axis with keys 'x' , 'y' , 'z'\n"
@@ -747,6 +748,13 @@ void Render()
 
   my_gui.beginExtraWindow("Shader Switcher");
   my_gui.addCounter(g_selectedShader, "Shader Index");
+  my_gui.addItemCount("Shaders ", my_shaderManager->getShaderCount());
+
+  if (!my_shaderManager->swichShader(g_selectedShader))
+  {
+    sColorf red = { 0.7f,0.1f,0.1f,1.0f };
+    my_gui.addText("Error out of range",red);
+  }
 
   my_gui.endAllExtraWindows();
   my_gui.endFrame();
