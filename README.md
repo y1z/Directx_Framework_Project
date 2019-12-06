@@ -1,7 +1,7 @@
 # Project DirectX/OpenGl framework 
 This repository will house a graphics framework that can chose between 2 api's open_gl and directX
 ## Tools used 
-- visual sudio 2017 
+- visual studio 2017 
 ## Language 
 - c++ 17 
 ## External libs 
@@ -22,8 +22,12 @@ This repository will house a graphics framework that can chose between 2 api's o
  - DEVLIBS : `C:\c++libs\`
     - aka it in the same place where i keep my libs 
 ## submodule 
-	- This project contains 2 submodules 
+- This project contains 2 submodules 
 		- DxShaders : https://github.com/y1z/DxShaders
 		- GlShaders : https://github.com/y1z/GlShaders   
-## clone process 
-just clone the project then run the `updateSubmodule.bat` located in scripts
+## downloading this project from a zip file
+download the project then go to the folder called *`scripts`* and run the script called **`updateSubmodule-download.bat`** this will download the submodules this project needs to function.
+## cloning this project 
+run `git clone https://github.com/y1z/Directx_Framework_Project.git ` then go to the folder called 'scripts' and run the script called **`updateSubmodule-clone.bat`** this will update the submodules the project has.
+
+
