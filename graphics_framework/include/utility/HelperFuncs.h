@@ -128,6 +128,9 @@ namespace helper
 
   size_t
     findIndexAfterFirstNewLine(const std::string_view String);
+
+  size_t
+    findNewLineAfterGivenPosition(const std::string_view String, size_t postion = 0u);
 }
 
 

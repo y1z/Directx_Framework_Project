@@ -661,6 +661,21 @@ namespace helper
     return size_t(-1);
   }
 
+/*****************/
+
+  size_t 
+    findNewLineAfterGivenPosition(const std::string_view String, size_t postion)
+  {
+    for (size_t i = postion; i < String.size() - 1; ++i)
+    {
+      if (String[i] == '\n' || String[i] == '\r')
+      {
+        return i;
+      }
+    }
+    return size_t(-1);
+  }
+
 }
 
 

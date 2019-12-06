@@ -141,9 +141,7 @@ cCamera::updateCamera(cWindow & window)
     m_projection.matrix = glm::perspectiveFovLH<float>(m_fov, window.getWidth(),
                                                        window.getHeight(), m_near, m_far);
 
-    //m_projection.matrix = glm::transpose(m_projection.matrix);
     helper::arrangeForApi(m_projection);
-    //    m_projection.matrix = dx::XMMatrixTranspose(m_projection.matrix);
   }
   else
   {

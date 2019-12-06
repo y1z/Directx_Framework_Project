@@ -24,16 +24,22 @@ struct sShadersManagerDesc
   std::string pixelShaderVersion{ "" };
 };
 
-/*! used to store shader of different types */
+/*! used to store shader of different types 
+*
+*/
 struct sShadersPairs
 {
-  cVertexShader vertShader;
+  cVertexShader vertexShader;
   cPixelShader pixelShader;
+   
+  std::string name{""};
+  size_t id;
 };
 
 /**
 *@brief holds all the shaders and create every possible version
 * using the '#define' statements
+*TODO : make this class a modulo
 */
 class cShaderManager
 {
@@ -72,6 +78,10 @@ public: // functions
   cPixelShader*
     getPixelShaderPtr();
 
+  //!@returns the name of the currently selected shader determined by the class variable 'm_selectedShaders'
+  const std::string &
+    getShaderNameRef();
+
   //
   void
     setShader(cDeviceContext &deviceContext);
@@ -104,6 +114,12 @@ private:
     changeValueOfDefine(std::string &shader,
                         size_t definePos);
 
+  /*!
+  *@brief gives each shader a name based on it's defines 
+  */
+  void
+    generateNamesForShader();
+
 
 private:// variables 
   //! the final container of the shader
@@ -111,6 +127,9 @@ private:// variables
 
   //! used to contain all the defines for the shaders
   std::vector<std::string> m_defineOptions;
+
+  //! used to store names to all the shaders 
+  std::vector<std::string> m_shaderNames;
 
   //!used to keep track of the currently selected shaders
   size_t m_selectedShaders{ 0 };

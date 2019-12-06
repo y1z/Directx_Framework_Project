@@ -748,6 +748,8 @@ void Render()
 
   my_gui.beginExtraWindow("Shader Switcher");
   my_gui.addCounter(g_selectedShader, "Shader Index");
+  my_gui.addText(my_shaderManager->getShaderNameRef());
+
   my_gui.addItemCount("Shaders ", my_shaderManager->getShaderCount());
 
   if (!my_shaderManager->swichShader(g_selectedShader))

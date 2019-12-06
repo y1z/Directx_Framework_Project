@@ -6,15 +6,17 @@
 //std includes 
 #include <vector>
 
+// used to keep track of id values
+static size_t s_idCount = 0u;
+
 cShaderManager::cShaderManager()
   :m_selectedShaders(0)
 {
   m_defineOptions =
   {
-    {"BLIN 1"},
     {"DIR_LIGHT 1"},
-    {"CONE_LIGHT 1"},
     {"POINT_LIGHT 1"},
+    {"CONE_LIGHT 1"},
     {"ALL_SHADER 1"},
   };
 }
@@ -32,6 +34,7 @@ cShaderManager::init(cDevice &device,
   static std::vector<std::string> globalDefines =
   {
     {"PIXEL_LIGHT 1"},
+    {"BLIN 1"},
   };
 
   std::vector<std::string> vertexShaderStr = addUniqueDefines(helper::loadFileToString(descriptor.vertexShaderPath));
@@ -54,42 +57,43 @@ cShaderManager::init(cDevice &device,
   pixelShaderStr = createShaderWithGlobalDefines(pixelShaderStr, globalDefines);
 
 
-  bool isSucceful = false;
+  bool isSuccessful = false;
   for (size_t i = 0; i < pixelShaderStr.size() - 1; ++i)
   {
     sShadersPairs shaders;
+    shaders.id = s_idCount++;
 
-    isSucceful = shaders.vertShader.compileShaderFromMemory(vertexShaderStr[i],
-                                                            descriptor.vertexEntry,
-                                                            descriptor.vertexShaderVersion);
+    isSuccessful = shaders.vertexShader.compileShaderFromMemory(vertexShaderStr[i],
+                                                                descriptor.vertexEntry,
+                                                                descriptor.vertexShaderVersion);
 
-    if (!isSucceful)
+    if (!isSuccessful)
     {
       EN_LOG_ERROR_WITH_CODE(enErrorCode::ShaderComplieError);
       return false;
     }
 
-    isSucceful = shaders.pixelShader.compileShaderFromMemory(pixelShaderStr[i],
-                                                             descriptor.pixelEntry,
-                                                             descriptor.pixelShaderVersion);
+    isSuccessful = shaders.pixelShader.compileShaderFromMemory(pixelShaderStr[i],
+                                                               descriptor.pixelEntry,
+                                                               descriptor.pixelShaderVersion);
 
-    if (!isSucceful)
+    if (!isSuccessful)
     {
       EN_LOG_ERROR_WITH_CODE(enErrorCode::ShaderComplieError);
       return false;
     }
 
-    isSucceful = device.CreateVertexShader(shaders.vertShader);
+    isSuccessful = device.CreateVertexShader(shaders.vertexShader);
 
-    if (!isSucceful)
+    if (!isSuccessful)
     {
       EN_LOG_ERROR_WITH_CODE(enErrorCode::FailedCreation);
       return false;
     }
 
-    isSucceful = device.CreatePixelShader(shaders.pixelShader);
+    isSuccessful = device.CreatePixelShader(shaders.pixelShader);
 
-    if (!isSucceful)
+    if (!isSuccessful)
     {
       EN_LOG_ERROR_WITH_CODE(enErrorCode::FailedCreation);
       return false;
@@ -97,6 +101,8 @@ cShaderManager::init(cDevice &device,
 
     m_shaders.emplace_back(std::move(shaders));
   }//end for 
+
+  this->generateNamesForShader();
 
   return true;
 }
@@ -124,7 +130,7 @@ cShaderManager::getShaderCount() const
 cVertexShader&
 cShaderManager::getVertexShaderRef()
 {
-  return m_shaders[m_selectedShaders].vertShader;
+  return m_shaders[m_selectedShaders].vertexShader;
 }
 
 cPixelShader &
@@ -136,7 +142,7 @@ cShaderManager::getPixelShaderRef()
 cVertexShader *
 cShaderManager::getVertexShaderPtr()
 {
-  return &m_shaders[m_selectedShaders].vertShader;
+  return &m_shaders[m_selectedShaders].vertexShader;
 }
 
 cPixelShader *
@@ -145,10 +151,16 @@ cShaderManager::getPixelShaderPtr()
   return &m_shaders[m_selectedShaders].pixelShader;
 }
 
+const std::string &
+cShaderManager::getShaderNameRef()
+{
+  return m_shaders[m_selectedShaders].name;
+}
+
 void
 cShaderManager::setShader(cDeviceContext & deviceContext)
 {
-  deviceContext.SetShaders(m_shaders[m_selectedShaders].vertShader, m_shaders[m_selectedShaders].pixelShader);
+  deviceContext.SetShaders(m_shaders[m_selectedShaders].vertexShader, m_shaders[m_selectedShaders].pixelShader);
 }
 
 std::vector<std::string>
@@ -245,6 +257,44 @@ cShaderManager::changeValueOfDefine(std::string & shader, size_t definePos)
       break;
     }
     ++definePos;
+  }
+
+}
+
+void
+cShaderManager::generateNamesForShader()
+{
+  std::vector<size_t> positionsOfDefines;
+
+  for (sShadersPairs &shader : m_shaders)
+  {
+    const std::string *shaderPtr = shader.pixelShader.getOriginalShaderPtr();
+    size_t posInShader = 0u;
+
+    // store all the positions for later use 
+    while (posInShader != std::string::npos)
+    {
+      posInShader = shaderPtr->find("#define ", posInShader);
+      if (posInShader == std::string::npos)
+      {
+        break;
+      }
+      positionsOfDefines.emplace_back(posInShader);
+      posInShader += 8;
+    }
+
+    // generate all the names 
+    for (size_t Pos : positionsOfDefines)
+    {
+      shader.name += shaderPtr->substr(Pos,
+        (helper::findNewLineAfterGivenPosition(*shaderPtr, Pos) - (Pos)));
+
+      shader.name += " ";
+
+      std::cout << "shader name [[" << shader.name << "]]\n\n";
+    }
+
+    positionsOfDefines.clear();
   }
 
 }

@@ -131,9 +131,11 @@ struct sQuad
 
 struct alignas(16) sLightData
 {
-  sColorf ambientColor;
+  sColorf ambientColor = { 0.0f,0.0f,0.0f,1.0f };
   sColorf lightColor = { 0.0f,0.7f,0.7f,1.0f };
-  sColorf specularColor = { 0.5f,0.5f,0.5f,0.5f };
+  sColorf specularColor = { 0.5f,0.5f,0.5f,1.0f };
+  sColorf pointColor = { 0.7f,0.0f,0.0f,1.0f };
+  sColorf spotColor = { 0.0f,0.7f,0.0f,1.0f };
 
   sVector4 pos;
   sVector3 dir;
@@ -141,6 +143,7 @@ struct alignas(16) sLightData
   float lightIntensity{ 0.5f };
   float specularIntensity{ 0.5f };
   float ambientIntensity{ 0.5f };
+  float pointRadius{ 1.0f };
 };
 
 struct alignas(16)GlChangeEveryFrame
