@@ -210,6 +210,7 @@ cShaderManager::createShaderWithGlobalDefines(std::vector<std::string>& containe
       // change the value of the define(if it's 1 then it becomes 0 and vice-versa)
       this->changeValueOfDefine(shader, indexAfterNewLine);
       result.emplace_back(shader);
+      this->changeValueOfDefine(shader, indexAfterNewLine);
     }
   }
 

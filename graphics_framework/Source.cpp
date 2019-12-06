@@ -111,7 +111,7 @@ sColorf g_vMeshColor;
 
 float g_TransformAmount = 1.0f;
 static float g_trackedTime = 0.0f;
-static size_t g_selectedShader = 0;
+static size_t g_selectedShader = 0u;
 static bool g_ControlMouse(false);
 static bool g_loadNewModel(false);
 /********************************************************/
@@ -409,7 +409,7 @@ InitDevice()
 
   isSuccesful = my_shaderManager->init(*ptr_device,
                                        managerResource);
-  
+
   assert(isSuccesful == true && "Error with initializing the cShaderManager");
 
   cPixelShader* ptr_pixelShader = my_shaderManager->getPixelShaderPtr();
@@ -755,7 +755,7 @@ void Render()
   if (!my_shaderManager->swichShader(g_selectedShader))
   {
     sColorf red = { 0.7f,0.1f,0.1f,1.0f };
-    my_gui.addText("Error out of range",red);
+    my_gui.addText("Error out of range", red);
   }
 
   my_gui.endAllExtraWindows();
