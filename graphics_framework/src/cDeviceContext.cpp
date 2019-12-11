@@ -204,8 +204,27 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
     {
       auto *ViewMatrixTemp = reinterpret_cast< const CameraData* >(originOfData);
 
-      glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ViewMatrixTemp->matrix));
+      //glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ViewMatrixTemp->matrix));
 
+      std::vector<sUniformDetails>* refToContainer = constBuffer->getGlUniforms();
+
+      //update the necessary uniforms  
+      for (sUniformDetails & uni : *refToContainer)
+      {
+        if (!uni.name.compare("uView"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&ViewMatrixTemp->matrix); }
+
+        if (!uni.name.compare("uViewDir"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&ViewMatrixTemp->viewDir); }
+
+        if (!uni.name.compare("uViewPos"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&ViewMatrixTemp->cameraPos); }
+
+        if (uni.ptr_data != nullptr && uni.id != -1)
+        {
+          helper::GlUpdateUniform(uni);
+        }
+      }
     }
     else if (constBuffer->getIndex() == 1)
     {
@@ -274,16 +293,19 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->ambientColor); }
 
         else if (!uni.name.compare("uDiffuseColor"))
-        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->lightColor); }
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->diffuseColor); }
 
         else if (!uni.name.compare("uSpecularColor"))
-        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->specularColor);}
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->specularColor); }
 
         else if (!uni.name.compare("uLightPos"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->pos); }
 
+        else if (!uni.name.compare("uPointColor"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->pointColor); }
+
         else if (!uni.name.compare("uLightDir"))
-        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->dir); }
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->diffuseDir); }
 
         else if (!uni.name.compare("uDiffuseIntensity"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->lightIntensity); }
@@ -292,6 +314,9 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->ambientIntensity); }
 
         else if (!uni.name.compare("uSpecularIntensity"))
+        { uni.ptr_data = reinterpret_cast< const void* >(&LightData->specularIntensity); }
+
+        else if (!uni.name.compare("uPointRadius"))
         { uni.ptr_data = reinterpret_cast< const void* >(&LightData->specularIntensity); }
 
         if (uni.ptr_data != nullptr && uni.id != -1)
@@ -564,24 +589,30 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
 
   glUseProgram(*cApiComponents::getShaderProgram());
 
-  //glEnableVertexAttribArray(0);// position 
-  //glEnableVertexAttribArray(1);// normals 
-  //glEnableVertexAttribArray(2);// textures
+  glEnableVertexAttribArray(0);// position 
+  glEnableVertexAttribArray(1);// normals 
+  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(3);// textures
 
   glEnableVertexAttribArray(0);// position 
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
-  uint32 OffSetOfFirst = offsetof(sVertexPosNormTexEEE, pos);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTexEEE), reinterpret_cast< const void* >(OffSetOfFirst));
+  uint32 OffSetOfFirst = offsetof(VERTEX_T, pos);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void* >(OffSetOfFirst));
 
   glEnableVertexAttribArray(1);// normals 
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
-  uint32 OffSetOfSecond = offsetof(sVertexPosNormTexEEE, norm);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTexEEE), reinterpret_cast< const void * >(OffSetOfSecond));
+  uint32 OffSetOfSecond = offsetof(VERTEX_T, norm);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void * >(OffSetOfSecond));
 
   glEnableVertexAttribArray(2);// textures
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
-  uint32 OffSetOfThird = offsetof(sVertexPosNormTexEEE, tex);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sVertexPosNormTexEEEE), reinterpret_cast< const void * > (OffSetOfThird));
+  uint32 OffSetOfThird = offsetof(VERTEX_T, tan);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void * > (OffSetOfThird));
+
+  glEnableVertexAttribArray(3);// textures
+  glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
+  uint32 OffSetOfTexCoord = offsetof(VERTEX_T, tex);
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void * > ( OffSetOfTexCoord));
 
   if (GlCheckForError())
   {
@@ -610,7 +641,7 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
 #endif // DIRECTX
 }
 
-bool 
+bool
 cDeviceContext::SetShaders(cVertexShader & vertexShader, cPixelShader & pixelShader)
 {
 #if DIRECTX

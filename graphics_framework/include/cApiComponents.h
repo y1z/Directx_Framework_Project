@@ -39,6 +39,9 @@ public:
   static uint32
     *getShaderProgram();
 
+ static void
+    setCurrentProgram(uint32 &currentProgram);
+
   /*! returns a reference to the 
   vertex array object */
   static uint32 

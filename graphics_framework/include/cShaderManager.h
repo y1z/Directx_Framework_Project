@@ -33,7 +33,9 @@ struct sShadersPairs
   cPixelShader pixelShader;
    
   std::string name{""};
-  size_t id;
+  uint32_t id;
+  // TODO: remove when not needed
+  uint32 program;
 };
 
 /**

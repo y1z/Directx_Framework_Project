@@ -2,6 +2,7 @@
 #include "d3d11shader.h"
 #include "../include/cInputLayout.h"
 #include "../include/cVertexShader.h"
+#include "cApiComponents.h"
 
 cInputLayout::cInputLayout()
 #if DIRECTX
@@ -165,6 +166,11 @@ bool cInputLayout::ReadShaderData(cVertexShader & ShaderData, bool isPerVertex)
   ReflectorShader->Release();
   return true;
 #elif OPEN_GL
+GLint position_attrib_index = glGetAttribLocation(*cApiComponents::getShaderProgram(),  "position"); // program is what is returned by glCreateProgram.
+GLint texcoord_attrib_index = glGetAttribLocation( *cApiComponents::getShaderProgram(), "texcoord");
+GLint normal_attrib_index = glGetAttribLocation(*cApiComponents::getShaderProgram(), "normal");
+GLint color_attrib_index = glGetAttribLocation(*cApiComponents::getShaderProgram(), "color");
+
 
 #endif // DIRECTX
   return true;

@@ -2,6 +2,7 @@
 #include "cResourceManager.h"
 #include "cInputLayout.h"
 #include "utility/HelperFuncs.h"
+#include "cApiComponents.h"
 
 //std includes 
 #include <vector>
@@ -16,6 +17,7 @@ cShaderManager::cShaderManager()
   {
     {"DIR_LIGHT 1"},
     {"POINT_LIGHT 1"},
+    {"SPOT_LIGHT 1"},
     {"CONE_LIGHT 1"},
     {"ALL_SHADER 1"},
   };
@@ -46,7 +48,6 @@ cShaderManager::init(cDevice &device,
 
   vertexShaderStr = createShaderWithGlobalDefines(vertexShaderStr, globalDefines);
 
-
   std::vector<std::string> pixelShaderStr = addUniqueDefines(helper::loadFileToString(descriptor.pixelShaderPath));
   if (pixelShaderStr.empty())
   {
@@ -62,6 +63,10 @@ cShaderManager::init(cDevice &device,
   {
     sShadersPairs shaders;
     shaders.id = s_idCount++;
+    #if OPEN_GL
+    shaders.program = glCreateProgram();
+    cApiComponents::setCurrentProgram(shaders.program);
+    #endif // OPEN_GL
 
     isSuccessful = shaders.vertexShader.compileShaderFromMemory(vertexShaderStr[i],
                                                                 descriptor.vertexEntry,
@@ -103,6 +108,8 @@ cShaderManager::init(cDevice &device,
   }//end for 
 
   this->generateNamesForShader();
+
+  this->swichShader(0u);
 
   return true;
 }
@@ -160,6 +167,9 @@ cShaderManager::getShaderNameRef()
 void
 cShaderManager::setShader(cDeviceContext & deviceContext)
 {
+#if OPEN_GL
+  cApiComponents::setCurrentProgram(m_shaders[m_selectedShaders].program);
+#endif
   deviceContext.SetShaders(m_shaders[m_selectedShaders].vertexShader, m_shaders[m_selectedShaders].pixelShader);
 }
 

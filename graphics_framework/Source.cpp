@@ -52,7 +52,6 @@
 #include "DDSTextureLoader.h"
 
 #else 
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "utility/stb_image.h"
 #endif // STBI_INCLUDE_STB_IMAGE_H  
@@ -80,11 +79,13 @@ cConstBuffer my_constLightData;
 cSampler my_sampler;
 cViewport my_viewport;
 cShaderResourceView my_shaderResourceView;
+std::unique_ptr<cShaderResourceView > my_normalMap = std::make_unique<cShaderResourceView >();
 cSwapChain my_swapChain;
 imGuiManager my_gui;
 Timer my_timer;
 /*****************************************************/
 cWindow my_window;
+std::unique_ptr <cActor> my_actor = std::make_unique<cActor>();
 std::unique_ptr <cActor> my_actor = std::make_unique<cActor>();
 std::unique_ptr<cCameraManager> my_cameraManager = std::make_unique<cCameraManager>();
 std::unique_ptr<cShaderTarget> my_shaderTarget = std::make_unique<cShaderTarget>();
@@ -495,6 +496,17 @@ InitDevice()
                                                                    *ptr_device,
                                                                    *ptr_deviceContext);
 
+
+
+  assert(isSuccesful == true && "error with resource creation");
+
+  const wchar_t *NormalMapPath = L"\\base_normal.jpg";
+  PathToResoure = g_initPath;
+  PathToResoure += NormalMapPath;
+  isSuccesful = my_normalMap->createShaderResourceFromFile(PathToResoure.generic_string(),
+                                                           *ptr_device,
+                                                           *ptr_deviceContext);
+
   assert(isSuccesful == true && "error with resource creation");
 
   my_sampler.setDescirption(static_cast< int >(enFilter::Anisotropic),
@@ -546,7 +558,7 @@ InitDevice()
   sLightData LightData;
   //std::memset(&LightData, 0, sizeof(LightData));
   LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector3 = { 1.0f,0.f,0.f };
+  LightData.diffuseDir.vector3 = { 1.0f,0.f,0.f };
 
   LightData.ambientColor = { 0.7f,0.0f,0.0f };
 
@@ -599,6 +611,7 @@ void Render()
   static std::vector<cShaderResourceView*> shaderResources =
   {
     &my_shaderResourceView,
+    my_normalMap.get(), 
     my_shaderTarget->getShaderResourceViewPtr(),
   };
 
@@ -702,16 +715,24 @@ void Render()
                                        &Proj.matrix);
   //***
   sLightData LightData;
-  LightData.pos.vector4 = { 0.f,0.f,0.f,1.0f };
-  LightData.dir.vector3 = { 1.0f,cosf(t) ,0.0f };
+  LightData.diffuseDir.vector3 = { 1.0f,cosf(t) ,0.0f };
+  LightData.spotDir.vector3 = { 1.0f,cosf(-t) ,0.0f };
 
-  LightData.lightColor = { 0.2f , 0.3f,.5f/* fabsf(sinf(t))*/, 1.0f };
-  LightData.specularColor = { 0.0f,0.0f,0.5f };
+  LightData.diffuseColor = { 1.0f , 1.0f,1.0f/* fabsf(sinf(t))*/, 1.0f };
+  LightData.specularColor = { 0.0f,0.0f, fabsf(cosf(t)),1.0f };
   LightData.specularIntensity = fabsf(cosf(t));
   // https://rgbcolorcode.com/color/550080
-  LightData.ambientColor = { 0.52f,0.00f,0.86f,1.0f };
+  LightData.ambientColor = { 0.0f,0.0f,0.3f,1.0f };
+  LightData.pointColor = { 1.0f,1.0f,0.0f,1.0f };
+  //LightData.pointRadius = //sinf(t) *1000.0f;
   //LightData.lightIntensity = 0.5f;
   LightData.ambientIntensity = 0.2f;
+  LightData.pos = my_cameraManager->getEye();
+
+  LightData.pos.vector4 = { 0.f,0.f,0.0f,1.0f };
+  LightData.specularPower = fabsf(sin(t));
+  LightData.spotAlpha =fabsf(sin(t)) * 10.0f ;
+  LightData.spotBeta = fabsf(sin(t)) * 1.0f ;
 
   ptr_deviceContext->UpdateSubresource(&my_constLightData,
                                        &LightData);
@@ -986,7 +1007,9 @@ GLMoveMouse(GLFWwindow * window, double xPos, double yPos)
 
     glfwSetCursorPos(window, centerPos.x, centerPos.y);
 
-    sVector3 result = { (currentPos - centerPos) * 0.016f };
+    sVector3 result(currentPos - centerPos);
+
+    result.vector3 *= 0.016f ;
 
     result.vector3.y = -result.vector3.y;
 

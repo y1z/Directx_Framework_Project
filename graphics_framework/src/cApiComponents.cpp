@@ -61,6 +61,13 @@ cApiComponents::getShaderProgram()
   return &cApiComponents::GlShaderProgram;
 }
 
+void 
+cApiComponents::setCurrentProgram(uint32 & currentProgram)
+{
+  GlShaderProgram = currentProgram;
+}
+
+
 uint32 *
 cApiComponents::getvertexArrayObject()
 {

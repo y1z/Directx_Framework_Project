@@ -257,7 +257,7 @@ cShaderBase::compileShaderFromMemory(std::string_view  shader,
 #elif   OPEN_GL
   GlRemoveAllErrors();
   unsigned int * shaderProgram = cApiComponents::getShaderProgram();
-  this->setShader(helper::loadFileToString(shaderPath.data()));
+  this->setShader(shader);
   uint32_t shaderType{ 0u };
 
   if (this->m_shaderType == enShaderTypes::vertex)

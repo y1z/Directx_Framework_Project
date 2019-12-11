@@ -358,6 +358,7 @@ bool cDevice::CreateInputLayout(cInputLayout & inputLayout, cVertexShader & vert
   glEnableVertexAttribArray(0);// position 
   glEnableVertexAttribArray(1);// normals 
   glEnableVertexAttribArray(2);// textures
+  glEnableVertexAttribArray(3);
   //glGetVertexArrayiv()
 
   if (GlCheckForError())
@@ -507,8 +508,11 @@ bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
   // the view matrix 
   if (constBuffer.getIndex() == 0)
   {
-    auto location = glGetUniformLocation(*shaderProgram, "uView");
-    *constBuffer.getIDPtr() = location;
+    //auto location = glGetUniformLocation(*shaderProgram, "uView");
+    auto refToContainer = constBuffer.getGlUniforms();
+    refToContainer->push_back(helper::GlCreateUniformDetail("uView", enConstBufferElem::mat4x4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uViewDir", enConstBufferElem::vec3));
+
   }
   // the projection matrix 
   else if (constBuffer.getIndex() == 1)
@@ -536,10 +540,12 @@ bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
     refToContainer->push_back(helper::GlCreateUniformDetail("uDiffuseColor", enConstBufferElem::vec4));
     refToContainer->push_back(helper::GlCreateUniformDetail("uSpecularColor", enConstBufferElem::vec4));
     refToContainer->push_back(helper::GlCreateUniformDetail("uLightPos", enConstBufferElem::vec4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uPointColor", enConstBufferElem::vec4));
     refToContainer->push_back(helper::GlCreateUniformDetail("uLightDir", enConstBufferElem::vec3));
     refToContainer->push_back(helper::GlCreateUniformDetail("uLightIntensity", enConstBufferElem::single_float));
     refToContainer->push_back(helper::GlCreateUniformDetail("uAmbientIntensity", enConstBufferElem::single_float));
     refToContainer->push_back(helper::GlCreateUniformDetail("uSpecularIntensity", enConstBufferElem::single_float));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uPointRadius", enConstBufferElem::single_float));
 
 
     for (sUniformDetails &uni : *refToContainer)

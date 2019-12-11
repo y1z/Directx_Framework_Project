@@ -1,10 +1,13 @@
 #pragma once
 #include "utility/enGraphics.h"
 #include "utility/enDefs.h"
+//#include "utility/HelperFuncs.h"
 #include "glm/mat4x4.hpp"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
+
+
 
 /******************************/
 // Vector type struct's 
@@ -63,6 +66,30 @@ struct sColorf
 struct sVector3
 {
   glm::vec3 vector3;
+
+  sVector3(const sVector3 &other) = default;
+  sVector3(sVector3 &&other) = default;
+  sVector3()
+  {
+    this->vector3.x = 0.0f;
+    this->vector3.y = 0.0f;
+    this->vector3.z = 0.0f;
+  }
+
+  sVector3(float x, float y, float z)
+  {
+    this->vector3.x = x;
+    this->vector3.y = y;
+    this->vector3.z = z;
+  }
+
+  sVector3(const glm::vec3 &otherVector)
+  {
+    this->vector3 = otherVector;
+  }
+
+  sVector3& operator =(const sVector3 &other) = default;
+  sVector3& operator =(sVector3 &&other) = default;
 };
 
 /**
@@ -131,19 +158,28 @@ struct sQuad
 
 struct alignas(16) sLightData
 {
+  // color of the lights 
   sColorf ambientColor = { 0.0f,0.0f,0.0f,1.0f };
-  sColorf lightColor = { 0.0f,0.7f,0.7f,1.0f };
+  sColorf diffuseColor = { 0.0f,0.7f,0.7f,1.0f };
   sColorf specularColor = { 0.5f,0.5f,0.5f,1.0f };
   sColorf pointColor = { 0.7f,0.0f,0.0f,1.0f };
   sColorf spotColor = { 0.0f,0.7f,0.0f,1.0f };
-
+  //position of the lights 
   sVector4 pos;
-  sVector3 dir;
+  sVector4 spotPos;
+
+  // directions of the lights
+  sVector3 diffuseDir = sVector3(0.0f, 0.0f, 1.0f);
+  sVector3 spotDir = sVector3(-1.0f, 0.0f, 0.0f);
 
   float lightIntensity{ 0.5f };
   float specularIntensity{ 0.5f };
   float ambientIntensity{ 0.5f };
-  float pointRadius{ 1.0f };
+  float pointRadius{ 10.0f };
+  float specularPower{ 0.5f };
+  float spotBeta{ 1.0f };
+  float spotAlpha{ 10.0f };
+  float spotRadius{ 100.0f };
 };
 
 struct alignas(16)GlChangeEveryFrame
