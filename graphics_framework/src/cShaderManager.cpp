@@ -134,6 +134,12 @@ cShaderManager::getShaderCount() const
   return m_shaders.size();
 }
 
+size_t 
+cShaderManager::getShaderIndex() const
+{
+  return m_selectedShaders;
+}
+
 cVertexShader&
 cShaderManager::getVertexShaderRef()
 {

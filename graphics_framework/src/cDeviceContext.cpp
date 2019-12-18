@@ -202,7 +202,7 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
   {
     if (constBuffer->getIndex() == 0)
     {
-      auto *ViewMatrixTemp = reinterpret_cast< const CameraData* >(originOfData);
+      const CameraData* ViewMatrixTemp = reinterpret_cast< const CameraData* >(originOfData);
 
       //glUniformMatrix4fv(constBuffer->getID(), 1, GL_TRUE, glm::value_ptr(ViewMatrixTemp->matrix));
 
@@ -254,6 +254,7 @@ cDeviceContext::UpdateSubresource(cBuffer * Buffer, const void * originOfData)
       int32  offsets[2];
       glGetActiveUniformsiv(*cApiComponents::getShaderProgram(), 2, indices,
                             GL_UNIFORM_OFFSET, offsets);
+
 
       //std::memcpy(DataBuffer, worldMatrix, sizeof(GlChangeEveryFrame));
 
@@ -344,9 +345,11 @@ cDeviceContext::ClearRenderTargetView(cRenderTargetView & renderTargetView, sCol
 {
     // han purple https://rgbcolorcode.com/color/6619FF
   static constexpr float defaultClearColor[4] = { 0.40f,0.10f,1.0f,1.0f };
-  static constexpr sColorf directXColor{ 0.30f,0.30f,1.0f,1.0f };
 //rgb(0.30,0.30,1.00)
 #if DIRECTX
+
+  static constexpr sColorf directXColor{ 0.30f,0.30f,1.0f,1.0f };
+
   if (color == nullptr)
   {
     mptr_deviceContext->ClearRenderTargetView(renderTargetView.getRenderTragetView(), directXColor.allColor);
@@ -594,22 +597,22 @@ cDeviceContext::DrawIndexed(uint32_t indexCount, uint32_t indexOffset)
   glEnableVertexAttribArray(2);
   glEnableVertexAttribArray(3);// textures
 
-  glEnableVertexAttribArray(0);// position 
+  //glEnableVertexAttribArray(0);// position 
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);// m_drawingData.currentVertexBuffer);
   uint32 OffSetOfFirst = offsetof(VERTEX_T, pos);
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void* >(OffSetOfFirst));
 
-  glEnableVertexAttribArray(1);// normals 
+  //glEnableVertexAttribArray(1);// normals 
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
   uint32 OffSetOfSecond = offsetof(VERTEX_T, norm);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void * >(OffSetOfSecond));
 
-  glEnableVertexAttribArray(2);// textures
+  //glEnableVertexAttribArray(2);// textures
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
   uint32 OffSetOfThird = offsetof(VERTEX_T, tan);
   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void * > (OffSetOfThird));
 
-  glEnableVertexAttribArray(3);// textures
+  //glEnableVertexAttribArray(3);// textures
   glBindBuffer(GL_ARRAY_BUFFER, m_drawingData.currentVertexBuffer);
   uint32 OffSetOfTexCoord = offsetof(VERTEX_T, tex);
   glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX_T), reinterpret_cast< const void * > ( OffSetOfTexCoord));

@@ -3,8 +3,8 @@
 
 #include <cstdint>
 #include <cassert>
+#include <cstring> // for strrchr
 #include <iostream>
-
 
 /**
  * @brief This file contains all  typedef, #define and all other data
@@ -402,17 +402,30 @@ or if the setup wrong.)");
 /* #define's  */
 /*++++++++++++++++++++++++++++++++++++*/
 
+#define EN_FILENAME std::strrchr(__FILE__,'\\')  ?  std::strrchr(__FILE__,'\\') + 1 : __FILE__ 
+
 #ifndef  NDEBUG 
 /*! output that an error occurred
 in some function in some file in some line
 does not indicate the error only where it possibly
 happen */
-#define EN_LOG_ERROR enError::ENTROPY_log_error(__func__,__LINE__,__FILE__);
-#define EN_LOG_ERROR_WITH_CODE(ErrorCode) enError::ENTROPY_log_error_code(__func__,__LINE__,__FILE__,ErrorCode);
+#define EN_LOG_ERROR enError::ENTROPY_log_error(__func__,__LINE__, (EN_FILENAME) );
+#define EN_LOG_ERROR_WITH_CODE(ErrorCode) enError::ENTROPY_log_error_code(__func__,__LINE__, (EN_FILENAME),ErrorCode);
 #define EN_LOG_DB(message) std::cerr << #message << '\n';
 #else
 // does nothing 
 #define EN_LOG_ERROR
-#define EN_LOG_ERROR_WITH_CODE (ErrorCode)  ErrorCode ;
+#define EN_LOG_ERROR_WITH_CODE (ErrorCode);
 #define EN_LOG_DB(message);
 #endif // !NDEBUG
+
+#define LONG_CHAR(Message) L##Message
+#define GENERIC_CHAR(Message) #Message
+
+#if _UNICODE || UNICODE
+#define EN_CHAR(Message) LONG_CHAR(Message)
+
+#else 
+#define EN_CHAR(Message) GENERIC_CHAR(Message)
+
+#endif// _UNICODE

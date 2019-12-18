@@ -10,7 +10,8 @@ class cDeviceContext;
 
 
 /*!
-*@brief give the shader manager all the necessary
+*@brief give the shader manager all the necessary data
+* for the manipulation of shaders
 */
 struct sShadersManagerDesc
 {
@@ -24,15 +25,15 @@ struct sShadersManagerDesc
   std::string pixelShaderVersion{ "" };
 };
 
-/*! used to store shader of different types 
+/*! used to store shader of different types
 *
 */
 struct sShadersPairs
 {
   cVertexShader vertexShader;
   cPixelShader pixelShader;
-   
-  std::string name{""};
+
+  std::string name{ "" };
   uint32_t id;
   // TODO: remove when not needed
   uint32 program;
@@ -64,27 +65,36 @@ public: // functions
   size_t
     getShaderCount()const;
 
+  size_t
+    getShaderIndex()const;
+
   //!@returns a reference to a cVertexShader determined by the class variable 'm_selectedShaders'
+ // @note use the 'getShaderIndex' function to find out the current index of the selected shader
   cVertexShader&
     getVertexShaderRef();
 
   //!@returns a reference to a cPixelShader determined by the class variable 'm_selectedShaders'
+ // @note use the 'getShaderIndex' function to find out the current index of the selected shader
   cPixelShader&
     getPixelShaderRef();
 
   //!@returns a pointer to a cVertexShader determined by the class variable 'm_selectedShaders'
+// @note use the 'getShaderIndex' function to find out the current index of the selected shader
   cVertexShader*
     getVertexShaderPtr();
 
   //!@returns a pointer to a cPixelShader determined by the class variable 'm_selectedShaders'
+// @note use the 'getShaderIndex' function to find out the current index of the selected shader
   cPixelShader*
     getPixelShaderPtr();
 
   //!@returns the name of the currently selected shader determined by the class variable 'm_selectedShaders'
+// @note use the 'getShaderIndex' function to find out the current index of the selected shader
   const std::string &
     getShaderNameRef();
 
-  //
+  //! set's the shader that's going to be used determined by the class variable 'm_selectedShaders'
+  //! @note use the 'getShaderIndex' function to find out the current index of the selected shader
   void
     setShader(cDeviceContext &deviceContext);
 
@@ -99,7 +109,7 @@ private:
   *@param  globalDefines[in] contain all the defines that should be in every shader
   */
   std::vector<std::string>
-    createShaderWithGlobalDefines(std::vector<std::string >  &containerOfShaders,
+    createShaderWithGlobalDefines(std::vector<std::string > &containerOfShaders,
                                   std::vector< std::string> &globalDefines);
 
   /*! will add "#define " and finish with a '\n' if the current define does not have one or both.*/
@@ -109,7 +119,7 @@ private:
   /**
   *@brief will change the value of a define(if it's 0 then it will become 1 and vice-versa)
   * this function expects a shader and the position of the define
-  *@param shader [in][out] the shader that contain the define expected to be changed 
+  *@param shader [in][out] the shader that contain the define expected to be changed
   *@param definePos [in] the position of the define in the shader
   */
   void
@@ -117,7 +127,7 @@ private:
                         size_t definePos);
 
   /*!
-  *@brief gives each shader a name based on it's defines 
+  *@brief gives each shader a name based on it's defines
   */
   void
     generateNamesForShader();

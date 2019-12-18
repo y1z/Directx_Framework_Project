@@ -505,14 +505,22 @@ bool cDevice::CreateConstBuffer(cConstBuffer & constBuffer)
 
   glGetProgramiv(*shaderProgram, GL_ACTIVE_UNIFORMS, &ActiveUniformCount);
 
+  std::cerr << "Count of the active uniforms [" << ActiveUniformCount << "]\n\n";
+ 
+
   // the view matrix 
   if (constBuffer.getIndex() == 0)
   {
     //auto location = glGetUniformLocation(*shaderProgram, "uView");
     auto refToContainer = constBuffer.getGlUniforms();
     refToContainer->push_back(helper::GlCreateUniformDetail("uView", enConstBufferElem::mat4x4));
+    refToContainer->push_back(helper::GlCreateUniformDetail("uViewPos", enConstBufferElem::vec3));
     refToContainer->push_back(helper::GlCreateUniformDetail("uViewDir", enConstBufferElem::vec3));
 
+    for (sUniformDetails &uni : *refToContainer)
+    {
+      uni.id = glGetUniformLocation(*shaderProgram, uni.name.c_str());
+    }
   }
   // the projection matrix 
   else if (constBuffer.getIndex() == 1)

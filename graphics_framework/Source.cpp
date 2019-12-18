@@ -86,7 +86,6 @@ Timer my_timer;
 /*****************************************************/
 cWindow my_window;
 std::unique_ptr <cActor> my_actor = std::make_unique<cActor>();
-std::unique_ptr <cActor> my_actor = std::make_unique<cActor>();
 std::unique_ptr<cCameraManager> my_cameraManager = std::make_unique<cCameraManager>();
 std::unique_ptr<cShaderTarget> my_shaderTarget = std::make_unique<cShaderTarget>();
 /**********************************************************/
@@ -106,7 +105,7 @@ sWindowSize g_windowSizeTracker;
 bool g_isInit(false);
 bool g_isRunnig(true);
 
-//! this is the path local to the solution of the program
+//! this is the path local to the Project directory of the program
 const std::filesystem::path g_initPath = std::filesystem::current_path();
 sColorf g_vMeshColor;
 
@@ -350,7 +349,6 @@ InitDevice()
 
   std::filesystem::path shaderPath(g_initPath.parent_path());
 
-
 #if DIRECTX
   shaderPath += L"\\DxShaders\\";
 #elif  OPEN_GL
@@ -375,8 +373,8 @@ InitDevice()
   {
   #if WIND_OS
     MessageBoxW(NULL,
-                L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.",
-                L"Error",
+                EN_CHAR("The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file."),
+                EN_CHAR("Error"),
                 MB_OK);
     return hr;
   #endif // WIND_OS
@@ -407,6 +405,8 @@ InitDevice()
   shaderPath += selectedPixelhader;
 
   managerResource.pixelShaderPath = shaderPath.generic_string();
+
+  std::cout << "path to the pixel shader["<< managerResource.pixelShaderPath << '\n';
 
   isSuccesful = my_shaderManager->init(*ptr_device,
                                        managerResource);
@@ -611,7 +611,7 @@ void Render()
   static std::vector<cShaderResourceView*> shaderResources =
   {
     &my_shaderResourceView,
-    my_normalMap.get(), 
+    my_normalMap.get(),
     my_shaderTarget->getShaderResourceViewPtr(),
   };
 
@@ -707,8 +707,6 @@ void Render()
   ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constCameraData),
                                        &cameraData.matrix);
 
-  ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constCameraData),
-                                       &cameraData.matrix);
 
   Proj.matrix = my_cameraManager->getProjectionMatrix().matrix;
   ptr_deviceContext->UpdateSubresource(reinterpret_cast< cBuffer* >(&my_constProjectionMatrix),
@@ -731,8 +729,8 @@ void Render()
 
   LightData.pos.vector4 = { 0.f,0.f,0.0f,1.0f };
   LightData.specularPower = fabsf(sin(t));
-  LightData.spotAlpha =fabsf(sin(t)) * 10.0f ;
-  LightData.spotBeta = fabsf(sin(t)) * 1.0f ;
+  LightData.spotAlpha = fabsf(sin(t)) * 10.0f;
+  LightData.spotBeta = fabsf(sin(t)) * 1.0f;
 
   ptr_deviceContext->UpdateSubresource(&my_constLightData,
                                        &LightData);
@@ -765,6 +763,7 @@ void Render()
                  "use the 'o' and 'p' keys to apply reflection Transform \n"
                  "use the 't' ,'g' , 'h' ,'f' ,'v' and 'n' \n"
                  "keys to apply a translation Transform \n");
+
   my_gui.endAllChildren();
 
   my_gui.beginExtraWindow("Shader Switcher");
@@ -1009,7 +1008,7 @@ GLMoveMouse(GLFWwindow * window, double xPos, double yPos)
 
     sVector3 result(currentPos - centerPos);
 
-    result.vector3 *= 0.016f ;
+    result.vector3 *= 0.016f;
 
     result.vector3.y = -result.vector3.y;
 

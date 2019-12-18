@@ -566,7 +566,6 @@ namespace helper
     {
       EN_LOG_ERROR;
       return false;
-
     }
 
     return true;
